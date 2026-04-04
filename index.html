@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MCPixel</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="sidebar-overlay" id="overlay"></div>
+    <div class="global-overlay" id="modalOverlay">
+        <div class="filter-modal-content">
+            <div class="filter-image-overlap">
+                <img src="img/filter-icon.png" alt="Filtro Icono">
+            </div>
+            <div class="filter-header-text">
+                <h3>Filtro</h3>
+                <p>Escoge una Opcion para Ordenar de...</p>
+            </div>
+            <div class="filter-options-grid">
+                <button class="filter-option-btn selected" data-filter="default">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                    Por Defecto
+                </button>
+                <button class="filter-option-btn" data-filter="popular">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"></path></svg>
+                    Más Populares
+                </button>
+                <button class="filter-option-btn" data-filter="recent">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Más Recientes
+                </button>
+                <button class="filter-option-btn" data-filter="downloaded">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Más Descargados
+                </button>
+                <button class="filter-option-btn" data-filter="updated">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4v7h7V4zM20 4h-7v7h7V4zM11 13H4v7h7v-7zM20 13h-7v7h7v-7z"></path></svg>
+                    Actualizados
+                </button>
+                <button class="filter-option-btn" data-filter="random">
+                    <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><polyline points="8 21 3 21 3 16"></polyline><line x1="10" y1="14" x2="3" y2="21"></line></svg>
+                    Al Azar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="custom-notification" id="customNotification">
+        <div class="notification-content">
+            <span class="notification-message" id="notificationMessage"></span>
+        </div>
+    </div>
+    <aside class="sidebar" id="sidebar">
+        <div class="user-profile-section" id="profileSection">
+            <div class="sidebar-avatar" id="sidebarAvatarIcon">
+                <div class="u-head"></div>
+                <div class="u-body"></div>
+            </div>
+            <div class="user-name" id="userNameDisplay">Usuario</div>
+        </div>
+        <nav class="nav-menu" id="navMenu">
+            <a href="#" class="nav-item active">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Inicio
+            </a>
+            <a href="#" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Skins
+            </a>
+            <a href="#" class="nav-item">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Servidores
+            </a>
+            <a href="sc/post.html" class="nav-item" id="publishNav">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+                Publicar
+            </a>
+            <a href="#" class="nav-item">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Categorías
+            </a>
+            <a href="#" class="nav-item" id="settingsNav">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Ajustes
+            </a>
+            <div class="bottom-section" id="authBottomSection">
+                <a href="sv/login.html" class="nav-item" id="loginNav">
+                    <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Iniciar Sesión
+                </a>
+                <a href="sv/register.html" class="nav-item" id="registerNav">
+                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="16"/><line x1="16" y1="12" x2="24" y2="12"/></svg>
+                    Crear Cuenta
+                </a>
+                <a href="#" class="nav-item" id="logoutNav" style="display: none;">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </nav>
+    </aside>
+    <div class="main-wrapper">
+        <header class="navbar" id="mainNavbar">
+            <img src="img/logo.png" alt="Logo" class="logo-top">
+            <div class="profile-trigger" id="toggleBtn">
+                <div class="u-head"></div>
+                <div class="u-body"></div>
+            </div>
+        </header>
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-button" id="filterTrigger">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                </svg>
+                <span>Filtro</span>
+            </button>
+            <span class="filter-name">Ordenar por: Por Defecto</span>
+            <div class="search-wrapper">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar addons por nombre, autor o descripción..." autocomplete="off">
+                </div>
+                <div class="search-dropdown" id="searchDropdown"></div>
+            </div>
+        </div>
+        <main class="container">
+            <div class="addons-list" id="addonsListContainer"></div>
+        </main>
+    </div>
+    <script>
+        const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdWNpZmxndHZ1dW9xcXh6dWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjY1NTUsImV4cCI6MjA5MDY0MjU1NX0.z8eV2KRnq16C5obuyPKhUmeJnGfci9lH-o40QIJuJ5o';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const navbar = document.getElementById('mainNavbar');
+        const filterBar = document.getElementById('filterBar');
+        const filterTrigger = document.getElementById('filterTrigger');
+        const filterModalOverlay = document.getElementById('modalOverlay');
+        const filterOptions = document.querySelectorAll('.filter-option-btn');
+        const filterNameSpan = document.querySelector('.filter-name');
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        const loginNav = document.getElementById('loginNav');
+        const registerNav = document.getElementById('registerNav');
+        const logoutNav = document.getElementById('logoutNav');
+        const publishNav = document.getElementById('publishNav');
+        const settingsNav = document.getElementById('settingsNav');
+        const profileSection = document.getElementById('profileSection');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const sidebarAvatar = document.getElementById('sidebarAvatarIcon');
+        const profileTrigger = document.getElementById('toggleBtn');
+        const customNotification = document.getElementById('customNotification');
+        
+        let currentUser = null;
+        let currentFilter = 'default';
+        let allAddons = [];
+        
+        function showNotification(message) {
+            const notificationMessage = document.getElementById('notificationMessage');
+            notificationMessage.textContent = message;
+            customNotification.classList.add('show');
+            setTimeout(() => {
+                customNotification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function getCurrentSession() {
+            const session = localStorage.getItem('mc_session');
+            if (session) {
+                try {
+                    return JSON.parse(session);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+        
+        async function getAllAddonsFromDB() {
+            const { data, error } = await supabaseClient
+                .from('addons')
+                .select('*')
+                .eq('status', 'approved')
+                .order('publish_date', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        }
+        
+        async function checkAuthState() {
+            const session = getCurrentSession();
+            if (session) {
+                currentUser = session;
+                if (loginNav) loginNav.style.display = 'none';
+                if (registerNav) registerNav.style.display = 'none';
+                if (logoutNav) logoutNav.style.display = 'flex';
+                if (publishNav) publishNav.classList.remove('disabled');
+                if (settingsNav) settingsNav.classList.remove('disabled');
+                if (userNameDisplay) {
+                    userNameDisplay.textContent = session.public_name || session.username;
+                }
+                if (sidebarAvatar && session.avatar_url) {
+                    sidebarAvatar.style.backgroundImage = `url('${session.avatar_url}')`;
+                    const head = sidebarAvatar.querySelector('.u-head');
+                    const body = sidebarAvatar.querySelector('.u-body');
+                    if (head) head.style.opacity = '0';
+                    if (body) body.style.opacity = '0';
+                }
+                if (profileTrigger && session.avatar_url) {
+                    profileTrigger.style.backgroundImage = `url('${session.avatar_url}')`;
+                    const head = profileTrigger.querySelector('.u-head');
+                    const body = profileTrigger.querySelector('.u-body');
+                    if (head) head.style.opacity = '0';
+                    if (body) body.style.opacity = '0';
+                }
+            } else {
+                currentUser = null;
+                if (loginNav) loginNav.style.display = 'flex';
+                if (registerNav) registerNav.style.display = 'flex';
+                if (logoutNav) logoutNav.style.display = 'none';
+                if (publishNav) publishNav.classList.add('disabled');
+                if (settingsNav) settingsNav.classList.add('disabled');
+                if (userNameDisplay) userNameDisplay.textContent = 'Invitado';
+                if (sidebarAvatar) {
+                    sidebarAvatar.style.backgroundImage = 'none';
+                    const head = sidebarAvatar.querySelector('.u-head');
+                    const body = sidebarAvatar.querySelector('.u-body');
+                    if (head) head.style.opacity = '1';
+                    if (body) body.style.opacity = '1';
+                }
+                if (profileTrigger) {
+                    profileTrigger.style.backgroundImage = 'none';
+                    const head = profileTrigger.querySelector('.u-head');
+                    const body = profileTrigger.querySelector('.u-body');
+                    if (head) head.style.opacity = '1';
+                    if (body) body.style.opacity = '1';
+                }
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('mc_session');
+            localStorage.removeItem('mc_user');
+            currentUser = null;
+            showNotification('Sesión cerrada correctamente');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
+        
+        if (profileSection) {
+            profileSection.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentUser) {
+                    window.location.href = 'sc/profile.html';
+                } else {
+                    showNotification('Debes iniciar sesión para ver tu perfil');
+                }
+            });
+        }
+        
+        if (logoutNav) {
+            logoutNav.addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        }
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 40) {
+                navbar.classList.add('scrolled');
+                if (filterBar) filterBar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+                if (filterBar) filterBar.classList.remove('scrolled');
+            }
+        });
+        
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+        
+        if (filterTrigger) {
+            filterTrigger.addEventListener('click', () => {
+                filterModalOverlay.classList.add('active');
+            });
+        }
+        
+        filterModalOverlay.addEventListener('click', function(e) {
+            if (e.target === filterModalOverlay) {
+                filterModalOverlay.classList.remove('active');
+            }
+        });
+        
+        filterOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                filterOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                const filterText = this.textContent.trim();
+                filterNameSpan.textContent = `Ordenar por: ${filterText}`;
+                currentFilter = this.dataset.filter;
+                filterModalOverlay.classList.remove('active');
+                filterAndSortAddons(currentFilter);
+            });
+        });
+        
+        function filterAndSortAddons(filterType) {
+            let addons = [...allAddons];
+            const container = document.getElementById('addonsListContainer');
+            if (!container) return;
+            switch(filterType) {
+                case 'popular':
+                    addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                    break;
+                case 'recent':
+                    addons.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+                    break;
+                case 'downloaded':
+                    addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                    break;
+                case 'updated':
+                    addons.sort((a, b) => {
+                        const dateA = a.last_updated ? new Date(a.last_updated) : new Date(a.publish_date);
+                        const dateB = b.last_updated ? new Date(b.last_updated) : new Date(b.publish_date);
+                        return dateB - dateA;
+                    });
+                    break;
+                case 'random':
+                    addons = addons.sort(() => Math.random() - 0.5);
+                    break;
+                default:
+                    addons.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+            }
+            renderAddons(addons);
+        }
+        
+        function formatBoldText(text) {
+            if (!text) return '';
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+        
+        function renderAddons(addons) {
+            const container = document.getElementById('addonsListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (addons.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #a1a1a6;">No hay addons publicados. ¡Sé el primero en publicar!</div>';
+                return;
+            }
+            addons.forEach(addon => {
+                const publishDate = new Date(addon.publish_date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+                const updatedDate = addon.last_updated ? new Date(addon.last_updated).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : publishDate;
+                const cardImage = addon.icon_url || addon.banner_url || 'img/default-addon.png';
+                const authorName = addon.author_name || 'Usuario';
+                const downloads = addon.downloads || '0';
+                const platform = addon.platform || 'Bedrock';
+                const version = addon.version || 'v1.0.0';
+                const formattedDescription = formatBoldText(addon.description);
+                const card = document.createElement('article');
+                card.className = 'addon-card';
+                card.style.cursor = 'pointer';
+                const flameIcon = addon.featured ? '<svg class="flame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152-.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z" clip-rule="evenodd" /></svg><div class="flame-tooltip">Complemento Destacado</div>' : '';
+                card.innerHTML = `
+                    ${flameIcon}
+                    <img src="${cardImage}" alt="${addon.title}" class="addon-logo" onerror="this.src='img/default-addon.png'">
+                    <div class="addon-content">
+                        <h2 class="addon-title">${addon.title}</h2>
+                        <div class="author-row">
+                            By <span>${authorName}</span>
+                            <svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 15px; height: 15px;">
+                                <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path>
+                            </svg>
+                        </div>
+                        <p class="addon-desc">${formattedDescription}</p>
+                        <div class="addon-meta">
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                ${downloads}
+                            </div>
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                                ${publishDate}
+                            </div>
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+                                </svg>
+                                ${updatedDate}
+                            </div>
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"/>
+                                </svg>
+                                ${version}
+                            </div>
+                            <span class="platform-tag">${platform}</span>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', function() {
+                    localStorage.setItem('selectedAddon', JSON.stringify(addon));
+                    window.location.href = 'sc/view.html';
+                });
+                container.appendChild(card);
+            });
+        }
+        
+        function performSearch() {
+            const query = searchInput.value.toLowerCase().trim();
+            if (query === '') {
+                filterAndSortAddons(currentFilter);
+                return;
+            }
+            const filtered = allAddons.filter(addon => 
+                addon.title.toLowerCase().includes(query) ||
+                (addon.author_name && addon.author_name.toLowerCase().includes(query)) ||
+                addon.description.toLowerCase().includes(query)
+            );
+            let sortedFiltered = [...filtered];
+            switch(currentFilter) {
+                case 'popular':
+                case 'downloaded':
+                    sortedFiltered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                    break;
+                case 'recent':
+                    sortedFiltered.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+                    break;
+                case 'updated':
+                    sortedFiltered.sort((a, b) => {
+                        const dateA = a.last_updated ? new Date(a.last_updated) : new Date(a.publish_date);
+                        const dateB = b.last_updated ? new Date(b.last_updated) : new Date(b.publish_date);
+                        return dateB - dateA;
+                    });
+                    break;
+                case 'random':
+                    sortedFiltered = sortedFiltered.sort(() => Math.random() - 0.5);
+                    break;
+                default:
+                    sortedFiltered.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+            }
+            renderAddons(sortedFiltered);
+            searchDropdown.classList.remove('active');
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+        }
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            if (query === '') {
+                searchDropdown.classList.remove('active');
+                return;
+            }
+            const filtered = allAddons.filter(addon => 
+                addon.title.toLowerCase().includes(query) ||
+                (addon.author_name && addon.author_name.toLowerCase().includes(query)) ||
+                addon.description.toLowerCase().includes(query)
+            );
+            if (filtered.length > 0) {
+                let html = '<div class="dropdown-header">Resultados de búsqueda</div>';
+                filtered.forEach(addon => {
+                    const imageUrl = addon.icon_url || addon.banner_url || 'img/default-addon.png';
+                    html += `
+                        <div class="dropdown-item" data-addon-id="${addon.id}">
+                            <img src="${imageUrl}" alt="${addon.title}" class="dropdown-item-image" onerror="this.src='img/default-addon.png'">
+                            <div class="dropdown-item-info">
+                                <div class="dropdown-item-title">${addon.title}</div>
+                                <div class="dropdown-item-author">
+                                    By ${addon.author_name || 'Usuario'}
+                                    <svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 12px; height: 12px;">
+                                        <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                searchDropdown.innerHTML = html;
+                document.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const titleElement = this.querySelector('.dropdown-item-title');
+                        if (titleElement) {
+                            const addonTitle = titleElement.textContent;
+                            const addon = filtered.find(a => a.title === addonTitle);
+                            if (addon) {
+                                localStorage.setItem('selectedAddon', JSON.stringify(addon));
+                                window.location.href = 'sc/view.html';
+                            }
+                        }
+                    });
+                });
+                searchDropdown.classList.add('active');
+            } else {
+                searchDropdown.innerHTML = `<div class="dropdown-no-results"><img src="img/ic3.png" alt="No results"><p>No se encontraron resultados para "${query}"</p></div>`;
+                searchDropdown.classList.add('active');
+            }
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!searchDropdown.contains(e.target) && e.target !== searchInput) {
+                searchDropdown.classList.remove('active');
+            }
+        });
+        
+        async function initializeAddons() {
+            try {
+                allAddons = await getAllAddonsFromDB();
+                filterAndSortAddons(currentFilter);
+            } catch (error) {
+                console.error('Error loading addons:', error);
+                showNotification('Error al cargar los addons');
+            }
+        }
+        
+        initializeAddons();
+        checkAuthState();
+    </script>
+</body>
+</html>
