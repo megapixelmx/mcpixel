@@ -759,9 +759,19 @@
             const stored = localStorage.getItem('editingAddon');
             if (stored) {
                 editingAddon = JSON.parse(stored);
+                console.log('Addon cargado para editar:', editingAddon);
+            } else {
+                showNotification('No se encontró el complemento para editar', 'error');
+                setTimeout(() => {
+                    window.location.href = 'profile.html';
+                }, 2000);
             }
         } catch (e) {
             console.error('Error loading editing addon:', e);
+            showNotification('Error al cargar el complemento', 'error');
+            setTimeout(() => {
+                window.location.href = 'profile.html';
+            }, 2000);
         }
         
         if (editingAddon) {
@@ -813,11 +823,6 @@
                     addLinkBtn.style.display = 'block';
                 }
             }
-        } else {
-            showNotification('No se encontró el complemento para editar', 'error');
-            setTimeout(() => {
-                window.location.href = 'profile.html';
-            }, 2000);
         }
         
         document.getElementById('postForm').addEventListener('submit', async (e) => {
@@ -846,7 +851,7 @@
                 return;
             }
             
-            if (!editingAddon || !editingAddon.addon_id) {
+            if (!editingAddon || !editingAddon.id) {
                 showNotification('No se pudo identificar el complemento a editar', 'error');
                 return;
             }
@@ -869,10 +874,12 @@
                         banner_url: bannerUrl,
                         last_updated: new Date().toISOString()
                     })
-                    .eq('addon_id', editingAddon.addon_id)
-                    .eq('author_id', currentUser.id);
+                    .eq('id', editingAddon.id);
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Error en la actualización:', error);
+                    throw error;
+                }
                 
                 localStorage.removeItem('editingAddon');
                 showNotification('¡Complemento actualizado exitosamente!', 'success');
@@ -882,7 +889,7 @@
                 }, 2000);
             } catch (error) {
                 console.error('Error updating addon:', error);
-                showNotification('Error al actualizar el complemento. Intenta nuevamente.', 'error');
+                showNotification('Error al actualizar el complemento: ' + (error.message || 'Intenta nuevamente'), 'error');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Guardar Cambios';
             }
