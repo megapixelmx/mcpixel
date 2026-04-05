@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/profile", "destination": "/sc/profile.html" },
+    { "source": "/view", "destination": "/sc/view.html" },
+    { "source": "/post", "destination": "/sc/post.html" },
+    { "source": "/publish", "destination": "/sc/publish.html" },
+    { "source": "/login", "destination": "/sv/login.html" },
+    { "source": "/register", "destination": "/sv/register.html" }
+  ]
+}
