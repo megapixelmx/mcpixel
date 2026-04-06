@@ -45,7 +45,7 @@
         .addon-view-author {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             font-size: 1.1rem;
             color: #a1a1a6;
         }
@@ -57,7 +57,6 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-left: 2px;
         }
         .verified-badge svg {
             width: 18px;
@@ -363,6 +362,9 @@
         .comment-author {
             font-weight: 700;
             color: #f5f5f7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .comment-author small {
             font-weight: 400;
@@ -456,6 +458,9 @@
         .reply-author {
             font-weight: 700;
             color: #ff8c42;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .delete-reply {
             position: absolute;
@@ -675,9 +680,12 @@
         const publishNav = document.getElementById('publishNav');
         const settingsNav = document.getElementById('settingsNav');
         const profileSection = document.getElementById('profileSection');
+        
         let currentUser = null;
+        let currentUserData = null;
         let currentAddon = null;
         let addonComments = [];
+        let usersCache = {};
         
         function showNotification(message) {
             notificationMessage.textContent = message;
@@ -733,16 +741,33 @@
             return null;
         }
         
+        async function getUserVerifiedStatus(username) {
+            if (usersCache[username]) {
+                return usersCache[username];
+            }
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('is_verified, username, public_name, avatar_url')
+                .eq('username', username)
+                .single();
+            if (!error && data) {
+                usersCache[username] = data;
+                return data;
+            }
+            return { is_verified: false, username: username, public_name: username, avatar_url: null };
+        }
+        
         async function checkAuthState() {
             const session = getCurrentSession();
             if (session && session.user_id) {
-                const { data: userData } = await supabaseClient
+                const { data: userData, error } = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('id', session.user_id)
                     .single();
-                if (userData) {
+                if (userData && !error) {
                     currentUser = userData;
+                    currentUserData = userData;
                     if (loginNav) loginNav.style.display = 'none';
                     if (registerNav) registerNav.style.display = 'none';
                     if (logoutNav) logoutNav.style.display = 'flex';
@@ -761,6 +786,8 @@
                     }
                 }
             } else {
+                currentUser = null;
+                currentUserData = null;
                 if (loginNav) loginNav.style.display = 'flex';
                 if (registerNav) registerNav.style.display = 'flex';
                 if (logoutNav) logoutNav.style.display = 'none';
@@ -826,18 +853,29 @@
             });
         }
         
-        function loadAddonFromStorage() {
+        function loadAddonFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const addonIdParam = urlParams.get('id');
+            if (addonIdParam) {
+                const stored = localStorage.getItem('selectedAddon');
+                if (stored) {
+                    try {
+                        const addon = JSON.parse(stored);
+                        if (addon.addon_id === addonIdParam || addon.id === addonIdParam) {
+                            return addon;
+                        }
+                    } catch (e) {}
+                }
+            }
             try {
                 const stored = localStorage.getItem('selectedAddon');
-                if (!stored) {
-                    viewContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#a1a1a6;">No se ha seleccionado ningún addon. <a href="../index.html">Volver al inicio</a></div>';
-                    return null;
+                if (stored) {
+                    return JSON.parse(stored);
                 }
-                return JSON.parse(stored);
             } catch (e) {
-                console.error('Error loading addon:', e);
                 return null;
             }
+            return null;
         }
         
         async function incrementDownloadCount(addon) {
@@ -846,11 +884,27 @@
                 await supabaseClient.rpc('increment_downloads', { addon_uuid: addon.id });
                 addon.downloads = (addon.downloads || 0) + 1;
                 localStorage.setItem('selectedAddon', JSON.stringify(addon));
+                const urlParams = new URLSearchParams(window.location.search);
+                const addonIdParam = urlParams.get('id');
+                if (addonIdParam) {
+                    const newUrl = `${window.location.pathname}?id=${addonIdParam}`;
+                    window.history.replaceState({}, '', newUrl);
+                }
                 return addon;
             } catch (error) {
                 console.error('Error incrementing downloads:', error);
                 return addon;
             }
+        }
+        
+        function updateURLWithAddonName(addon) {
+            if (!addon || !addon.title) return;
+            const slug = addon.title.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '');
+            const newUrl = `${window.location.pathname}?id=${addon.addon_id}&name=${slug}`;
+            window.history.replaceState({}, '', newUrl);
         }
         
         function getPlatformIcon(url) {
@@ -903,8 +957,7 @@
         }
         
         async function addReplyToComment(commentId, replyContent) {
-            const updateData = replyContent ? { reply_content: replyContent } : { reply_content: null };
-            updateData.updated_at = new Date().toISOString();
+            const updateData = replyContent ? { reply_content: replyContent, updated_at: new Date().toISOString() } : { reply_content: null, updated_at: new Date().toISOString() };
             const { data, error } = await supabaseClient
                 .from('comments')
                 .update(updateData)
@@ -915,23 +968,17 @@
             return data;
         }
         
-        async function getUserProfile(username) {
-            const { data, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .single();
-            if (error) return null;
-            return data;
-        }
-        
         async function renderAddonView() {
-            const addon = loadAddonFromStorage();
-            if (!addon) return;
+            const addon = loadAddonFromURL();
+            if (!addon) {
+                viewContainer.innerHTML = '<div style="text-align:center; padding:3rem; color:#a1a1a6;">No se ha seleccionado ningún addon. <a href="../index.html">Volver al inicio</a></div>';
+                return;
+            }
             currentAddon = addon;
+            updateURLWithAddonName(addon);
             
             const publishDate = new Date(addon.publish_date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-            const updateDate = addon.last_updated ? new Date(addon.last_updated).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin actualizaciones';
+            const updateDate = addon.updated_at ? new Date(addon.updated_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin actualizaciones';
             const tags = addon.tags ? addon.tags.split(',').map(t => t.trim()).filter(t => t) : [];
             
             let downloadLinksHTML = '';
@@ -957,6 +1004,10 @@
                 downloadLinksHTML = '<p style="color:#a1a1a6;">No hay enlaces de descarga disponibles.</p>';
             }
             
+            const authorInfo = await getUserVerifiedStatus(addon.author_name);
+            const isAuthorVerified = authorInfo.is_verified === true;
+            const authorDisplayName = authorInfo.public_name || addon.author_name;
+            
             let html = `
                 <div class="addon-banner">
                     <img src="${addon.banner_url || '../img/default-banner.png'}" alt="${addon.title}" onerror="this.src='../img/default-banner.png'">
@@ -964,10 +1015,8 @@
                 <div class="addon-view-header">
                     <h1 class="addon-view-title">${addon.title}</h1>
                     <div class="addon-view-author">
-                        By <span>${addon.author_name || 'Usuario'}</span>
-                        <span class="verified-badge" title="Autor verificado">
-                            <svg viewBox="0 0 24 24"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>
-                        </span>
+                        By <span>${authorDisplayName}</span>
+                        ${isAuthorVerified ? '<span class="verified-badge"><svg viewBox="0 0 24 24"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg></span>' : ''}
                     </div>
                 </div>
                 <div class="meta-grid">
@@ -1086,8 +1135,10 @@
                     const commentDate = new Date(comment.created_at).toLocaleDateString();
                     const isCommentAuthor = currentUser && currentUser.id === comment.author_id;
                     const showReplyForm = isAuthor && !comment.reply_content;
-                    const commentAuthorData = await getUserProfile(comment.author_name);
-                    const authorAvatar = commentAuthorData?.avatar_url || '';
+                    const commentAuthorInfo = await getUserVerifiedStatus(comment.author_name);
+                    const isCommentAuthorVerified = commentAuthorInfo.is_verified === true;
+                    const commentAuthorDisplayName = commentAuthorInfo.public_name || comment.author_name;
+                    const commentAuthorAvatar = commentAuthorInfo.avatar_url || '';
                     
                     commentsHTML += `
                         <div class="comment-card" data-comment-id="${comment.id}">
@@ -1098,20 +1149,25 @@
                             ` : ''}
                             <div class="comment-header">
                                 <div class="comment-avatar">
-                                    ${authorAvatar ? `<img src="${authorAvatar}" alt="avatar">` : comment.author_name?.charAt(0).toUpperCase()}
+                                    ${commentAuthorAvatar ? `<img src="${commentAuthorAvatar}" alt="avatar">` : commentAuthorDisplayName.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <span class="comment-author">${comment.author_name}</span>
+                                    <div class="comment-author">
+                                        ${commentAuthorDisplayName}
+                                        ${isCommentAuthorVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 14px; height: 14px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : ''}
+                                        <small>${commentDate}</small>
+                                    </div>
                                     ${comment.author_id === currentAddon.author_id ? '<span class="comment-badge">Creador</span>' : ''}
-                                    <small>${commentDate}</small>
                                 </div>
                             </div>
                             <div class="comment-text">${formatText(comment.content)}</div>
                     `;
                     
                     if (comment.reply_content) {
-                        const creatorData = await getUserProfile(currentAddon.author_name);
-                        const creatorAvatar = creatorData?.avatar_url || '';
+                        const creatorInfo = await getUserVerifiedStatus(currentAddon.author_name);
+                        const isCreatorVerified = creatorInfo.is_verified === true;
+                        const creatorDisplayName = creatorInfo.public_name || currentAddon.author_name;
+                        const creatorAvatar = creatorInfo.avatar_url || '';
                         commentsHTML += `
                             <div class="comment-reply">
                                 ${isAuthor ? `
@@ -1121,9 +1177,12 @@
                                 ` : ''}
                                 <div class="reply-header">
                                     <div class="reply-avatar">
-                                        ${creatorAvatar ? `<img src="${creatorAvatar}" alt="avatar">` : currentAddon.author_name?.charAt(0).toUpperCase()}
+                                        ${creatorAvatar ? `<img src="${creatorAvatar}" alt="avatar">` : creatorDisplayName.charAt(0).toUpperCase()}
                                     </div>
-                                    <span class="reply-author">${currentAddon.author_name} (creador)</span>
+                                    <div class="reply-author">
+                                        ${creatorDisplayName} (creador)
+                                        ${isCreatorVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 12px; height: 12px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : ''}
+                                    </div>
                                 </div>
                                 <p style="margin-top:5px;">${formatText(comment.reply_content)}</p>
                             </div>
