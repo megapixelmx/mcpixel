@@ -134,6 +134,18 @@
             resize: vertical;
             min-height: 120px;
         }
+        .char-counter {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #a1a1a6;
+            margin-top: 6px;
+        }
+        .char-counter.warning {
+            color: #ff9f0a;
+        }
+        .char-counter.danger {
+            color: #ff3b30;
+        }
         .platform-selector {
             display: flex;
             gap: 12px;
@@ -449,6 +461,7 @@
                 <div class="form-group">
                     <label class="form-label">Descripción Detallada</label>
                     <textarea class="form-input" id="addonDescription" placeholder="Describe las funciones, crafteos y novedades..." required></textarea>
+                    <div class="char-counter" id="charCounter">0 / 200 caracteres mínimo</div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group">
@@ -539,6 +552,29 @@
                 setTimeout(() => element.remove(), 400);
             }, 4000);
         }
+        
+        const descriptionField = document.getElementById('addonDescription');
+        const charCounter = document.getElementById('charCounter');
+        
+        function updateCharCounter() {
+            const length = descriptionField.value.length;
+            charCounter.textContent = `${length} / 200 caracteres mínimo`;
+            if (length >= 200) {
+                charCounter.classList.remove('warning', 'danger');
+                charCounter.style.color = '#34c759';
+            } else if (length >= 150) {
+                charCounter.classList.add('warning');
+                charCounter.classList.remove('danger');
+                charCounter.style.color = '#ff9f0a';
+            } else {
+                charCounter.classList.add('danger');
+                charCounter.classList.remove('warning');
+                charCounter.style.color = '#ff3b30';
+            }
+        }
+        
+        descriptionField.addEventListener('input', updateCharCounter);
+        updateCharCounter();
         
         window.addEventListener('scroll', () => {
             if (window.scrollY > 20) {
@@ -666,12 +702,19 @@
         updateRemoveButtons();
         
         function isValidImageUrl(url) {
-            const allowedDomains = ['ibb.co', 'imgbb.com', 'postimg.cc', 'postimages.org', 'imgur.com', 'discordapp.com', 'i.imgur.com'];
+            const imageExtensions = /\.(jpg|jpeg|png|webp|gif|bmp|svg)$/i;
             try {
                 const parsedUrl = new URL(url);
-                const domainMatch = allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
-                const extensionMatch = /\.(jpg|jpeg|png|webp|gif)$/.test(parsedUrl.pathname.toLowerCase());
-                return domainMatch || extensionMatch;
+                if (imageExtensions.test(parsedUrl.pathname)) {
+                    return true;
+                }
+                if (parsedUrl.hostname.includes('imgbb.com') || parsedUrl.hostname.includes('ibb.co')) {
+                    return false;
+                }
+                if (parsedUrl.hostname.includes('postimg.cc') || parsedUrl.hostname.includes('postimages.org')) {
+                    return false;
+                }
+                return false;
             } catch (e) {
                 return false;
             }
@@ -700,7 +743,7 @@
                 }
                 urlModal.classList.remove('active');
             } else {
-                showNotification('URL no válida. Usa enlaces directos de sitios como ImgBB o Postimages.', 'error');
+                showNotification('URL no válida. Debe ser un enlace directo que termine en .jpg, .png, .jpeg, .webp o .gif. No uses enlaces de páginas como imgbb.com o postimg.cc', 'error');
             }
         });
         
@@ -724,6 +767,10 @@
             });
             if (!title || !description || !version || downloadLinks.length === 0) {
                 showNotification('Por favor, completa todos los campos obligatorios.', 'error');
+                return;
+            }
+            if (description.length < 200) {
+                showNotification('La descripción debe tener al menos 200 caracteres. Actualmente tiene ' + description.length + ' caracteres.', 'error');
                 return;
             }
             const addonData = {
