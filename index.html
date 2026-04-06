@@ -164,8 +164,10 @@
         const customNotification = document.getElementById('customNotification');
         
         let currentUser = null;
+        let currentUserData = null;
         let currentFilter = 'default';
         let allAddons = [];
+        let usersCache = {};
         
         function showNotification(message) {
             const notificationMessage = document.getElementById('notificationMessage');
@@ -198,31 +200,54 @@
             return data || [];
         }
         
+        async function getUserVerifiedStatus(username) {
+            if (usersCache[username]) {
+                return usersCache[username];
+            }
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('is_verified, username, public_name')
+                .eq('username', username)
+                .single();
+            if (!error && data) {
+                usersCache[username] = data;
+                return data;
+            }
+            return { is_verified: false, username: username, public_name: username };
+        }
+        
         async function checkAuthState() {
             const session = getCurrentSession();
-            if (session) {
-                currentUser = session;
-                if (loginNav) loginNav.style.display = 'none';
-                if (registerNav) registerNav.style.display = 'none';
-                if (logoutNav) logoutNav.style.display = 'flex';
-                if (publishNav) publishNav.classList.remove('disabled');
-                if (settingsNav) settingsNav.classList.remove('disabled');
-                if (userNameDisplay) {
-                    userNameDisplay.textContent = session.public_name || session.username;
-                }
-                if (sidebarAvatar && session.avatar_url) {
-                    sidebarAvatar.style.backgroundImage = `url('${session.avatar_url}')`;
-                    const head = sidebarAvatar.querySelector('.u-head');
-                    const body = sidebarAvatar.querySelector('.u-body');
-                    if (head) head.style.opacity = '0';
-                    if (body) body.style.opacity = '0';
-                }
-                if (profileTrigger && session.avatar_url) {
-                    profileTrigger.style.backgroundImage = `url('${session.avatar_url}')`;
-                    const head = profileTrigger.querySelector('.u-head');
-                    const body = profileTrigger.querySelector('.u-body');
-                    if (head) head.style.opacity = '0';
-                    if (body) body.style.opacity = '0';
+            if (session && session.user_id) {
+                const { data: userData, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', session.user_id)
+                    .single();
+                if (userData && !error) {
+                    currentUser = userData;
+                    if (loginNav) loginNav.style.display = 'none';
+                    if (registerNav) registerNav.style.display = 'none';
+                    if (logoutNav) logoutNav.style.display = 'flex';
+                    if (publishNav) publishNav.classList.remove('disabled');
+                    if (settingsNav) settingsNav.classList.remove('disabled');
+                    if (userNameDisplay) {
+                        userNameDisplay.textContent = userData.public_name || userData.username;
+                    }
+                    if (sidebarAvatar && userData.avatar_url) {
+                        sidebarAvatar.style.backgroundImage = `url('${userData.avatar_url}')`;
+                        const head = sidebarAvatar.querySelector('.u-head');
+                        const body = sidebarAvatar.querySelector('.u-body');
+                        if (head) head.style.opacity = '0';
+                        if (body) body.style.opacity = '0';
+                    }
+                    if (profileTrigger && userData.avatar_url) {
+                        profileTrigger.style.backgroundImage = `url('${userData.avatar_url}')`;
+                        const head = profileTrigger.querySelector('.u-head');
+                        const body = profileTrigger.querySelector('.u-body');
+                        if (head) head.style.opacity = '0';
+                        if (body) body.style.opacity = '0';
+                    }
                 }
             } else {
                 currentUser = null;
@@ -252,7 +277,6 @@
         function logout() {
             localStorage.removeItem('mc_session');
             localStorage.removeItem('mc_user');
-            currentUser = null;
             showNotification('Sesión cerrada correctamente');
             setTimeout(() => {
                 window.location.reload();
@@ -325,32 +349,69 @@
             });
         });
         
+        function weightedRandomShuffle(addons) {
+            const featuredAddons = addons.filter(a => a.featured === true);
+            const normalAddons = addons.filter(a => a.featured !== true);
+            const result = [];
+            const featuredWeight = 0.4;
+            const normalWeight = 0.6;
+            let featuredIndex = 0;
+            let normalIndex = 0;
+            const shuffledFeatured = [...featuredAddons];
+            const shuffledNormal = [...normalAddons];
+            for (let i = shuffledFeatured.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledFeatured[i], shuffledFeatured[j]] = [shuffledFeatured[j], shuffledFeatured[i]];
+            }
+            for (let i = shuffledNormal.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledNormal[i], shuffledNormal[j]] = [shuffledNormal[j], shuffledNormal[i]];
+            }
+            while (featuredIndex < shuffledFeatured.length || normalIndex < shuffledNormal.length) {
+                const useFeatured = (featuredIndex < shuffledFeatured.length) && (normalIndex >= shuffledNormal.length || Math.random() < featuredWeight);
+                if (useFeatured) {
+                    result.push(shuffledFeatured[featuredIndex]);
+                    featuredIndex++;
+                } else if (normalIndex < shuffledNormal.length) {
+                    result.push(shuffledNormal[normalIndex]);
+                    normalIndex++;
+                }
+            }
+            return result;
+        }
+        
         function filterAndSortAddons(filterType) {
             let addons = [...allAddons];
             const container = document.getElementById('addonsListContainer');
             if (!container) return;
-            switch(filterType) {
-                case 'popular':
-                    addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
-                    break;
-                case 'recent':
-                    addons.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
-                    break;
-                case 'downloaded':
-                    addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
-                    break;
-                case 'updated':
-                    addons.sort((a, b) => {
-                        const dateA = a.last_updated ? new Date(a.last_updated) : new Date(a.publish_date);
-                        const dateB = b.last_updated ? new Date(b.last_updated) : new Date(b.publish_date);
-                        return dateB - dateA;
-                    });
-                    break;
-                case 'random':
-                    addons = addons.sort(() => Math.random() - 0.5);
-                    break;
-                default:
-                    addons.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+            
+            if (filterType === 'default') {
+                addons = weightedRandomShuffle(addons);
+            } else {
+                switch(filterType) {
+                    case 'popular':
+                        addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                        break;
+                    case 'recent':
+                        addons.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+                        break;
+                    case 'downloaded':
+                        addons.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                        break;
+                    case 'updated':
+                        addons.sort((a, b) => {
+                            const dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.publish_date);
+                            const dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.publish_date);
+                            return dateB - dateA;
+                        });
+                        break;
+                    case 'random':
+                        for (let i = addons.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [addons[i], addons[j]] = [addons[j], addons[i]];
+                        }
+                        break;
+                }
             }
             renderAddons(addons);
         }
@@ -360,37 +421,52 @@
             return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
         
-        function renderAddons(addons) {
+        async function renderAddons(addons) {
             const container = document.getElementById('addonsListContainer');
             if (!container) return;
+            
             container.innerHTML = '';
+            
             if (addons.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #a1a1a6;">No hay addons publicados. ¡Sé el primero en publicar!</div>';
                 return;
             }
-            addons.forEach(addon => {
+            
+            for (const addon of addons) {
                 const publishDate = new Date(addon.publish_date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
-                const updatedDate = addon.last_updated ? new Date(addon.last_updated).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : publishDate;
+                const updatedDate = addon.updated_at ? new Date(addon.updated_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : publishDate;
                 const cardImage = addon.icon_url || addon.banner_url || 'img/default-addon.png';
                 const authorName = addon.author_name || 'Usuario';
                 const downloads = addon.downloads || '0';
                 const platform = addon.platform || 'Bedrock';
                 const version = addon.version || 'v1.0.0';
                 const formattedDescription = formatBoldText(addon.description);
+                
+                let userVerified = false;
+                let userPublicName = authorName;
+                try {
+                    const userInfo = await getUserVerifiedStatus(authorName);
+                    userVerified = userInfo.is_verified === true;
+                    userPublicName = userInfo.public_name || authorName;
+                } catch (e) {
+                    console.error('Error fetching user verification:', e);
+                }
+                
                 const card = document.createElement('article');
                 card.className = 'addon-card';
                 card.style.cursor = 'pointer';
+                
                 const flameIcon = addon.featured ? '<svg class="flame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152-.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z" clip-rule="evenodd" /></svg><div class="flame-tooltip">Complemento Destacado</div>' : '';
+                
+                const verifiedIcon = userVerified ? '<svg class="author-verified-icon" viewBox="0 0 24 24" style="fill: #1d9bf0; width: 14px; height: 14px; margin-left: 3px; vertical-align: middle;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : '';
+                
                 card.innerHTML = `
                     ${flameIcon}
                     <img src="${cardImage}" alt="${addon.title}" class="addon-logo" onerror="this.src='img/default-addon.png'">
                     <div class="addon-content">
                         <h2 class="addon-title">${addon.title}</h2>
                         <div class="author-row">
-                            By <span>${authorName}</span>
-                            <svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 15px; height: 15px;">
-                                <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path>
-                            </svg>
+                            By <span>${escapeHtml(userPublicName)}</span>${verifiedIcon}
                         </div>
                         <p class="addon-desc">${formattedDescription}</p>
                         <div class="addon-meta">
@@ -430,12 +506,21 @@
                         </div>
                     </div>
                 `;
+                
                 card.addEventListener('click', function() {
                     localStorage.setItem('selectedAddon', JSON.stringify(addon));
                     window.location.href = 'sc/view.html';
                 });
+                
                 container.appendChild(card);
-            });
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         function performSearch() {
@@ -460,16 +545,19 @@
                     break;
                 case 'updated':
                     sortedFiltered.sort((a, b) => {
-                        const dateA = a.last_updated ? new Date(a.last_updated) : new Date(a.publish_date);
-                        const dateB = b.last_updated ? new Date(b.last_updated) : new Date(b.publish_date);
+                        const dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.publish_date);
+                        const dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.publish_date);
                         return dateB - dateA;
                     });
                     break;
                 case 'random':
-                    sortedFiltered = sortedFiltered.sort(() => Math.random() - 0.5);
+                    for (let i = sortedFiltered.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [sortedFiltered[i], sortedFiltered[j]] = [sortedFiltered[j], sortedFiltered[i]];
+                    }
                     break;
                 default:
-                    sortedFiltered.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+                    sortedFiltered = weightedRandomShuffle(sortedFiltered);
             }
             renderAddons(sortedFiltered);
             searchDropdown.classList.remove('active');
@@ -484,7 +572,7 @@
             });
         }
         
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', async function() {
             const query = this.value.toLowerCase().trim();
             if (query === '') {
                 searchDropdown.classList.remove('active');
@@ -497,23 +585,28 @@
             );
             if (filtered.length > 0) {
                 let html = '<div class="dropdown-header">Resultados de búsqueda</div>';
-                filtered.forEach(addon => {
+                for (const addon of filtered) {
                     const imageUrl = addon.icon_url || addon.banner_url || 'img/default-addon.png';
+                    let userVerified = false;
+                    let userPublicName = addon.author_name || 'Usuario';
+                    try {
+                        const userInfo = await getUserVerifiedStatus(addon.author_name);
+                        userVerified = userInfo.is_verified === true;
+                        userPublicName = userInfo.public_name || addon.author_name;
+                    } catch (e) {}
+                    const verifiedIcon = userVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 13px; height: 13px; margin-left: 3px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : '';
                     html += `
                         <div class="dropdown-item" data-addon-id="${addon.id}">
                             <img src="${imageUrl}" alt="${addon.title}" class="dropdown-item-image" onerror="this.src='img/default-addon.png'">
                             <div class="dropdown-item-info">
-                                <div class="dropdown-item-title">${addon.title}</div>
-                                <div class="dropdown-item-author">
-                                    By ${addon.author_name || 'Usuario'}
-                                    <svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 12px; height: 12px;">
-                                        <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path>
-                                    </svg>
+                                <div class="dropdown-item-title">${escapeHtml(addon.title)}</div>
+                                <div class="dropdown-item-author" style="display: flex; align-items: center; gap: 2px;">
+                                    By ${escapeHtml(userPublicName)}${verifiedIcon}
                                 </div>
                             </div>
                         </div>
                     `;
-                });
+                }
                 searchDropdown.innerHTML = html;
                 document.querySelectorAll('.dropdown-item').forEach(item => {
                     item.addEventListener('click', function() {
