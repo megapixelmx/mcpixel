@@ -520,7 +520,7 @@ body {
 .author-row {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     font-size: 0.9rem;
     color: #a1a1a6;
     margin-bottom: 8px;
@@ -532,9 +532,11 @@ body {
 }
 
 .author-verified-icon {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
     fill: #1d9bf0;
+    margin-left: 2px;
+    vertical-align: middle;
 }
 
 .addon-desc {
@@ -863,5 +865,13 @@ body {
         top: 35px;
         font-size: 0.75rem;
         padding: 6px 12px;
+    }
+    .author-row {
+        gap: 3px;
+    }
+    .author-verified-icon {
+        width: 13px;
+        height: 13px;
+        margin-left: 1px;
     }
 }
