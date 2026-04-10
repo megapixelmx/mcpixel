@@ -770,112 +770,6 @@ body {
     box-shadow: 0 0 10px #ff6b00;
 }
 
-@media (min-width: 769px) {
-    .sidebar {
-        transform: translateX(0) !important;
-    }
-    .profile-trigger {
-        display: none;
-    }
-    .sidebar-overlay {
-        display: none !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
-    .sidebar.active {
-        transform: translateX(0);
-    }
-    .main-wrapper {
-        margin-left: 0;
-        width: 100%;
-    }
-    .sidebar-overlay.active {
-        display: block;
-    }
-    .navbar {
-        padding: 1rem;
-    }
-    .navbar.scrolled {
-        background: rgba(17, 17, 17, 0.95);
-    }
-    .filter-bar {
-        padding: 0.8rem 1rem;
-        top: 72px;
-        gap: 0.8rem;
-    }
-    .filter-bar.scrolled {
-        background: rgba(17, 17, 17, 0.95);
-    }
-    .filter-button {
-        padding: 0.6rem 1rem;
-    }
-    .filter-button span {
-        display: none;
-    }
-    .filter-name {
-        display: none;
-    }
-    .search-wrapper {
-        max-width: none;
-    }
-    .search-input {
-        padding: 0.6rem 1rem 0.6rem 2.5rem;
-        font-size: 0.85rem;
-    }
-    .container {
-        padding: 1rem;
-    }
-    .addon-card {
-        padding: 1rem;
-        gap: 1rem;
-    }
-    .addon-logo {
-        width: 70px;
-        height: 70px;
-    }
-    .addon-title {
-        font-size: 1.1rem;
-    }
-    .addon-desc {
-        -webkit-line-clamp: 1;
-        margin-bottom: 0.6rem;
-    }
-    .addon-meta {
-        gap: 0.8rem;
-        display: flex;
-        flex-wrap: wrap;
-    }
-    .meta-item:nth-child(3) {
-        display: none;
-    }
-    .filter-options-grid {
-        grid-template-columns: 1fr;
-    }
-    .flame-icon {
-        width: 22px;
-        height: 22px;
-        top: 8px;
-        right: 8px;
-    }
-    .flame-tooltip {
-        top: 35px;
-        font-size: 0.75rem;
-        padding: 6px 12px;
-    }
-    .author-row {
-        gap: 3px;
-    }
-    .author-verified-icon {
-        width: 13px;
-        height: 13px;
-        margin-left: 1px;
-    }
-}
-
 .hero-carousel {
     width: 100%;
     padding: 1rem 2rem;
@@ -898,7 +792,6 @@ body {
 .carousel-slide {
     min-width: 100%;
     position: relative;
-    aspect-ratio: 16 / 9;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1038,31 +931,205 @@ body {
     border-radius: 4px;
 }
 
+@media (min-width: 769px) {
+    .sidebar {
+        transform: translateX(0) !important;
+    }
+    .profile-trigger {
+        display: none;
+    }
+    .sidebar-overlay {
+        display: none !important;
+    }
+    
+    .hero-carousel {
+        padding: 1.5rem 2rem;
+    }
+    
+    .carousel-slide {
+        aspect-ratio: 21 / 9;
+    }
+    
+    .slide-info {
+        padding: 2rem;
+        gap: 1.5rem;
+    }
+    
+    .slide-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px;
+    }
+    
+    .slide-title {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    
+    .slide-author {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    .slide-description {
+        font-size: 1rem;
+        max-width: 60%;
+        -webkit-line-clamp: 2;
+    }
+    
+    .carousel-btn {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .carousel-btn svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .carousel-dots {
+        bottom: 20px;
+        right: 30px;
+    }
+    
+    .dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .dot.active {
+        width: 30px;
+    }
+}
+
 @media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    .navbar {
+        padding: 1rem;
+    }
+    .navbar.scrolled {
+        background: rgba(17, 17, 17, 0.95);
+    }
+    .filter-bar {
+        padding: 0.8rem 1rem;
+        top: 72px;
+        gap: 0.8rem;
+    }
+    .filter-bar.scrolled {
+        background: rgba(17, 17, 17, 0.95);
+    }
+    .filter-button {
+        padding: 0.6rem 1rem;
+    }
+    .filter-button span {
+        display: none;
+    }
+    .filter-name {
+        display: none;
+    }
+    .search-wrapper {
+        max-width: none;
+    }
+    .search-input {
+        padding: 0.6rem 1rem 0.6rem 2.5rem;
+        font-size: 0.85rem;
+    }
+    .container {
+        padding: 1rem;
+    }
+    .addon-card {
+        padding: 1rem;
+        gap: 1rem;
+    }
+    .addon-logo {
+        width: 70px;
+        height: 70px;
+    }
+    .addon-title {
+        font-size: 1.1rem;
+    }
+    .addon-desc {
+        -webkit-line-clamp: 1;
+        margin-bottom: 0.6rem;
+    }
+    .addon-meta {
+        gap: 0.8rem;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .meta-item:nth-child(3) {
+        display: none;
+    }
+    .filter-options-grid {
+        grid-template-columns: 1fr;
+    }
+    .flame-icon {
+        width: 22px;
+        height: 22px;
+        top: 8px;
+        right: 8px;
+    }
+    .flame-tooltip {
+        top: 35px;
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+    .author-row {
+        gap: 3px;
+    }
+    .author-verified-icon {
+        width: 13px;
+        height: 13px;
+        margin-left: 1px;
+    }
+    
     .hero-carousel {
         padding: 0.5rem 1rem;
     }
+    
+    .carousel-slide {
+        aspect-ratio: 16 / 9;
+    }
+    
     .slide-icon {
         width: 50px;
         height: 50px;
     }
+    
     .slide-title {
         font-size: 1rem;
     }
+    
     .slide-author {
         font-size: 0.7rem;
     }
+    
     .slide-description {
         display: none;
     }
+    
     .carousel-btn {
         width: 32px;
         height: 32px;
     }
+    
     .carousel-btn svg {
         width: 18px;
         height: 18px;
     }
+    
     .slide-info {
         padding: 1rem;
         gap: 0.75rem;
