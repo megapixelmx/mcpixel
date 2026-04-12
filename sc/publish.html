@@ -2,6 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editar Publicación - MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -571,24 +575,35 @@
         let bannerUrl = null;
         let editingAddon = null;
         
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function showNotification(message, type = 'error') {
             const id = Date.now();
-            const icon = type === 'success' 
+            const safeMessage = escapeHtml(message);
+            const safeType = (type === 'success' || type === 'warning') ? type : 'error';
+            const icon = safeType === 'success' 
                 ? '<svg class="notification-icon" fill="none" stroke="#34c759" viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>'
                 : '<svg class="notification-icon" fill="none" stroke="#ff3b30" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             const html = `
-                <div class="notification ${type}" id="notif-${id}">
+                <div class="notification ${safeType}" id="notif-${id}">
                     ${icon}
-                    <div class="notification-content">${message}</div>
+                    <div class="notification-content">${safeMessage}</div>
                 </div>
             `;
             notificationContainer.insertAdjacentHTML('beforeend', html);
             const element = document.getElementById(`notif-${id}`);
-            setTimeout(() => element.classList.add('active'), 10);
-            setTimeout(() => {
-                element.classList.remove('active');
-                setTimeout(() => element.remove(), 400);
-            }, 4000);
+            if (element) {
+                setTimeout(() => element.classList.add('active'), 10);
+                setTimeout(() => {
+                    element.classList.remove('active');
+                    setTimeout(() => element && element.remove(), 400);
+                }, 4000);
+            }
         }
         
         window.addEventListener('scroll', () => {
@@ -717,12 +732,15 @@
         updateRemoveButtons();
         
         function isValidImageUrl(url) {
-            const allowedDomains = ['ibb.co', 'imgbb.com', 'postimg.cc', 'postimages.org', 'imgur.com', 'discordapp.com', 'i.imgur.com'];
+            if (!url || typeof url !== 'string') return false;
+            const allowedDomains = ['i.imgur.com', 'imgur.com', 'i.ibb.co', 'ibb.co', 'cdn.discordapp.com', 'media.discordapp.net'];
             try {
                 const parsedUrl = new URL(url);
-                const domainMatch = allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
-                const extensionMatch = /\.(jpg|jpeg|png|webp|gif)$/.test(parsedUrl.pathname.toLowerCase());
-                return domainMatch || extensionMatch;
+                if (parsedUrl.protocol !== 'https:') return false;
+                const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, '');
+                const domainMatch = allowedDomains.some(domain => hostname === domain || hostname.endsWith('.' + domain));
+                if (!domainMatch) return false;
+                return /\.(jpg|jpeg|png|webp|gif)$/i.test(parsedUrl.pathname);
             } catch (e) {
                 return false;
             }
@@ -743,7 +761,8 @@
         saveModal.addEventListener('click', () => {
             const url = modalInput.value.trim();
             if (url && isValidImageUrl(url)) {
-                activeTarget.innerHTML = `<img src="${url}" class="preview-img">`;
+                const safeUrl = escapeHtml(url);
+                activeTarget.innerHTML = `<img src="${safeUrl}" class="preview-img">`;
                 if (activeTarget.id === 'squareUpload') {
                     iconUrl = url;
                 } else if (activeTarget.id === 'bannerUpload') {
@@ -785,11 +804,11 @@
             
             if (iconUrl) {
                 const squareUpload = document.getElementById('squareUpload');
-                squareUpload.innerHTML = `<img src="${iconUrl}" class="preview-img">`;
+                squareUpload.innerHTML = `<img src="${escapeHtml(iconUrl)}" class="preview-img">`;
             }
             if (bannerUrl) {
                 const bannerUpload = document.getElementById('bannerUpload');
-                bannerUpload.innerHTML = `<img src="${bannerUrl}" class="preview-img">`;
+                bannerUpload.innerHTML = `<img src="${escapeHtml(bannerUrl)}" class="preview-img">`;
             }
             
             const platformBtns = document.querySelectorAll('.platform-btn');
@@ -804,12 +823,13 @@
             if (editingAddon.download_links && editingAddon.download_links.length > 0) {
                 linksContainer.innerHTML = '';
                 editingAddon.download_links.forEach((link, index) => {
-                    const linkName = editingAddon.link_names && editingAddon.link_names[index] ? editingAddon.link_names[index] : `Download #${index + 1}`;
+                    const linkName = editingAddon.link_names && editingAddon.link_names[index] ? escapeHtml(editingAddon.link_names[index]) : `Download #${index + 1}`;
+                    const safeLink = escapeHtml(link);
                     const newRow = document.createElement('div');
                     newRow.className = 'link-row';
                     newRow.innerHTML = `
-                        <input type="text" class="link-name-input" placeholder="Nombre (Ej: Mediafire)" value="${linkName.replace(/"/g, '&quot;')}">
-                        <input type="url" class="link-url-input" placeholder="https://ejemplo.com/archivo-addon" value="${link.replace(/"/g, '&quot;')}" required>
+                        <input type="text" class="link-name-input" placeholder="Nombre (Ej: Mediafire)" value="${linkName}">
+                        <input type="url" class="link-url-input" placeholder="https://ejemplo.com/archivo-addon" value="${safeLink}" required>
                         <button type="button" class="btn-remove-link">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
                         </button>

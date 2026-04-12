@@ -2,6 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crear Cuenta | MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -249,33 +253,49 @@
             });
         });
         
+        async function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'sh_' + hash.toString(16);
+            // Foxy dice: "Registro exitoso! Bienvenido/a al lado oscuro... de los addons de Minecraft c:"
+        }
+
         async function registerUser(username, password) {
+            const safeUsername = String(username).replace(/[^a-zA-Z0-9_]/g, '').substring(0, 30);
+            if (!safeUsername || safeUsername.length < 3) {
+                throw new Error('El nombre de usuario debe tener al menos 3 caracteres');
+            }
             const { data: existingUser } = await supabaseClient
                 .from('users')
                 .select('username')
-                .eq('username', username)
+                .eq('username', safeUsername)
                 .single();
             
             if (existingUser) {
                 throw new Error('El nombre de usuario ya existe');
             }
             
-            const newUserId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36);
+            const newUserId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+            const passwordHash = await simpleHash(password);
             
             const { error: insertError } = await supabaseClient
                 .from('users')
                 .insert({
                     id: newUserId,
-                    username: username,
-                    email: `${username}@mcpixel.local`,
-                    public_name: username,
-                    password_hash: password,
+                    username: safeUsername,
+                    email: `${safeUsername}@mcpixel.local`,
+                    public_name: safeUsername,
+                    password_hash: passwordHash,
                     role: 'user',
                     created_at: new Date().toISOString()
                 });
             
             if (insertError) {
-                throw new Error(insertError.message);
+                throw new Error('Error al crear usuario. Intenta con otro nombre.');
             }
             
             return true;

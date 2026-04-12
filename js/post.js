@@ -1,6 +1,46 @@
 const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdWNpZmxndHZ1dW9xcXh6dWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjY1NTUsImV4cCI6MjA5MDY0MjU1NX0.z8eV2KRnq16C5obuyPKhUmeJnGfci9lH-o40QIJuJ5o';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Foxy dice: "Hey! Encontraste un Easter Egg! Toma un galletico 🍪"
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function sanitizeInput(text, maxLength = 1000) {
+            if (!text || typeof text !== 'string') return '';
+            return text.substring(0, maxLength).replace(/[<>]/g, '');
+        }
+
+        function validateDownloadLink(url) {
+            if (!url || typeof url !== 'string') return false;
+            try {
+                const parsed = new URL(url);
+                const allowedProtocols = ['https:'];
+                if (!allowedProtocols.includes(parsed.protocol)) return false;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function generateAddonId() {
+            const timestamp = Date.now().toString(36);
+            const randomPart = Math.random().toString(36).substring(2, 15);
+            const randomPart2 = Math.random().toString(36).substring(2, 15);
+            return `addon_${timestamp}_${randomPart}${randomPart2}`;
+        }
+
+        function validateTags(tags) {
+            if (!tags || typeof tags !== 'string') return '';
+            const allowedChars = /^[a-zA-Z0-9\s,_-]+$/;
+            const parts = tags.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0 && t.length <= 20);
+            return parts.slice(0, 10).join(', ');
+        }
         
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -59,28 +99,39 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             }
         }
         
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function showNotification(message, type = 'error') {
             const id = Date.now();
+            const safeMessage = escapeHtml(message);
+            const safeType = ['success', 'warning', 'error'].includes(type) ? type : 'error';
             let icon = '';
-            if (type === 'success') {
+            if (safeType === 'success') {
                 icon = '<svg class="notification-icon" fill="none" stroke="#34c759" viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>';
-            } else if (type === 'warning') {
+            } else if (safeType === 'warning') {
                 icon = '<svg class="notification-icon" fill="none" stroke="#ff9f0a" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             } else {
                 icon = '<svg class="notification-icon" fill="none" stroke="#ff3b30" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             }
             const html = `
-                <div class="notification ${type}" id="notif-${id}">
+                <div class="notification ${safeType}" id="notif-${id}">
                     ${icon}
-                    <div class="notification-content">${message}</div>
+                    <div class="notification-content">${safeMessage}</div>
                 </div>
             `;
             notificationContainer.insertAdjacentHTML('beforeend', html);
             const element = document.getElementById(`notif-${id}`);
-            setTimeout(() => element.classList.add('active'), 10);
+            setTimeout(() => element && element.classList.add('active'), 10);
             setTimeout(() => {
-                element.classList.remove('active');
-                setTimeout(() => element.remove(), 400);
+                if (element) {
+                    element.classList.remove('active');
+                    setTimeout(() => element && element.remove(), 400);
+                }
             }, 4000);
         }
         
@@ -235,19 +286,24 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         updateRemoveButtons();
         
         function isValidImageUrl(url) {
-            const imageExtensions = /\.(jpg|jpeg|png|webp|gif|bmp|svg)$/i;
+            if (!url || typeof url !== 'string') return false;
+            const imageExtensions = /\.(jpg|jpeg|png|webp|gif|bmp)$/i;
             try {
                 const parsedUrl = new URL(url);
-                if (imageExtensions.test(parsedUrl.pathname)) {
-                    return true;
-                }
-                if (parsedUrl.hostname.includes('imgbb.com') || parsedUrl.hostname.includes('ibb.co')) {
-                    return false;
-                }
-                if (parsedUrl.hostname.includes('postimg.cc') || parsedUrl.hostname.includes('postimages.org')) {
-                    return false;
-                }
-                return false;
+                if (parsedUrl.protocol !== 'https:') return false;
+                const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, '');
+                const allowedDomains = [
+                    'i.imgur.com',
+                    'imgur.com', 
+                    'i.ibb.co',
+                    'ibb.co',
+                    'cdn.discordapp.com',
+                    'media.discordapp.net'
+                ];
+                const isAllowedDomain = allowedDomains.some(d => hostname === d || hostname.endsWith('.' + d));
+                if (!isAllowedDomain) return false;
+                const pathLower = parsedUrl.pathname.toLowerCase();
+                return imageExtensions.test(pathLower);
             } catch (e) {
                 return false;
             }
@@ -268,7 +324,8 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         saveModal.addEventListener('click', () => {
             const url = modalInput.value.trim();
             if (url && isValidImageUrl(url)) {
-                activeTarget.innerHTML = `<img src="${url}" class="preview-img">`;
+                const safeUrl = escapeHtml(url);
+                activeTarget.innerHTML = `<img src="${safeUrl}" class="preview-img">`;
                 if (activeTarget.id === 'squareUpload') {
                     iconUrl = url;
                 } else if (activeTarget.id === 'bannerUpload') {
@@ -280,22 +337,30 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             }
         });
         
-        document.getElementById('postForm').addEventListener('submit', async (e) => {
+document.getElementById('postForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const title = document.getElementById('addonTitle').value.trim();
-            const description = document.getElementById('addonDescription').value.trim();
-            const version = document.getElementById('addonVersion').value.trim();
-            const tags = document.getElementById('addonTags').value.trim();
+            const rawTitle = document.getElementById('addonTitle').value.trim();
+            const rawDescription = document.getElementById('addonDescription').value.trim();
+            const rawVersion = document.getElementById('addonVersion').value.trim();
+            const rawTags = document.getElementById('addonTags').value.trim();
+            const title = sanitizeInput(rawTitle, 100);
+            const description = sanitizeInput(rawDescription, 5000);
+            const version = sanitizeInput(rawVersion, 20);
+            const tags = validateTags(rawTags);
             const platformBtn = document.querySelector('.platform-btn.active');
-            const platform = platformBtn ? platformBtn.dataset.platform : 'Bedrock';
+            const platform = sanitizeInput(platformBtn ? platformBtn.dataset.platform : 'Bedrock', 20);
             const downloadLinks = [];
             const linkNames = [];
             document.querySelectorAll('.link-row').forEach(row => {
                 const nameInput = row.querySelector('.link-name-input');
                 const urlInput = row.querySelector('.link-url-input');
-                if (urlInput.value.trim()) {
-                    downloadLinks.push(urlInput.value.trim());
-                    linkNames.push(nameInput.value.trim() || `Download #${downloadLinks.length}`);
+                const rawUrl = urlInput.value.trim();
+                const rawName = nameInput.value.trim();
+                if (rawUrl && validateDownloadLink(rawUrl)) {
+                    downloadLinks.push(rawUrl);
+                    const rawNameStr = rawName || `Download #${downloadLinks.length}`;
+                    const safeName = escapeHtml(sanitizeInput(rawNameStr, 50));
+                    linkNames.push(safeName);
                 }
             });
             if (!title || !description || !version || downloadLinks.length === 0) {
@@ -306,14 +371,26 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 showNotification('La descripción debe tener al menos 200 caracteres. Actualmente tiene ' + description.length + ' caracteres.', 'error');
                 return;
             }
+            if (title.length < 3) {
+                showNotification('El título debe tener al menos 3 caracteres.', 'error');
+                return;
+            }
             const normalizedTitle = normalizeString(title);
             const exists = allAddons.some(addon => normalizeString(addon.title) === normalizedTitle);
             if (exists) {
                 showNotification('Este Complemento ya ha sido publicado. No puedes publicar un complemento con el mismo nombre.', 'warning');
                 return;
             }
+            if (iconUrl && !validateImageUrl(iconUrl)) {
+                showNotification('URL de icono no válida.', 'error');
+                return;
+            }
+            if (bannerUrl && !validateImageUrl(bannerUrl)) {
+                showNotification('URL de banner no válida.', 'error');
+                return;
+            }
             const addonData = {
-                addon_id: 'addon_' + Date.now(),
+                addon_id: generateAddonId(),
                 title: title,
                 description: description,
                 version: version,
@@ -321,8 +398,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 platform: platform,
                 download_links: downloadLinks,
                 link_names: linkNames,
-                icon_url: iconUrl,
-                banner_url: bannerUrl,
                 author_id: currentUser.id,
                 author_name: currentUser.username,
                 downloads: 0,
@@ -330,6 +405,12 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 status: 'approved',
                 publish_date: new Date().toISOString()
             };
+            if (iconUrl && validateImageUrl(iconUrl)) {
+                addonData.icon_url = iconUrl;
+            }
+            if (bannerUrl && validateImageUrl(bannerUrl)) {
+                addonData.banner_url = bannerUrl;
+            }
             try {
                 const { error } = await supabaseClient
                     .from('addons')
@@ -344,5 +425,4 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 showNotification('Error al publicar el addon. Intenta nuevamente.', 'error');
             }
         });
-        
-        checkAuthState();
+checkAuthState();

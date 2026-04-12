@@ -2,6 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Iniciar Sesión | MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -226,19 +230,48 @@
             });
         });
         
+        async function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'sh_' + hash.toString(16);
+            // Foxy dice: "No es bitcoin, pero esta OK para unas pruebas xD"
+        }
+
+        async function simpleHashTimingSafe(a, b) {
+            let result = a.length ^ b.length;
+            const minLen = Math.min(a.length, b.length);
+            for (let i = 0; i < minLen; i++) {
+                result ^= a.charCodeAt(i) ^ b.charCodeAt(i);
+            }
+            return result === 0;
+        }
+        
         async function login(username, password) {
+            const safeUsername = String(username).replace(/[^a-zA-Z0-9_]/g, '').substring(0, 30);
+            if (!safeUsername || safeUsername.length < 3) {
+                throw new Error('Credenciales inválidas');
+            }
             const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('id, username, public_name, avatar_url, role, password_hash')
-                .eq('username', username)
+                .eq('username', safeUsername)
                 .single();
             
             if (error || !user) {
-                throw new Error('Usuario no encontrado');
+                await new Promise(r => setTimeout(r, 1000));
+                throw new Error('Credenciales incorrectas');
             }
             
-            if (user.password_hash !== password) {
-                throw new Error('Contraseña incorrecta');
+            const inputHash = await simpleHash(password);
+            const isValidPassword = await simpleHashTimingSafe(user.password_hash, inputHash) || user.password_hash === password;
+            
+            if (!isValidPassword) {
+                await new Promise(r => setTimeout(r, 1000));
+                throw new Error('Credenciales incorrectas');
             }
             
             const sessionData = {
@@ -276,12 +309,10 @@
                 window.location.href = '../index.html';
             } catch (error) {
                 errorDiv.style.display = 'block';
-                if (error.message === 'Usuario no encontrado') {
-                    errorDiv.textContent = 'Usuario no encontrado. ¿Quieres registrarte?';
-                } else if (error.message === 'Contraseña incorrecta') {
-                    errorDiv.textContent = 'Contraseña incorrecta. Intenta nuevamente.';
+                if (error.message === 'Credenciales incorrectas') {
+                    errorDiv.textContent = 'Usuario o contraseña incorrectos.';
                 } else {
-                    errorDiv.textContent = 'Error al iniciar sesión. Intenta nuevamente.';
+                    errorDiv.textContent = 'Error al iniciar sesión.';
                 }
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Entrar';
