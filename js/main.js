@@ -1,7 +1,6 @@
 const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdWNpZmxndHZ1dW9xcXh6dWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjY1NTUsImV4cCI6MjA5MDY0MjU1NX0.z8eV2KRnq16C5obuyPKhUmeJnGfci9lH-o40QIJuJ5o';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        // Foxy dice: "Si estás leyendo esto, te debo un cafe" ☕
         
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -42,7 +41,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 return (num / 1000).toFixed(1) + 'k';
             }
             return num.toString();
-            // Foxy dice: "Funcion innecesaria, pero quedan nice"
         }
         
         function showNotification(message) {
@@ -58,13 +56,8 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             const session = localStorage.getItem('mc_session');
             if (session) {
                 try {
-                    const parsed = JSON.parse(session);
-                    if (parsed && typeof parsed === 'object' && parsed.user_id && typeof parsed.user_id === 'string') {
-                        return parsed;
-                    }
-                    return null;
+                    return JSON.parse(session);
                 } catch (e) {
-                    localStorage.removeItem('mc_session');
                     return null;
                 }
             }
@@ -265,7 +258,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             let addons = [...allAddons];
             const container = document.getElementById('addonsListContainer');
             if (!container) return;
-            // Foxy dice: "Ordenando addons, que no se entere NADIE"
             
             if (filterType === 'default') {
                 addons = weightedRandomShuffle(addons);
@@ -300,8 +292,7 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         
         function formatBoldText(text) {
             if (!text) return '';
-            let escaped = escapeHtml(text);
-            return escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
         
         async function renderAddons(addons) {
@@ -318,15 +309,12 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             for (const addon of addons) {
                 const publishDate = new Date(addon.publish_date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
                 const updatedDate = addon.updated_at ? new Date(addon.updated_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) : publishDate;
-                const rawImage = addon.icon_url || addon.banner_url || '';
-                const cardImage = validateImageUrl(rawImage) ? rawImage : 'img/default-addon.png';
+                const cardImage = addon.icon_url || addon.banner_url || 'img/default-addon.png';
                 const authorName = addon.author_name || 'Usuario';
-                const safeTitle = escapeHtml(addon.title || '');
-                const safeAuthor = escapeHtml(authorName);
-                const safeVersion = escapeHtml(addon.version || 'v1.0.0');
-                const safePlatform = escapeHtml(addon.platform || 'Bedrock');
-                const safeDescription = formatBoldText(addon.description || '');
                 const downloads = formatNumber(addon.downloads || 0);
+                const platform = addon.platform || 'Bedrock';
+                const version = addon.version || 'v1.0.0';
+                const formattedDescription = formatBoldText(addon.description);
                 
                 let userVerified = false;
                 let userPublicName = authorName;
@@ -348,13 +336,13 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 
                 card.innerHTML = `
                     ${flameIcon}
-                    <img src="${cardImage}" alt="${safeTitle}" class="addon-logo" onerror="this.src='img/default-addon.png'">
+                    <img src="${cardImage}" alt="${addon.title}" class="addon-logo" onerror="this.src='img/default-addon.png'">
                     <div class="addon-content">
-                        <h2 class="addon-title">${safeTitle}</h2>
+                        <h2 class="addon-title">${addon.title}</h2>
                         <div class="author-row">
                             By <span>${escapeHtml(userPublicName)}</span>${verifiedIcon}
                         </div>
-                        <p class="addon-desc">${safeDescription}</p>
+                        <p class="addon-desc">${formattedDescription}</p>
                         <div class="addon-meta">
                             <div class="meta-item">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -386,9 +374,9 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                                     <line x1="7" y1="7" x2="7.01" y2="7"/>
                                 </svg>
-                                ${safeVersion}
+                                ${version}
                             </div>
-                            <span class="platform-tag">${safePlatform}</span>
+                            <span class="platform-tag">${platform}</span>
                         </div>
                     </div>
                 `;
@@ -407,103 +395,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        }
-
-        function sanitizeUrl(url) {
-            try {
-                const parsed = new URL(url);
-                const allowedProtocols = ['https:'];
-                if (!allowedProtocols.includes(parsed.protocol)) {
-                    // Foxy dice: "Solo HTTPS, no me metas HTTP viejuno"
-                    return null;
-                }
-                const allowedHosts = parsed.hostname.replace(/^www\./, '');
-                const trustedDomains = ['imgur.com', 'i.imgur.com', 'ibb.co', 'i.ibb.co', 'discord.gg', 'discord.com'];
-                if (!trustedDomains.some(d => allowedHosts.endsWith(d))) {
-                    // Foxy dice: "Dominio sospechoso, proibido!"
-                    return null;
-                }
-                return url;
-            } catch (e) {
-                // Foxy dice: "URL invalida, aprende a escribir URLs"
-                return null;
-            }
-        }
-
-        function sanitizeFilename(filename) {
-            return filename.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 100);
-        }
-
-        function encodeForStorage(obj) {
-            try {
-                return btoa(encodeURIComponent(JSON.stringify(obj)));
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function decodeFromStorage(encoded) {
-            try {
-                return JSON.parse(decodeURIComponent(atob(encoded)));
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function safeNavigate(url) {
-            try {
-                const parsed = new URL(url);
-                if (parsed.protocol !== 'file:' && !parsed.origin.includes('mcpixel')) {
-                    const allowedOrigins = ['http://localhost', 'https://mcpixel.vercel.app'];
-                    if (!allowedOrigins.some(o => parsed.origin === o || parsed.origin.endsWith(o.replace('http://', 'https://')))) {
-                        // Foxy dice: "Ni se te ocurra navegar a otros lugares >:("
-                        return;
-                    }
-                }
-                window.location.href = url;
-            } catch (e) {
-                if (/^[a-zA-Z0-9_-]+\.html?$/.test(url)) {
-                    window.location.href = url;
-                    // Foxy dice: "URL local, eso esta bien"
-                }
-            }
-        }
-
-        function safeSetItem(key, value) {
-            try {
-                const serialized = JSON.stringify(value);
-                if (serialized.length > 2000000) {
-                    console.warn('Data too large for storage');
-                    return false;
-                }
-                localStorage.setItem(key, serialized);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function validateImageUrl(url) {
-            if (!url || typeof url !== 'string') return false;
-            try {
-                const parsed = new URL(url);
-                if (parsed.protocol !== 'https:') return false;
-                const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
-                const allowedDomains = [
-                    'i.imgur.com',
-                    'imgur.com',
-                    'i.ibb.co',
-                    'ibb.co',
-                    'cdn.discordapp.com',
-                    'media.discordapp.net'
-                ];
-                const pathLower = parsed.pathname.toLowerCase();
-                const validExtensions = /\.(jpg|jpeg|png|webp|gif)$/;
-                if (!validExtensions.test(pathLower)) return false;
-                return allowedDomains.some(d => hostname === d || hostname.endsWith('.' + d));
-            } catch (e) {
-                return false;
-            }
         }
         
         function startSearchPlaceholderAnimation() {
@@ -617,8 +508,8 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                     } catch (e) {}
                     const verifiedIcon = userVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 13px; height: 13px; margin-left: 3px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : '';
                     html += `
-                        <div class="dropdown-item" data-addon-id="${escapeHtml(addon.id)}">
-                            <img src="${imageUrl}" alt="${escapeHtml(addon.title)}" class="dropdown-item-image" onerror="this.src='img/default-addon.png'">
+                        <div class="dropdown-item" data-addon-id="${addon.id}">
+                            <img src="${imageUrl}" alt="${addon.title}" class="dropdown-item-image" onerror="this.src='img/default-addon.png'">
                             <div class="dropdown-item-info">
                                 <div class="dropdown-item-title">${escapeHtml(addon.title)}</div>
                                 <div class="dropdown-item-author" style="display: flex; align-items: center; gap: 2px;">
@@ -644,7 +535,7 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 });
                 searchDropdown.classList.add('active');
             } else {
-                searchDropdown.innerHTML = `<div class="dropdown-no-results"><img src="img/ic3.png" alt="No results"><p>No se encontraron resultados para "${escapeHtml(query)}"</p></div>`;
+                searchDropdown.innerHTML = `<div class="dropdown-no-results"><img src="img/ic3.png" alt="No results"><p>No se encontraron resultados para "${query}"</p></div>`;
                 searchDropdown.classList.add('active');
             }
         });
@@ -684,17 +575,13 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             const today = new Date().toDateString();
             
             if (storedRecommendation) {
-                try {
-                    const recommendation = JSON.parse(storedRecommendation);
-                    if (recommendation && recommendation.date === today && recommendation.addonId) {
-                        const foundAddon = allAddons.find(a => a.id === recommendation.addonId);
-                        if (foundAddon && !usedAddonIds.has(foundAddon.id)) {
-                            recommendationOfTheDay = foundAddon;
-                            usedAddonIds.add(foundAddon.id);
-                        }
+                const recommendation = JSON.parse(storedRecommendation);
+                if (recommendation.date === today) {
+                    const foundAddon = allAddons.find(a => a.id === recommendation.addonId);
+                    if (foundAddon && !usedAddonIds.has(foundAddon.id)) {
+                        recommendationOfTheDay = foundAddon;
+                        usedAddonIds.add(foundAddon.id);
                     }
-                } catch (e) {
-                    localStorage.removeItem('dailyRecommendation');
                 }
             }
             
@@ -775,11 +662,11 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 slideElement.style.backgroundImage = `url('${bannerUrl}')`;
                 slideElement.innerHTML = `
                     <div class="slide-info">
-                        <img src="${iconUrl}" alt="${safeTitle}" class="slide-icon" onerror="this.src='img/default-addon.png'">
+                        <img src="${iconUrl}" alt="${addon.title}" class="slide-icon" onerror="this.src='img/default-addon.png'">
                         <div class="slide-text">
                             <div class="slide-title">${escapeHtml(addon.title.length > 50 ? addon.title.substring(0, 47) + '...' : addon.title)}</div>
-                            <div class="slide-author">By ${safeAuthor}</div>
-                            <div class="slide-description">${safeDescription}</div>
+                            <div class="slide-author">By ${escapeHtml(addon.author_name || 'Usuario')}</div>
+                            <div class="slide-description">${escapeHtml(addon.description ? (addon.description.length > 100 ? addon.description.substring(0, 97) + '...' : addon.description) : 'Sin descripción')}</div>
                         </div>
                     </div>
                 `;
