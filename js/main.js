@@ -1,7 +1,6 @@
 const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdWNpZmxndHZ1dW9xcXh6dWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjY1NTUsImV4cCI6MjA5MDY0MjU1NX0.z8eV2KRnq16C5obuyPKhUmeJnGfci9lH-o40QIJuJ5o';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        // Foxy dice: "Si estás leyendo esto, te debo un cafe" ☕
         
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -42,7 +41,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 return (num / 1000).toFixed(1) + 'k';
             }
             return num.toString();
-            // Foxy dice: "Funcion innecesaria, pero quedan nice"
         }
         
         function showNotification(message) {
@@ -265,7 +263,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             let addons = [...allAddons];
             const container = document.getElementById('addonsListContainer');
             if (!container) return;
-            // Foxy dice: "Ordenando addons, que no se entere NADIE"
             
             if (filterType === 'default') {
                 addons = weightedRandomShuffle(addons);
@@ -414,18 +411,15 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
                 const parsed = new URL(url);
                 const allowedProtocols = ['https:'];
                 if (!allowedProtocols.includes(parsed.protocol)) {
-                    // Foxy dice: "Solo HTTPS, no me metas HTTP viejuno"
                     return null;
                 }
                 const allowedHosts = parsed.hostname.replace(/^www\./, '');
                 const trustedDomains = ['imgur.com', 'i.imgur.com', 'ibb.co', 'i.ibb.co', 'discord.gg', 'discord.com'];
                 if (!trustedDomains.some(d => allowedHosts.endsWith(d))) {
-                    // Foxy dice: "Dominio sospechoso, proibido!"
                     return null;
                 }
                 return url;
             } catch (e) {
-                // Foxy dice: "URL invalida, aprende a escribir URLs"
                 return null;
             }
         }
@@ -464,7 +458,6 @@ const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
             } catch (e) {
                 if (/^[a-zA-Z0-9_-]+\.html?$/.test(url)) {
                     window.location.href = url;
-                    // Foxy dice: "URL local, eso esta bien"
                 }
             }
         }
