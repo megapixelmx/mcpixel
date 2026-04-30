@@ -1,0 +1,40 @@
+[build]
+  publish = "/"
+
+[layout]
+  filter = "relative"
+
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile"
+  to = "/sc/profile.html"
+  status = 200
+
+[[redirects]]
+  from = "/view"
+  to = "/sc/view.html"
+  status = 200
+
+[[redirects]]
+  from = "/post"
+  to = "/sc/post.html"
+  status = 200
+
+[[redirects]]
+  from = "/publish"
+  to = "/sc/publish.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/sv/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/sv/register.html"
+  status = 200
