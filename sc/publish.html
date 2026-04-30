@@ -2,10 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Editar Publicación - MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -431,7 +427,7 @@
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
                 </svg>
                 Publicar
-            </a>
+            </a>            
             <a href="#" class="nav-item">
                 <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Categorías
@@ -534,7 +530,7 @@
                 </div>
                 <div class="action-buttons">
                     <button type="button" class="btn-cancel" onclick="window.location.href='profile.html'">Cancelar</button>
-                    <button type="submit" class="btn-post" id="submitBtn">Guardar Cambios</button>
+                    <button type="submit" class="btn-post">Guardar Cambios</button>
                 </div>
             </form>
         </main>
@@ -567,43 +563,30 @@
         const saveModal = document.getElementById('saveModal');
         const closeModal = document.getElementById('closeModal');
         const notificationContainer = document.getElementById('notificationContainer');
-        const submitBtn = document.getElementById('submitBtn');
-        
         let currentUser = null;
         let activeTarget = null;
         let iconUrl = null;
         let bannerUrl = null;
         let editingAddon = null;
         
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         function showNotification(message, type = 'error') {
             const id = Date.now();
-            const safeMessage = escapeHtml(message);
-            const safeType = (type === 'success' || type === 'warning') ? type : 'error';
-            const icon = safeType === 'success' 
+            const icon = type === 'success' 
                 ? '<svg class="notification-icon" fill="none" stroke="#34c759" viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>'
                 : '<svg class="notification-icon" fill="none" stroke="#ff3b30" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             const html = `
-                <div class="notification ${safeType}" id="notif-${id}">
+                <div class="notification ${type}" id="notif-${id}">
                     ${icon}
-                    <div class="notification-content">${safeMessage}</div>
+                    <div class="notification-content">${message}</div>
                 </div>
             `;
             notificationContainer.insertAdjacentHTML('beforeend', html);
             const element = document.getElementById(`notif-${id}`);
-            if (element) {
-                setTimeout(() => element.classList.add('active'), 10);
-                setTimeout(() => {
-                    element.classList.remove('active');
-                    setTimeout(() => element && element.remove(), 400);
-                }, 4000);
-            }
+            setTimeout(() => element.classList.add('active'), 10);
+            setTimeout(() => {
+                element.classList.remove('active');
+                setTimeout(() => element.remove(), 400);
+            }, 4000);
         }
         
         window.addEventListener('scroll', () => {
@@ -635,12 +618,12 @@
         async function checkAuthState() {
             const session = getCurrentSession();
             if (session && session.user_id) {
-                const { data: userData, error } = await supabaseClient
+                const { data: userData } = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('id', session.user_id)
                     .single();
-                if (userData && !error) {
+                if (userData) {
                     currentUser = userData;
                     if (userNameDisplay) userNameDisplay.textContent = userData.public_name || userData.username;
                     if (loginNav) loginNav.style.display = 'none';
@@ -732,15 +715,12 @@
         updateRemoveButtons();
         
         function isValidImageUrl(url) {
-            if (!url || typeof url !== 'string') return false;
-            const allowedDomains = ['i.imgur.com', 'imgur.com', 'i.ibb.co', 'ibb.co', 'cdn.discordapp.com', 'media.discordapp.net'];
+            const allowedDomains = ['ibb.co', 'imgbb.com', 'postimg.cc', 'postimages.org', 'imgur.com', 'discordapp.com', 'i.imgur.com'];
             try {
                 const parsedUrl = new URL(url);
-                if (parsedUrl.protocol !== 'https:') return false;
-                const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, '');
-                const domainMatch = allowedDomains.some(domain => hostname === domain || hostname.endsWith('.' + domain));
-                if (!domainMatch) return false;
-                return /\.(jpg|jpeg|png|webp|gif)$/i.test(parsedUrl.pathname);
+                const domainMatch = allowedDomains.some(domain => parsedUrl.hostname.includes(domain));
+                const extensionMatch = /\.(jpg|jpeg|png|webp|gif)$/.test(parsedUrl.pathname.toLowerCase());
+                return domainMatch || extensionMatch;
             } catch (e) {
                 return false;
             }
@@ -761,8 +741,7 @@
         saveModal.addEventListener('click', () => {
             const url = modalInput.value.trim();
             if (url && isValidImageUrl(url)) {
-                const safeUrl = escapeHtml(url);
-                activeTarget.innerHTML = `<img src="${safeUrl}" class="preview-img">`;
+                activeTarget.innerHTML = `<img src="${url}" class="preview-img">`;
                 if (activeTarget.id === 'squareUpload') {
                     iconUrl = url;
                 } else if (activeTarget.id === 'bannerUpload') {
@@ -778,19 +757,9 @@
             const stored = localStorage.getItem('editingAddon');
             if (stored) {
                 editingAddon = JSON.parse(stored);
-                console.log('Addon cargado para editar:', editingAddon);
-            } else {
-                showNotification('No se encontró el complemento para editar', 'error');
-                setTimeout(() => {
-                    window.location.href = 'profile.html';
-                }, 2000);
             }
         } catch (e) {
             console.error('Error loading editing addon:', e);
-            showNotification('Error al cargar el complemento', 'error');
-            setTimeout(() => {
-                window.location.href = 'profile.html';
-            }, 2000);
         }
         
         if (editingAddon) {
@@ -803,12 +772,10 @@
             bannerUrl = editingAddon.banner_url || null;
             
             if (iconUrl) {
-                const squareUpload = document.getElementById('squareUpload');
-                squareUpload.innerHTML = `<img src="${escapeHtml(iconUrl)}" class="preview-img">`;
+                document.getElementById('squareUpload').innerHTML = `<img src="${iconUrl}" class="preview-img">`;
             }
             if (bannerUrl) {
-                const bannerUpload = document.getElementById('bannerUpload');
-                bannerUpload.innerHTML = `<img src="${escapeHtml(bannerUrl)}" class="preview-img">`;
+                document.getElementById('bannerUpload').innerHTML = `<img src="${bannerUrl}" class="preview-img">`;
             }
             
             const platformBtns = document.querySelectorAll('.platform-btn');
@@ -823,13 +790,12 @@
             if (editingAddon.download_links && editingAddon.download_links.length > 0) {
                 linksContainer.innerHTML = '';
                 editingAddon.download_links.forEach((link, index) => {
-                    const linkName = editingAddon.link_names && editingAddon.link_names[index] ? escapeHtml(editingAddon.link_names[index]) : `Download #${index + 1}`;
-                    const safeLink = escapeHtml(link);
+                    const linkName = editingAddon.link_names && editingAddon.link_names[index] ? editingAddon.link_names[index] : `Download #${index + 1}`;
                     const newRow = document.createElement('div');
                     newRow.className = 'link-row';
                     newRow.innerHTML = `
-                        <input type="text" class="link-name-input" placeholder="Nombre (Ej: Mediafire)" value="${linkName}">
-                        <input type="url" class="link-url-input" placeholder="https://ejemplo.com/archivo-addon" value="${safeLink}" required>
+                        <input type="text" class="link-name-input" placeholder="Nombre (Ej: Mediafire)" value="${linkName.replace(/"/g, '&quot;')}">
+                        <input type="url" class="link-url-input" placeholder="https://ejemplo.com/archivo-addon" value="${link.replace(/"/g, '&quot;')}" required>
                         <button type="button" class="btn-remove-link">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
                         </button>
@@ -847,7 +813,6 @@
         
         document.getElementById('postForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const title = document.getElementById('addonTitle').value.trim();
             const description = document.getElementById('addonDescription').value.trim();
             const version = document.getElementById('addonVersion').value.trim();
@@ -856,7 +821,6 @@
             const platform = platformBtn ? platformBtn.dataset.platform : 'Bedrock';
             const downloadLinks = [];
             const linkNames = [];
-            
             document.querySelectorAll('.link-row').forEach(row => {
                 const nameInput = row.querySelector('.link-name-input');
                 const urlInput = row.querySelector('.link-url-input');
@@ -865,53 +829,42 @@
                     linkNames.push(nameInput.value.trim() || `Download #${downloadLinks.length}`);
                 }
             });
-            
             if (!title || !description || !version || downloadLinks.length === 0) {
                 showNotification('Por favor, completa todos los campos obligatorios.', 'error');
                 return;
             }
             
-            if (!editingAddon || !editingAddon.id) {
-                showNotification('No se pudo identificar el complemento a editar', 'error');
-                return;
-            }
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando cambios...';
-            
             try {
-                const { error } = await supabaseClient
-                    .from('addons')
-                    .update({
-                        title: title,
-                        description: description,
-                        version: version,
-                        tags: tags,
-                        platform: platform,
-                        download_links: downloadLinks,
-                        link_names: linkNames,
-                        icon_url: iconUrl,
-                        banner_url: bannerUrl,
-                        last_updated: new Date().toISOString()
-                    })
-                    .eq('id', editingAddon.id);
-                
-                if (error) {
-                    console.error('Error en la actualización:', error);
-                    throw error;
+                if (editingAddon && editingAddon.addon_id) {
+                    const { error } = await supabaseClient
+                        .from('addons')
+                        .update({
+                            title: title,
+                            description: description,
+                            version: version,
+                            tags: tags,
+                            platform: platform,
+                            download_links: downloadLinks,
+                            link_names: linkNames,
+                            icon_url: iconUrl,
+                            banner_url: bannerUrl,
+                            last_updated: new Date().toISOString()
+                        })
+                        .eq('addon_id', editingAddon.addon_id)
+                        .eq('author_id', currentUser.id);
+                    if (error) throw error;
+                    showNotification('¡Tu addon ha sido actualizado exitosamente!', 'success');
+                } else {
+                    showNotification('No se pudo identificar el addon a editar', 'error');
+                    return;
                 }
-                
                 localStorage.removeItem('editingAddon');
-                showNotification('¡Complemento actualizado exitosamente!', 'success');
-                
                 setTimeout(() => {
                     window.location.href = 'profile.html';
                 }, 2000);
             } catch (error) {
                 console.error('Error updating addon:', error);
-                showNotification('Error al actualizar el complemento: ' + (error.message || 'Intenta nuevamente'), 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Guardar Cambios';
+                showNotification('Error al actualizar el addon. Intenta nuevamente.', 'error');
             }
         });
         
