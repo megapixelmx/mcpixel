@@ -1,35 +1,6 @@
-const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
+        const supabaseUrl = 'https://tauciflgtvuuoqqxzucy.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhdWNpZmxndHZ1dW9xcXh6dWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjY1NTUsImV4cCI6MjA5MDY0MjU1NX0.z8eV2KRnq16C5obuyPKhUmeJnGfci9lH-o40QIJuJ5o';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        
-        // Foxy dice: "Perfil? No, gracias. Soy FOXY y no tengo perfil. *rimshot* 🎵
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function sanitizeInput(text, maxLength = 500) {
-            if (!text || typeof text !== 'string') return '';
-            return text.substring(0, maxLength).replace(/[<>]/g, '');
-        }
-
-        function validateImageUrl(url) {
-            if (!url || typeof url !== 'string') return false;
-            try {
-                const parsed = new URL(url);
-                if (parsed.protocol !== 'https:') return false;
-                const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
-                const allowedDomains = ['i.imgur.com', 'imgur.com', 'i.ibb.co', 'ibb.co', 'cdn.discordapp.com', 'media.discordapp.net'];
-                const isAllowed = allowedDomains.some(d => hostname === d || hostname.endsWith('.' + d));
-                if (!isAllowed) return false;
-                return /\.(jpg|jpeg|png|webp|gif)$/i.test(parsed.pathname);
-            } catch (e) {
-                return false;
-            }
-        }
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -122,23 +93,14 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             if (error) throw error;
         }
         
-function editAddon(encodedAddon) {
-            try {
-                const addon = JSON.parse(decodeURIComponent(atob(encodedAddon)));
-                localStorage.setItem('editingAddon', JSON.stringify(addon));
-                window.location.href = 'publish.html';
-            } catch (e) {
-                showNotification('Error al cargar datos del addon');
-            }
+        function editAddon(addon) {
+            localStorage.setItem('editingAddon', JSON.stringify(addon));
+            window.location.href = 'publish.html';
         }
-
-        function openDeleteModal(encodedAddon) {
-            try {
-                pendingDeleteAddon = JSON.parse(decodeURIComponent(atob(encodedAddon)));
-                deleteModal.classList.add('active');
-            } catch (e) {
-                showNotification('Error al cargar datos del addon');
-            }
+        
+        function openDeleteModal(addon) {
+            pendingDeleteAddon = addon;
+            deleteModal.classList.add('active');
         }
         
         function closeDeleteModal() {
@@ -159,8 +121,7 @@ function editAddon(encodedAddon) {
         
         function formatText(text) {
             if (!text) return '';
-            let escaped = escapeHtml(text);
-            return escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
         
         function renderAddons(addons) {
@@ -178,28 +139,29 @@ function editAddon(encodedAddon) {
             
             let html = '<div class="addons-grid">';
             addons.forEach(addon => {
-                const rawImage = addon.icon_url || addon.banner_url || '';
-                const imageUrl = validateImageUrl(rawImage) ? rawImage : '../img/default-addon.png';
-                const safeAddonData = btoa(encodeURIComponent(JSON.stringify(addon)));
-                const safeTitle = escapeHtml(addon.title || '');
-                const safeDesc = formatText(sanitizeInput(addon.description, 100));
+                const imageUrl = addon.icon_url || addon.banner_url || '../img/default-addon.png';
+                const formattedDescription = formatText(addon.description.substring(0, 100) + (addon.description.length > 100 ? '...' : ''));
+                const safeAddon = JSON.stringify(addon).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                
+                const isVerified = currentUser && currentUser.is_verified;
+                const editButtonStyle = isVerified ? '' : 'display: none;';
                 
                 html += `
                     <div class="addon-card-owner">
-                        <img src="${imageUrl}" alt="${safeTitle}" onerror="this.src='../img/default-addon.png'">
+                        <img src="${imageUrl}" alt="${addon.title}" onerror="this.src='../img/default-addon.png'">
                         <div class="addon-card-owner-info">
-                            <h4>${safeTitle}</h4>
-                            <p>${safeDesc}</p>
+                            <h4>${addon.title}</h4>
+                            <p>${formattedDescription}</p>
                         </div>
                         <div class="addon-card-owner-actions">
-                            <button class="owner-action-btn" data-addon="${safeAddonData}" onclick="editAddon(this.dataset.addon)">
+                            <button class="owner-action-btn" onclick='editAddon(${safeAddon})' style="${editButtonStyle}">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                     <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/>
                                 </svg>
                                 Editar
                             </button>
-                            <button class="owner-action-btn delete" data-addon="${safeAddonData}" onclick="openDeleteModal(this.dataset.addon)">
+                            <button class="owner-action-btn delete" onclick='openDeleteModal(${safeAddon})'>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"/>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -272,7 +234,7 @@ function editAddon(encodedAddon) {
         
         async function updateAvatarFromUrl() {
             const url = avatarUrlInput.value.trim();
-            if (url && validateImageUrl(url)) {
+            if (url) {
                 const { error } = await supabaseClient
                     .from('users')
                     .update({ avatar_url: url })
@@ -286,14 +248,13 @@ function editAddon(encodedAddon) {
                     closeEditModal();
                 }
             } else {
-                showNotification('URL de imagen no válida. Usa HTTPS con extensiones jpg, png, webp o gif de dominios confiables.');
+                showNotification('Ingresa una URL válida');
             }
         }
         
         async function saveProfileChanges() {
-            const rawUsername = editUsername.value.trim();
-            const newUsername = sanitizeInput(rawUsername, 50);
-            if (newUsername && newUsername.length >= 3 && newUsername !== (currentUser.public_name || currentUser.username)) {
+            const newUsername = editUsername.value.trim();
+            if (newUsername && newUsername !== (currentUser.public_name || currentUser.username)) {
                 const { error } = await supabaseClient
                     .from('users')
                     .update({ public_name: newUsername })
@@ -358,7 +319,17 @@ function editAddon(encodedAddon) {
                     if (loginNav) loginNav.style.display = 'none';
                     if (registerNav) registerNav.style.display = 'none';
                     if (logoutNav) logoutNav.style.display = 'flex';
-                    if (publishNav) publishNav.classList.remove('disabled');
+                    
+                    if (publishNav) {
+                        if (userData.is_verified) {
+                            publishNav.style.display = 'flex';
+                            publishNav.classList.remove('disabled');
+                        } else {
+                            publishNav.style.display = 'none';
+                            publishNav.classList.add('disabled');
+                        }
+                    }
+                    
                     if (settingsNav) settingsNav.classList.remove('disabled');
                     
                     updateProfileUI();
