@@ -2,10 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Detalles del Addon - MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -28,12 +24,84 @@
             overflow: hidden;
             margin-bottom: 2rem;
             box-shadow: 0 15px 30px -10px rgba(0,0,0,0.5);
+            position: relative;
         }
         .addon-banner img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+        .addon-banner iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .gallery-section {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .gallery-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            border-radius: 20px;
+        }
+        .gallery-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .gallery-track {
+            display: flex;
+            gap: 16px;
+            flex-direction: row;
+            min-width: min-content;
+            padding: 4px 0;
+        }
+        .gallery-image {
+            width: 200px;
+            height: 120px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .gallery-image.active {
+            border-color: #ff6b00;
+            transform: scale(1.02);
+        }
+        .gallery-image:hover {
+            transform: translateY(-4px);
+            border-color: #ff6b00;
+        }
+        .gallery-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .play-overlay svg {
+            width: 48px;
+            height: 48px;
+            fill: white;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
         .addon-view-header {
             margin-bottom: 2rem;
@@ -49,7 +117,7 @@
         .addon-view-author {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-size: 1.1rem;
             color: #a1a1a6;
         }
@@ -61,11 +129,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            vertical-align: middle;
         }
         .verified-badge svg {
             width: 18px;
             height: 18px;
-            fill: #1d9bf0;
         }
         .meta-grid {
             display: flex;
@@ -240,312 +308,70 @@
             stroke: white;
             fill: none;
         }
-        .comments-section {
+        .suggested-section {
             border-top: 1px solid rgba(255,255,255,0.06);
             padding-top: 2.5rem;
             margin-top: 2rem;
         }
-        .comments-section h3 {
+        .suggested-section h3 {
             font-size: 1.4rem;
             font-weight: 700;
             color: #f5f5f7;
             margin-bottom: 1.5rem;
         }
-        .comment-form-container {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 1.8rem;
-            margin-bottom: 2rem;
+        .suggested-carousel {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 1rem;
         }
-        .comment-input {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.2rem 1.5rem;
-            color: #f5f5f7;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            min-height: 100px;
-            margin-bottom: 1rem;
-            outline: none;
-        }
-        .comment-input:focus {
-            border-color: #ff6b00;
-        }
-        .comment-actions {
-            display: flex;
-            justify-content: flex-end;
-        }
-        .btn-post-comment {
-            background: #ff6b00;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-post-comment:hover:not(:disabled) {
-            background: #e66000;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(255,107,0,0.3);
-        }
-        .auth-message {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255,255,255,0.02);
-            border-radius: 24px;
-        }
-        .auth-message p {
-            margin-bottom: 1rem;
-            color: #a1a1a6;
-        }
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        .auth-btn {
-            padding: 10px 24px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .auth-btn.login {
-            background: rgba(255,255,255,0.1);
-            color: #f5f5f7;
-        }
-        .auth-btn.register {
-            background: #ff6b00;
-            color: white;
-        }
-        .comments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        .comment-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 20px;
-            padding: 1.5rem;
-            position: relative;
-        }
-        .comment-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        .comment-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #333336;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #a1a1a6;
-            border: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .comment-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .comment-author {
-            font-weight: 700;
-            color: #f5f5f7;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .comment-author small {
-            font-weight: 400;
-            color: #a1a1a6;
-            margin-left: 8px;
-        }
-        .comment-badge {
-            background: rgba(255, 107, 0, 0.2);
-            color: #ff8c42;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 30px;
-            margin-left: 8px;
-        }
-        .comment-text {
-            color: #e1e1e6;
-            line-height: 1.5;
-            margin-bottom: 0.8rem;
-            padding-right: 40px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .comment-text strong {
-            color: #f5f5f7;
-            font-weight: 700;
-        }
-        .delete-comment {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #ff3b30;
-            transition: all 0.2s;
-        }
-        .delete-comment:hover {
-            background: #ff3b30;
-            color: white;
-        }
-        .delete-comment svg {
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-        }
-        .comment-reply {
-            margin-left: 3rem;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(0,0,0,0.2);
-            border-radius: 16px;
-            border-left: 3px solid #ff6b00;
-            position: relative;
-        }
-        .reply-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-        .reply-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #333336;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #a1a1a6;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .reply-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .reply-author {
-            font-weight: 700;
-            color: #ff8c42;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .delete-reply {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            border-radius: 6px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #ff3b30;
-            transition: all 0.2s;
-        }
-        .delete-reply:hover {
-            background: #ff3b30;
-            color: white;
-        }
-        .btn-reply {
-            background: none;
-            border: none;
-            color: #ff6b00;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 8px;
-            padding: 5px 10px;
-            border-radius: 30px;
-            transition: all 0.2s;
-        }
-        .btn-reply:hover {
-            background: rgba(255,107,0,0.1);
-        }
-        .reply-form {
-            margin-top: 1rem;
-            margin-left: 3rem;
+        .suggested-carousel::-webkit-scrollbar {
             display: none;
         }
-        .reply-form.active {
+        .suggested-track {
+            display: flex;
+            gap: 20px;
+        }
+        .suggested-card {
+            width: 260px;
+            height: 160px;
+            flex-shrink: 0;
+            background: #1e1e20;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .suggested-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b00;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .suggested-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             display: block;
         }
-        .reply-input {
+        .suggested-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 0.8rem 1rem;
-            color: #f5f5f7;
-            font-family: inherit;
-            margin-bottom: 0.8rem;
-            outline: none;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+            padding: 12px 15px;
+            pointer-events: none;
         }
-        .reply-input:focus {
-            border-color: #ff6b00;
-        }
-        .reply-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        .btn-reply-submit {
-            background: #ff6b00;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-reply-cancel {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #a1a1a6;
-            padding: 8px 20px;
-            border-radius: 30px;
-            cursor: pointer;
+        .suggested-name {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .custom-notification {
             position: fixed;
@@ -590,8 +416,9 @@
             .download-link-card { flex-direction: column; align-items: flex-start; gap: 15px; }
             .link-info { width: 100%; }
             .download-badge { align-self: flex-end; margin-left: 0; }
-            .auth-buttons { flex-direction: column; }
-            .comment-reply { margin-left: 1rem; }
+            .gallery-image { width: 150px; height: 90px; }
+            .play-overlay svg { width: 32px; height: 32px; }
+            .suggested-card { width: 220px; height: 140px; }
         }
     </style>
 </head>
@@ -613,42 +440,40 @@
         </div>
         <nav class="nav-menu" id="navMenu">
             <a href="../index.html" class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Inicio
             </a>
             <a href="#" class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 Skins
             </a>
             <a href="#" class="nav-item">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                 Servidores
             </a>
-            <a href="post.html" class="nav-item" id="publishNav">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                </svg>
+            <a href="post.html" class="nav-item" id="publishNav" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                 Publicar
             </a>
             <a href="#" class="nav-item">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Categorías
             </a>
-            <a href="#" class="nav-item" id="settingsNav">
+            <a href="settings.html" class="nav-item" id="settingsNav">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 Ajustes
             </a>
             <div class="bottom-section" id="authBottomSection">
                 <a href="../sv/login.html" class="nav-item" id="loginNav">
-                    <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     Iniciar Sesión
                 </a>
                 <a href="../sv/register.html" class="nav-item" id="registerNav">
-                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="16"/><line x1="16" y1="12" x2="24" y2="12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="16"/><line x1="16" y1="12" x2="24" y2="12"/></svg>
                     Crear Cuenta
                 </a>
                 <a href="#" class="nav-item" id="logoutNav" style="display: none;">
-                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     Cerrar Sesión
                 </a>
             </div>
@@ -688,8 +513,9 @@
         let currentUser = null;
         let currentUserData = null;
         let currentAddon = null;
-        let addonComments = [];
         let usersCache = {};
+        let currentDisplayUrl = null;
+        let currentIsVideo = false;
         
         function showNotification(message) {
             notificationMessage.textContent = message;
@@ -699,21 +525,30 @@
             }, 3000);
         }
         
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return num.toString();
         }
         
-        // Foxy dice: "Viste esto? Eres un hacker! o_O"
-
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?#/]+)/,
+                /youtube\.com\/shorts\/([^&?#/]+)/
+            ];
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) return match[1];
+            }
+            return null;
+        }
+        
         function formatText(text) {
             if (!text) return text;
-            let escaped = escapeHtml(text);
-            let formatted = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             const urlRegex = /(https?:\/\/[^\s]+)/g;
-            formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer nofollow">$1</a>');
+            formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
             const lines = formatted.split('\n');
             let inList = false;
             let listHtml = '';
@@ -725,7 +560,7 @@
                         inList = true;
                         listHtml = '<ul>';
                     }
-                    listHtml += '<li>' + escapeHtml(line.substring(2)) + '</li>';
+                    listHtml += '<li>' + line.substring(2) + '</li>';
                 } else {
                     if (inList) {
                         listHtml += '</ul>';
@@ -756,9 +591,7 @@
         }
         
         async function getUserVerifiedStatus(username) {
-            if (usersCache[username]) {
-                return usersCache[username];
-            }
+            if (usersCache[username]) return usersCache[username];
             const { data, error } = await supabaseClient
                 .from('users')
                 .select('is_verified, username, public_name, avatar_url')
@@ -785,11 +618,13 @@
                     if (loginNav) loginNav.style.display = 'none';
                     if (registerNav) registerNav.style.display = 'none';
                     if (logoutNav) logoutNav.style.display = 'flex';
-                    if (publishNav) publishNav.classList.remove('disabled');
-                    if (settingsNav) settingsNav.classList.remove('disabled');
-                    if (userNameDisplay) {
-                        userNameDisplay.textContent = userData.public_name || userData.username;
+                    if (userData.is_verified) {
+                        if (publishNav) publishNav.style.display = 'flex';
+                    } else {
+                        if (publishNav) publishNav.style.display = 'none';
                     }
+                    if (settingsNav) settingsNav.classList.remove('disabled');
+                    if (userNameDisplay) userNameDisplay.textContent = userData.public_name || userData.username;
                     if (sidebarAvatar && userData.avatar_url) {
                         sidebarAvatar.style.backgroundImage = `url('${userData.avatar_url}')`;
                         sidebarAvatar.querySelectorAll('.u-head, .u-body').forEach(el => el.style.opacity = '0');
@@ -805,7 +640,7 @@
                 if (loginNav) loginNav.style.display = 'flex';
                 if (registerNav) registerNav.style.display = 'flex';
                 if (logoutNav) logoutNav.style.display = 'none';
-                if (publishNav) publishNav.classList.add('disabled');
+                if (publishNav) publishNav.style.display = 'none';
                 if (settingsNav) settingsNav.classList.add('disabled');
                 if (userNameDisplay) userNameDisplay.textContent = 'Invitado';
                 if (sidebarAvatar) {
@@ -832,11 +667,8 @@
         }
         
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 40) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+            if (window.scrollY > 40) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
         });
         
         if (toggleBtn) {
@@ -859,11 +691,8 @@
         }
         if (profileSection) {
             profileSection.addEventListener('click', () => {
-                if (currentUser) {
-                    window.location.href = 'profile.html';
-                } else {
-                    showNotification('Debes iniciar sesión para ver tu perfil');
-                }
+                if (currentUser) window.location.href = 'profile.html';
+                else showNotification('Debes iniciar sesión para ver tu perfil');
             });
         }
         
@@ -875,17 +704,13 @@
                 if (stored) {
                     try {
                         const addon = JSON.parse(stored);
-                        if (addon.addon_id === addonIdParam || addon.id === addonIdParam) {
-                            return addon;
-                        }
+                        if (addon.addon_id === addonIdParam || addon.id === addonIdParam) return addon;
                     } catch (e) {}
                 }
             }
             try {
                 const stored = localStorage.getItem('selectedAddon');
-                if (stored) {
-                    return JSON.parse(stored);
-                }
+                if (stored) return JSON.parse(stored);
             } catch (e) {
                 return null;
             }
@@ -898,12 +723,6 @@
                 await supabaseClient.rpc('increment_downloads', { addon_uuid: addon.id });
                 addon.downloads = (addon.downloads || 0) + 1;
                 localStorage.setItem('selectedAddon', JSON.stringify(addon));
-                const urlParams = new URLSearchParams(window.location.search);
-                const addonIdParam = urlParams.get('id');
-                if (addonIdParam) {
-                    const newUrl = `${window.location.pathname}?id=${addonIdParam}`;
-                    window.history.replaceState({}, '', newUrl);
-                }
                 return addon;
             } catch (error) {
                 console.error('Error incrementing downloads:', error);
@@ -917,71 +736,150 @@
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
-            const safeAddonId = encodeURIComponent(addon.addon_id || '');
-            const safeSlug = encodeURIComponent(slug);
-            const newUrl = `${window.location.pathname}?id=${safeAddonId}&name=${safeSlug}`;
+            const newUrl = `${window.location.pathname}?id=${addon.addon_id}&name=${slug}`;
             window.history.replaceState({}, '', newUrl);
         }
         
         function getPlatformIcon(url) {
-            if (url.includes('mediafire.com')) {
-                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8v8H8z"/></svg>`;
-            } else if (url.includes('mega.nz')) {
-                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
-            } else if (url.includes('drive.google.com')) {
-                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15L12 3L18 15H6z"/><path d="M6 21h12v-3H6v3z"/></svg>`;
-            } else if (url.includes('dropbox.com')) {
-                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8L12 4L18 8L12 12L6 8z"/><path d="M6 16L12 20L18 16"/></svg>`;
+            if (url.includes('mediafire.com')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8v8H8z"/></svg>`;
+            else if (url.includes('mega.nz')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
+            else if (url.includes('drive.google.com')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15L12 3L18 15H6z"/><path d="M6 21h12v-3H6v3z"/></svg>`;
+            else if (url.includes('dropbox.com')) return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8L12 4L18 8L12 12L6 8z"/><path d="M6 16L12 20L18 16"/></svg>`;
+            else return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+        }
+        
+        function updateBannerDisplay(url, isVideo) {
+            const bannerContainer = document.getElementById('mainBanner');
+            if (!bannerContainer) return;
+            if (isVideo && url) {
+                const videoId = getYouTubeId(url);
+                if (videoId) bannerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+                else bannerContainer.innerHTML = `<img src="${url}" alt="Portada" onerror="this.src='../img/default-banner.png'">`;
             } else {
-                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+                bannerContainer.innerHTML = `<img src="${url || '../img/default-banner.png'}" alt="Portada" onerror="this.src='../img/default-banner.png'">`;
             }
         }
         
-        async function getCommentsForAddon(addonId) {
-            const { data, error } = await supabaseClient
-                .from('comments')
-                .select('*')
-                .eq('addon_id', addonId)
-                .order('created_at', { ascending: true });
-            if (error) throw error;
-            return data || [];
+        function changeMainDisplay(url, isVideo) {
+            currentDisplayUrl = url;
+            currentIsVideo = isVideo;
+            updateBannerDisplay(url, isVideo);
         }
         
-        async function createComment(addonId, addonRefId, content) {
-            if (!currentUser) throw new Error('Debes iniciar sesión');
-            const { data, error } = await supabaseClient
-                .from('comments')
-                .insert({
-                    addon_id: addonId,
-                    addon_ref_id: addonRefId,
-                    author_id: currentUser.id,
-                    author_name: currentUser.public_name || currentUser.username,
-                    content: content
-                })
-                .select()
-                .single();
-            if (error) throw error;
-            return data;
+        function renderGallery() {
+            if (!currentAddon) return '';
+            const allImages = [];
+            const addedUrls = new Set();
+            if (currentAddon.video_url && getYouTubeId(currentAddon.video_url)) {
+                if (!addedUrls.has(currentAddon.video_url)) {
+                    allImages.push({ type: 'video', url: currentAddon.video_url, title: 'Video' });
+                    addedUrls.add(currentAddon.video_url);
+                }
+            }
+            if (currentAddon.banner_url) {
+                if (!addedUrls.has(currentAddon.banner_url)) {
+                    allImages.push({ type: 'image', url: currentAddon.banner_url, title: 'Portada' });
+                    addedUrls.add(currentAddon.banner_url);
+                }
+            }
+            if (currentAddon.gallery && currentAddon.gallery.length > 0) {
+                currentAddon.gallery.forEach(img => {
+                    if (img && img.url && !addedUrls.has(img.url)) {
+                        allImages.push({ type: 'image', url: img.url, title: 'Galería' });
+                        addedUrls.add(img.url);
+                    }
+                });
+            }
+            if (allImages.length <= 1) return '';
+            if (allImages.length > 0 && !currentDisplayUrl) {
+                const firstItem = allImages[0];
+                currentDisplayUrl = firstItem.url;
+                currentIsVideo = firstItem.type === 'video';
+            }
+            let galleryHTML = `<div class="gallery-section"><div class="gallery-scroll"><div class="gallery-track">`;
+            allImages.forEach((item, index) => {
+                const isActive = (item.type === 'video' && currentIsVideo && currentDisplayUrl === item.url) || 
+                                (item.type === 'image' && !currentIsVideo && currentDisplayUrl === item.url);
+                const activeClass = isActive ? 'active' : '';
+                if (item.type === 'video') {
+                    const videoId = getYouTubeId(item.url);
+                    galleryHTML += `
+                        <div class="gallery-image ${activeClass}" data-url="${item.url}" data-type="video">
+                            <img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="Video">
+                            <div class="play-overlay">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    galleryHTML += `
+                        <div class="gallery-image ${activeClass}" data-url="${item.url}" data-type="image">
+                            <img src="${item.url}" alt="Imagen" onerror="this.src='../img/default-banner.png'">
+                        </div>
+                    `;
+                }
+            });
+            galleryHTML += `</div></div></div>`;
+            return galleryHTML;
         }
         
-        async function deleteComment(commentId) {
-            const { error } = await supabaseClient
-                .from('comments')
-                .delete()
-                .eq('id', commentId);
-            if (error) throw error;
+        function initGalleryEvents() {
+            const galleryImages = document.querySelectorAll('.gallery-image');
+            galleryImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    const url = img.dataset.url;
+                    const type = img.dataset.type;
+                    changeMainDisplay(url, type === 'video');
+                    galleryImages.forEach(i => i.classList.remove('active'));
+                    img.classList.add('active');
+                });
+            });
         }
-        
-        async function addReplyToComment(commentId, replyContent) {
-            const updateData = replyContent ? { reply_content: replyContent, updated_at: new Date().toISOString() } : { reply_content: null, updated_at: new Date().toISOString() };
-            const { data, error } = await supabaseClient
-                .from('comments')
-                .update(updateData)
-                .eq('id', commentId)
-                .select()
-                .single();
-            if (error) throw error;
-            return data;
+
+        async function renderSuggestedAddons() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('addons')
+                    .select('*')
+                    .neq('id', currentAddon.id);
+                
+                if (error) throw error;
+                
+                const randomAddons = data.sort(() => 0.5 - Math.random()).slice(0, 10);
+                const suggestedContainer = document.createElement('div');
+                suggestedContainer.className = 'suggested-section';
+                
+                let html = `<h3>Addons Sugeridos</h3>
+                            <div class="suggested-carousel">
+                                <div class="suggested-track">`;
+                
+                randomAddons.forEach(item => {
+                    html += `
+                        <div class="suggested-card" data-addon='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
+                            <img src="${item.banner_url || '../img/default-banner.png'}" class="suggested-thumb" onerror="this.src='../img/default-banner.png'">
+                            <div class="suggested-info">
+                                <div class="suggested-name">${item.title}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                suggestedContainer.innerHTML = html;
+                viewContainer.appendChild(suggestedContainer);
+                
+                document.querySelectorAll('.suggested-card').forEach(card => {
+                    card.addEventListener('click', function() {
+                        const addonData = JSON.parse(this.dataset.addon);
+                        localStorage.setItem('selectedAddon', JSON.stringify(addonData));
+                        window.location.href = `view.html?id=${addonData.addon_id}`;
+                    });
+                });
+            } catch (err) {
+                console.error("Error al cargar sugeridos:", err);
+            }
         }
         
         async function renderAddonView() {
@@ -992,33 +890,18 @@
             }
             currentAddon = addon;
             updateURLWithAddonName(addon);
-            
             const publishDate = new Date(addon.publish_date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
             const updateDate = addon.updated_at ? new Date(addon.updated_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin actualizaciones';
             const tags = addon.tags ? addon.tags.split(',').map(t => t.trim()).filter(t => t) : [];
-            
-            function sanitizeUrl(url) {
-                if (!url || typeof url !== 'string') return null;
-                try {
-                    const parsed = new URL(url);
-                    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
-                    return url;
-                } catch (e) {
-                    return null;
-                }
-            }
-            
             let downloadLinksHTML = '';
             if (addon.download_links && addon.download_links.length > 0) {
                 downloadLinksHTML = addon.download_links.map((link, index) => {
-                    const safeLink = sanitizeUrl(link);
-                    if (!safeLink) return '';
-                    const linkName = addon.link_names && addon.link_names[index] ? escapeHtml(addon.link_names[index]) : `Download #${index + 1}`;
+                    const linkName = addon.link_names && addon.link_names[index] ? addon.link_names[index] : `Download #${index + 1}`;
                     return `
-                        <a href="${safeLink}" target="_blank" rel="noopener noreferrer" class="download-link-card">
+                        <a href="${link}" target="_blank" class="download-link-card" data-url="${link}">
                             <div class="link-info">
                                 <div class="link-icon">
-                                    ${getPlatformIcon(safeLink)}
+                                    ${getPlatformIcon(link)}
                                 </div>
                                 <span class="link-name">${linkName}</span>
                             </div>
@@ -1032,21 +915,33 @@
             } else {
                 downloadLinksHTML = '<p style="color:#a1a1a6;">No hay enlaces de descarga disponibles.</p>';
             }
-            
             const authorInfo = await getUserVerifiedStatus(addon.author_name);
             const isAuthorVerified = authorInfo.is_verified === true;
-            const authorDisplayName = escapeHtml(authorInfo.public_name || addon.author_name || '');
+            const authorDisplayName = authorInfo.public_name || addon.author_name;
+            const downloadsFormatted = formatNumber(addon.downloads || 0);
+            let galleryHTML = renderGallery();
             
-            let safeAddonTitle = escapeHtml(addon.title || '');
+            const initialVideoId = getYouTubeId(addon.video_url);
+            const bannerContent = initialVideoId ? 
+                `<iframe src="https://www.youtube.com/embed/${initialVideoId}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>` : 
+                `<img src="${addon.banner_url || '../img/default-banner.png'}" alt="${addon.title}" onerror="this.src='../img/default-banner.png'">`;
+
             let html = `
-                <div class="addon-banner">
-                    <img src="${addon.banner_url ? escapeHtml(addon.banner_url) : '../img/default-banner.png'}" alt="${safeAddonTitle}" onerror="this.src='../img/default-banner.png'">
+                <div class="addon-banner" id="mainBanner">
+                    ${bannerContent}
                 </div>
+                ${galleryHTML}
                 <div class="addon-view-header">
-                    <h1 class="addon-view-title">${safeAddonTitle}</h1>
+                    <h1 class="addon-view-title">${addon.title}</h1>
                     <div class="addon-view-author">
                         By <span>${authorDisplayName}</span>
-                        ${isAuthorVerified ? '<span class="verified-badge"><svg viewBox="0 0 24 24"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg></span>' : ''}
+                        ${isAuthorVerified ? `
+                        <span class="verified-badge">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 12l2 2 4-4" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>` : ''}
                     </div>
                 </div>
                 <div class="meta-grid">
@@ -1068,28 +963,23 @@
                         <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                         <div>
                             <span class="label">Versión</span>
-                            <span class="value">${escapeHtml(addon.version || 'v1.0.0')}</span>
+                            <span class="value">${addon.version || 'v1.0.0'}</span>
                         </div>
                     </div>
                     <div class="meta-grid-item">
                         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <div>
                             <span class="label">Descargas</span>
-                            <span class="value" id="downloadCountDisplay">${Number(addon.downloads) || 0}</span>
+                            <span class="value" id="downloadCountDisplay">${downloadsFormatted}</span>
                         </div>
                     </div>
                 </div>
             `;
-            
             if (tags.length > 0) {
                 html += `<div class="tags-container">`;
-                tags.forEach(tag => {
-                    const safeTag = escapeHtml(tag);
-                    html += `<span class="tag">#${safeTag}</span>`;
-                });
+                tags.forEach(tag => { html += `<span class="tag">#${tag}</span>`; });
                 html += `</div>`;
             }
-            
             html += `
                 <div class="description-section">
                     <h3>Descripción</h3>
@@ -1102,12 +992,12 @@
                     </div>
                 </div>
             `;
-            
             viewContainer.innerHTML = html;
+            const allImagesCount = (currentAddon.video_url && getYouTubeId(currentAddon.video_url) ? 1 : 0) + (currentAddon.banner_url ? 1 : 0) + (currentAddon.gallery ? currentAddon.gallery.length : 0);
+            if (allImagesCount > 1) initGalleryEvents();
             
-            addonComments = await getCommentsForAddon(addon.id);
-            await renderCommentsSection();
-            
+            await renderSuggestedAddons();
+
             document.querySelectorAll('.download-link-card').forEach(linkElement => {
                 linkElement.addEventListener('click', async function(e) {
                     e.preventDefault();
@@ -1116,247 +1006,8 @@
                         const updatedAddon = await incrementDownloadCount(addon);
                         currentAddon = updatedAddon;
                         const downloadSpan = document.getElementById('downloadCountDisplay');
-                        if (downloadSpan) downloadSpan.textContent = updatedAddon.downloads;
+                        if (downloadSpan) downloadSpan.textContent = formatNumber(updatedAddon.downloads);
                         window.open(url, '_blank');
-                    }
-                });
-            });
-        }
-        
-        async function renderCommentsSection() {
-            if (!currentAddon) return;
-            
-            const commentsContainer = document.createElement('div');
-            commentsContainer.className = 'comments-section';
-            commentsContainer.id = 'commentsSection';
-            
-            let commentsHTML = `<h3>Comentarios (${addonComments.length})</h3>`;
-            
-            const userHasCommented = currentUser ? addonComments.some(c => c.author_id === currentUser.id) : false;
-            const isAuthor = currentUser && currentAddon.author_id === currentUser.id;
-            
-            if (currentUser) {
-                if (!userHasCommented) {
-                    commentsHTML += `
-                        <div class="comment-form-container">
-                            <textarea class="comment-input" id="newCommentText" placeholder="Escribe tu comentario... **negritas**, * listas y https://enlaces"></textarea>
-                            <div class="comment-actions">
-                                <button class="btn-post-comment" id="submitCommentBtn">Publicar comentario</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    commentsHTML += `<p style="color:#a1a1a6; margin-bottom:1rem;">Ya has publicado un comentario. Solo puedes dejar uno.</p>`;
-                }
-            } else {
-                commentsHTML += `
-                    <div class="auth-message">
-                        <p>Inicia sesión para dejar un comentario.</p>
-                        <div class="auth-buttons">
-                            <a href="../sv/login.html" class="auth-btn login">Iniciar Sesión</a>
-                            <a href="../sv/register.html" class="auth-btn register">Crear Cuenta</a>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (addonComments.length > 0) {
-                commentsHTML += `<div class="comments-list">`;
-                for (const comment of addonComments) {
-                    const commentDate = new Date(comment.created_at).toLocaleDateString();
-                    const isCommentAuthor = currentUser && currentUser.id === comment.author_id;
-                    const showReplyForm = isAuthor && !comment.reply_content;
-                    const commentAuthorInfo = await getUserVerifiedStatus(comment.author_name);
-                    const isCommentAuthorVerified = commentAuthorInfo.is_verified === true;
-                    const commentAuthorDisplayName = escapeHtml(commentAuthorInfo.public_name || comment.author_name || '');
-                    const commentAuthorAvatar = commentAuthorInfo.avatar_url || '';
-                    const safeCommentDate = escapeHtml(commentDate);
-                    const safeCommentId = escapeHtml(String(comment.id));
-                    const safeReplyId = escapeHtml(String(comment.id));
-                    
-                    commentsHTML += `
-                        <div class="comment-card" data-comment-id="${safeCommentId}">
-                            ${(isAuthor || isCommentAuthor) ? `
-                                <div class="delete-comment" data-delete-comment="${safeCommentId}">
-                                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                </div>
-                            ` : ''}
-                            <div class="comment-header">
-                                <div class="comment-avatar">
-                                    ${commentAuthorAvatar ? `<img src="${escapeHtml(commentAuthorAvatar)}" alt="avatar">` : commentAuthorDisplayName.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <div class="comment-author">
-                                        ${commentAuthorDisplayName}
-                                        ${isCommentAuthorVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 14px; height: 14px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : ''}
-                                        <small>${safeCommentDate}</small>
-                                    </div>
-                                    ${comment.author_id === currentAddon.author_id ? '<span class="comment-badge">Creador</span>' : ''}
-                                </div>
-                            </div>
-                            <div class="comment-text">${formatText(comment.content)}</div>
-                    `;
-                    
-                    if (comment.reply_content) {
-                        const creatorInfo = await getUserVerifiedStatus(currentAddon.author_name);
-                        const isCreatorVerified = creatorInfo.is_verified === true;
-                        const creatorDisplayName = escapeHtml(creatorInfo.public_name || currentAddon.author_name || '');
-                        const creatorAvatar = creatorInfo.avatar_url || '';
-                        commentsHTML += `
-                            <div class="comment-reply">
-                                ${isAuthor ? `
-                                    <div class="delete-reply" data-delete-reply="${safeReplyId}">
-                                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                    </div>
-                                ` : ''}
-                                <div class="reply-header">
-                                    <div class="reply-avatar">
-                                        ${creatorAvatar ? `<img src="${escapeHtml(creatorAvatar)}" alt="avatar">` : creatorDisplayName.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div class="reply-author">
-                                        ${creatorDisplayName} (creador)
-                                        ${isCreatorVerified ? '<svg viewBox="0 0 24 24" style="fill: #1d9bf0; width: 12px; height: 12px;"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>' : ''}
-                                    </div>
-                                </div>
-                                <p style="margin-top:5px;">${formatText(comment.reply_content)}</p>
-                            </div>
-                        `;
-                    } else if (showReplyForm) {
-                        commentsHTML += `
-                            <button class="btn-reply" data-comment-id="${safeCommentId}" data-reply-btn>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                Responder
-                            </button>
-                            <div class="reply-form" id="replyForm-${safeCommentId}">
-                                <textarea class="reply-input" placeholder="Escribe tu respuesta... **negritas**, * listas y https://enlaces"></textarea>
-                                <div class="reply-actions">
-                                    <button class="btn-reply-cancel" data-cancel-reply="${safeCommentId}">Cancelar</button>
-                                    <button class="btn-reply-submit" data-submit-reply="${safeCommentId}">Responder</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    commentsHTML += `</div>`;
-                }
-                commentsHTML += `</div>`;
-            } else {
-                commentsHTML += `<p style="color:#a1a1a6; text-align:center; padding:2rem;">No hay comentarios aún. ¡Sé el primero en comentar!</p>`;
-            }
-            
-            commentsContainer.innerHTML = commentsHTML;
-            viewContainer.appendChild(commentsContainer);
-            
-            const submitBtn = document.getElementById('submitCommentBtn');
-            if (submitBtn) {
-                submitBtn.addEventListener('click', async function() {
-                    const textarea = document.getElementById('newCommentText');
-                    const text = textarea.value.trim();
-                    if (!text) {
-                        showNotification('El comentario no puede estar vacío');
-                        return;
-                    }
-                    if (!currentUser) {
-                        showNotification('Debes iniciar sesión');
-                        return;
-                    }
-                    try {
-                        await createComment(currentAddon.id, currentAddon.addon_id, text);
-                        showNotification('Comentario publicado');
-                        addonComments = await getCommentsForAddon(currentAddon.id);
-                        document.getElementById('commentsSection').remove();
-                        await renderCommentsSection();
-                    } catch (error) {
-                        console.error('Error posting comment:', error);
-                        showNotification('Error al publicar comentario');
-                    }
-                });
-            }
-            
-            document.querySelectorAll('[data-delete-comment]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const commentId = this.dataset.deleteComment;
-                    const comment = addonComments.find(c => c.id === commentId);
-                    if (comment && (currentUser?.id === comment.author_id || currentUser?.id === currentAddon.author_id)) {
-                        try {
-                            await deleteComment(commentId);
-                            showNotification('Comentario eliminado');
-                            addonComments = await getCommentsForAddon(currentAddon.id);
-                            document.getElementById('commentsSection').remove();
-                            await renderCommentsSection();
-                        } catch (error) {
-                            console.error('Error deleting comment:', error);
-                            showNotification('Error al eliminar comentario');
-                        }
-                    }
-                });
-            });
-            
-            document.querySelectorAll('[data-delete-reply]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const commentId = this.dataset.deleteReply;
-                    const comment = addonComments.find(c => c.id === commentId);
-                    if (comment && currentUser?.id === currentAddon.author_id && comment.reply_content) {
-                        try {
-                            await addReplyToComment(commentId, null);
-                            showNotification('Respuesta eliminada');
-                            addonComments = await getCommentsForAddon(currentAddon.id);
-                            document.getElementById('commentsSection').remove();
-                            await renderCommentsSection();
-                        } catch (error) {
-                            console.error('Error deleting reply:', error);
-                            showNotification('Error al eliminar respuesta');
-                        }
-                    }
-                });
-            });
-            
-            document.querySelectorAll('[data-reply-btn]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const commentId = this.dataset.commentId;
-                    const replyForm = document.getElementById(`replyForm-${commentId}`);
-                    if (replyForm) {
-                        replyForm.classList.add('active');
-                    }
-                });
-            });
-            
-            document.querySelectorAll('[data-cancel-reply]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const commentId = this.dataset.cancelReply;
-                    const replyForm = document.getElementById(`replyForm-${commentId}`);
-                    if (replyForm) {
-                        replyForm.classList.remove('active');
-                        replyForm.querySelector('.reply-input').value = '';
-                    }
-                });
-            });
-            
-            document.querySelectorAll('[data-submit-reply]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const commentId = this.dataset.submitReply;
-                    const replyForm = document.getElementById(`replyForm-${commentId}`);
-                    const input = replyForm.querySelector('.reply-input');
-                    const replyText = input.value.trim();
-                    if (!replyText) {
-                        showNotification('La respuesta no puede estar vacía');
-                        return;
-                    }
-                    if (currentUser?.id !== currentAddon.author_id) {
-                        showNotification('Solo el creador del addon puede responder');
-                        return;
-                    }
-                    const comment = addonComments.find(c => c.id === commentId);
-                    if (comment && !comment.reply_content) {
-                        try {
-                            await addReplyToComment(commentId, replyText);
-                            showNotification('Respuesta publicada');
-                            addonComments = await getCommentsForAddon(currentAddon.id);
-                            document.getElementById('commentsSection').remove();
-                            await renderCommentsSection();
-                        } catch (error) {
-                            console.error('Error posting reply:', error);
-                            showNotification('Error al publicar respuesta');
-                        }
                     }
                 });
             });
