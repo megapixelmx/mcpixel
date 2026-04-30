@@ -2,10 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://i.imgur.com https://imgur.com https://i.ibb.co https://ibb.co https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://tauciflgtvuuoqqxzucy.supabase.co https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Publicar Addon - MCPixel</title>
     <link rel="icon" type="image/png" href="../img/logo.png">
@@ -92,6 +88,24 @@
                     <span class="upload-text">Portada Horizontal (Recomendado 1200x600)</span>
                 </div>
             </div>
+            
+            <div class="form-group">
+                <label class="form-label">Galería de Imágenes <span style="color: #a1a1a6; font-weight: normal;">(Opcional - Máx. 10 imágenes)</span></label>
+                <div class="gallery-container">
+                    <div class="gallery-scroll" id="galleryScroll">
+                        <div class="gallery-track" id="galleryTrack">
+                            <div class="gallery-add-card" id="galleryAddCard">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                <span>Añadir imagen</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #a1a1a6; margin-top: 8px;">Desliza para ver más imágenes. Las imágenes se mostrarán en un carrusel horizontal</p>
+            </div>
+
             <form id="postForm">
                 <div class="form-group">
                     <label class="form-label">Nombre del Addon</label>
