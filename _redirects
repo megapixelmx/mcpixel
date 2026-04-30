@@ -1,0 +1,7 @@
+/profile    /sc/profile.html    200
+/view       /sc/view.html       200
+/post       /sc/post.html       200
+/publish    /sc/publish.html    200
+/login      /sv/login.html      200
+/register   /sv/register.html   200
+/* /index.html         200
