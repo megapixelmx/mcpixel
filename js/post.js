@@ -388,6 +388,7 @@ document.getElementById('postForm').addEventListener('submit', async (e) => {
     const description = document.getElementById('addonDescription').value.trim();
     const version = document.getElementById('addonVersion').value.trim();
     const tags = document.getElementById('addonTags').value.trim();
+    const videoUrl = document.getElementById('addonVideo').value.trim();
     const platformBtn = document.querySelector('.platform-btn.active');
     const platform = platformBtn ? platformBtn.dataset.platform : 'Bedrock';
     const downloadLinks = [];
@@ -420,6 +421,7 @@ document.getElementById('postForm').addEventListener('submit', async (e) => {
         description: description,
         version: version,
         tags: tags,
+        video_url: videoUrl,
         platform: platform,
         download_links: downloadLinks,
         link_names: linkNames,
