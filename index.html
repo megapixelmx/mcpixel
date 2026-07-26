@@ -1,1 +1,145 @@
-prueba
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="img/logo.jpg">
+    <title>MCPixel - En Mantenimiento</title>
+    <style>
+        :root {
+            --bg-principal: #0b0c10;
+            --bg-tarjeta: rgba(26, 29, 38, 0.65);
+            --bg-barra: rgba(17, 19, 25, 0.95);
+            --borde-glass: rgba(255, 255, 255, 0.08);
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --color-acento: #6366f1;
+            --color-hover: #4f46e5;
+            --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radio-suave: 12px;
+            --radio-banner: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--fuente);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 200;
+        }
+
+        .header-izquierda {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: var(--radio-suave);
+            cursor: pointer;
+        }
+
+        .contenedor-principal {
+            margin-top: 70px;
+            padding: 24px 16px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .mantenimiento-contenedor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 520px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .mantenimiento-img {
+            max-width: 260px;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 24px;
+        }
+
+        .mantenimiento-titulo {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--texto-principal);
+            margin-bottom: 12px;
+        }
+
+        .mantenimiento-descripcion {
+            font-size: 15px;
+            color: var(--texto-secundario);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 767px) {
+            .header {
+                padding: 0 16px;
+            }
+            .mantenimiento-titulo {
+                font-size: 24px;
+            }
+            .mantenimiento-descripcion {
+                font-size: 14px;
+            }
+            .mantenimiento-img {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-izquierda">
+            <img src="img/logo.jpg" alt="MCPixel Logo" class="logo">
+        </div>
+    </header>
+
+    <main class="contenedor-principal">
+        <div class="mantenimiento-contenedor">
+            <img src="img/error.gif" alt="En Mantenimiento" class="mantenimiento-img">
+            <h1 class="mantenimiento-titulo">¡En Mantenimiento!</h1>
+            <p class="mantenimiento-descripcion">Ooh ya veo que intentas acceder a todo el nuevo contenido pero no te preocupes mi querido amigo estamos trabajando para que hoy o mañana puedas descargar tus complementos</p>
+        </div>
+    </main>
+
+</body>
+</html>
