@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="../img/logo.jpg">
+    <title>Publicar Add-On - MCPixel</title>
+    <style>
+        :root {
+            --bg-principal: #0b0c10;
+            --bg-tarjeta: rgba(26, 29, 38, 0.65);
+            --bg-barra: rgba(17, 19, 25, 0.95);
+            --borde-glass: rgba(255, 255, 255, 0.08);
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --color-acento: #6366f1;
+            --color-hover: #4f46e5;
+            --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radio-suave: 12px;
+            --radio-banner: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--fuente);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 200;
+        }
+
+        .header-izquierda {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: var(--radio-suave);
+        }
+
+        .header-titulo-pagina {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+        }
+
+        .perfil-contenedor {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #272a37;
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--texto-secundario);
+            overflow: hidden;
+        }
+
+        .perfil-contenedor:hover {
+            border-color: var(--color-acento);
+            color: var(--texto-principal);
+            background: #2e3242;
+        }
+
+        .perfil-contenedor svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .perfil-img-activa {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--borde-glass);
+            z-index: 300;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar.activo {
+            transform: translateX(0);
+        }
+
+        .sidebar-cuenta-estado {
+            padding: 8px 16px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cuenta-anonima-texto {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.4;
+        }
+
+        .sidebar-auth-botones {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-auth-login {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-acento);
+            border: none;
+            color: #ffffff;
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-login:hover {
+            background: var(--color-hover);
+        }
+
+        .btn-auth-registro {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-principal);
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-registro:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-sidebar-contenido {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .btn-sidebar svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-sidebar:hover:not(.deshabilitado) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .btn-sidebar.activo-link {
+            background: var(--color-acento);
+            color: #ffffff;
+        }
+
+        .btn-sidebar.deshabilitado {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .icon-bloqueo {
+            width: 14px !important;
+            height: 14px !important;
+            color: var(--texto-secundario);
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .sidebar-divisor {
+            height: 1px;
+            background: var(--borde-glass);
+            margin: 12px 16px;
+        }
+
+        .sidebar-redes-fila {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 6px 16px;
+            width: 100%;
+        }
+
+        .btn-red-cuadrado {
+            flex: 1;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 12px;
+            gap: 8px;
+            color: var(--texto-secundario);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-width: 0;
+        }
+
+        .btn-red-cuadrado:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--texto-principal);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-red-cuadrado svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-red-cuadrado span {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-toggle-pc {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #1a1d26;
+            border: 1px solid var(--borde-glass);
+            border-radius: 8px;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            margin-top: auto;
+            align-self: flex-end;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-pc:hover {
+            background: var(--color-acento);
+            color: #ffffff;
+            border-color: var(--color-acento);
+        }
+
+        .sidebar-toggle-pc svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .contenedor-principal {
+            margin-top: 70px;
+            padding: 24px 16px;
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+        }
+
+        .formulario-post-envoltura {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .formulario-post-titulo-principal {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .formulario-post-subtitulo {
+            font-size: 14px;
+            color: var(--texto-secundario);
+            margin-bottom: 28px;
+        }
+
+        .campo-grupo {
+            margin-bottom: 26px;
+        }
+
+        .campo-etiqueta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--texto-principal);
+        }
+
+        .campo-etiqueta svg {
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: var(--color-acento);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .campo-opcional-tag {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--texto-secundario);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .zona-portada {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            border: 2px dashed rgba(255, 255, 255, 0.18);
+            border-radius: var(--radio-suave);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.25s ease, background 0.25s ease;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .zona-portada:hover {
+            border-color: var(--color-acento);
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .zona-portada.tiene-imagen {
+            border-style: solid;
+            border-color: var(--borde-glass);
+        }
+
+        .zona-portada-icono {
+            width: 38px;
+            height: 38px;
+            fill: none;
+            stroke: var(--texto-secundario);
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            margin-bottom: 10px;
+        }
+
+        .zona-portada-texto {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--texto-secundario);
+        }
+
+        .zona-portada-subtexto {
+            font-size: 12px;
+            color: var(--texto-secundario);
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .zona-portada-preview {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .zona-portada.tiene-imagen .zona-portada-preview {
+            display: block;
+        }
+
+        .zona-portada.tiene-imagen .zona-portada-icono,
+        .zona-portada.tiene-imagen .zona-portada-texto,
+        .zona-portada.tiene-imagen .zona-portada-subtexto {
+            display: none;
+        }
+
+        .btn-quitar-portada {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(11, 12, 16, 0.85);
+            border: 1px solid var(--borde-glass);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: background 0.2s;
+        }
+
+        .btn-quitar-portada:hover {
+            background: #ef4444;
+        }
+
+        .zona-portada.tiene-imagen .btn-quitar-portada {
+            display: flex;
+        }
+
+        .btn-quitar-portada svg {
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .zona-referencias {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .zona-referencias:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .zona-referencias.deshabilitada {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .zona-referencias-izq {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .zona-referencias-icono {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: var(--color-acento);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .zona-referencias-texto {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .zona-referencias-contador {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--texto-secundario);
+        }
+
+        .carrusel-referencias-envoltura {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .carrusel-referencias-envoltura.activo {
+            display: block;
+        }
+
+        .scroll-referencias {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .scroll-referencias::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tarjeta-referencia {
+            position: relative;
+            flex: 0 0 160px;
+            height: 120px;
+            border-radius: var(--radio-suave);
+            overflow: hidden;
+            border: 1px solid var(--borde-glass);
+        }
+
+        .tarjeta-referencia img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tarjeta-referencia-orden {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 6px;
+            background: rgba(11, 12, 16, 0.85);
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #ffffff;
+            z-index: 3;
+        }
+
+        .tarjeta-referencia-eliminar {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(11, 12, 16, 0.85);
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            transition: background 0.2s;
+        }
+
+        .tarjeta-referencia-eliminar:hover {
+            background: #ef4444;
+        }
+
+        .tarjeta-referencia-eliminar svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .input-texto-base {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            color: var(--texto-principal);
+            font-size: 14px;
+            font-weight: 500;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            outline: none;
+        }
+
+        .input-texto-base::placeholder {
+            color: var(--texto-secundario);
+            opacity: 0.6;
+        }
+
+        .input-texto-base:focus {
+            border-color: var(--color-acento);
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        textarea.input-texto-base {
+            resize: vertical;
+            min-height: 110px;
+            line-height: 1.5;
+            font-family: var(--fuente);
+        }
+
+        .input-texto-base.invalido {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .mensaje-error-campo {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ef4444;
+            margin-top: 7px;
+            display: none;
+        }
+
+        .mensaje-error-campo.visible {
+            display: block;
+        }
+
+        .fila-dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .selector-plataforma-fila {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-plataforma {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-plataforma svg {
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-plataforma:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--texto-principal);
+        }
+
+        .btn-plataforma.seleccionado {
+            background: var(--color-acento);
+            color: #ffffff;
+            border-color: var(--color-acento);
+        }
+
+        .lista-botones-descarga {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .fila-boton-descarga {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .fila-boton-descarga-campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-eliminar-descarga {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radio-suave);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-eliminar-descarga:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-eliminar-descarga svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: #ef4444;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-agregar-descarga {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px dashed rgba(99, 102, 241, 0.4);
+            border-radius: var(--radio-suave);
+            color: var(--color-acento);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-top: 4px;
+        }
+
+        .btn-agregar-descarga:hover {
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .btn-agregar-descarga svg {
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-agregar-descarga.oculto {
+            display: none;
+        }
+
+        .zona-publicar {
+            margin-top: 36px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-publicar-addon {
+            padding: 16px 36px;
+            border-radius: var(--radio-suave);
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: not-allowed;
+            background: #2a2d38;
+            color: #6b7280;
+            transition: all 0.25s ease;
+            width: 100%;
+        }
+
+        .btn-publicar-addon.habilitado {
+            background: var(--color-acento);
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .btn-publicar-addon.habilitado:hover {
+            background: var(--color-hover);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .contenedor-principal {
+                padding: 32px 40px;
+            }
+
+            body.sidebar-abierto-pc .sidebar {
+                transform: translateX(0);
+            }
+
+            body.sidebar-abierto-pc .contenedor-principal {
+                margin-left: 280px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar {
+                width: 80px;
+                transform: translateX(0);
+                padding: 24px 12px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-cuenta-estado,
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar span,
+            body.sidebar-minimizado-pc .sidebar .icon-bloqueo,
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado span {
+                display: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar {
+                justify-content: center;
+                padding: 12px;
+                width: 46px;
+                height: 46px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-divisor {
+                width: 32px;
+                margin: 12px 0;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-redes-fila {
+                flex-direction: column;
+                padding: 6px 0;
+                width: 46px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                justify-content: center;
+                flex: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc {
+                align-self: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc svg {
+                transform: rotate(180deg);
+            }
+
+            body.sidebar-minimizado-pc .contenedor-principal {
+                margin-left: 80px;
+            }
+
+            .sidebar-toggle-pc {
+                display: flex;
+            }
+
+            .zona-portada {
+                height: 280px;
+            }
+
+            .fila-dos-columnas {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .fila-boton-descarga {
+                grid-template-columns: 1fr 1fr auto;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-izquierda">
+            <img src="../img/logo.jpg" alt="MCPixel Logo" class="logo">
+        </div>
+
+        <div class="header-titulo-pagina">Publicar Add-On</div>
+
+        <div class="perfil-contenedor" id="perfilBtn">
+            <svg viewBox="0 0 24 24" id="perfilIconSvg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebarMenu">
+        <div class="sidebar-cuenta-estado" id="contenedorAutenticacion">
+            <span class="cuenta-anonima-texto">Disfruta de MCPixel al máximo creando una cuenta.</span>
+            <div class="sidebar-auth-botones">
+                <a id="btnAuthLoginMenu" href="login.html" class="btn-auth-login">Entrar</a>
+                <a id="btnAuthRegistroMenu" href="register.html" class="btn-auth-registro">Registro</a>
+            </div>
+        </div>
+
+        <div class="sidebar-divisor"></div>
+
+        <a id="menuLinkInicio" href="../" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Inicio</span>
+            </div>
+        </a>
+        <a id="menuLinkCategorias" href="#" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zm10 0h7v7h-7zM4 14h7v7H4zm10 0h7v7h-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Categorías</span>
+            </div>
+        </a>
+        <a id="menuLinkExplorar" href="explore" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Explorar</span>
+            </div>
+        </a>
+        <a id="menuLinkSkins" href="#" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5zM4 22h16v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Skins</span>
+            </div>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkServidores">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 14h16v7H4zm0-10h16v7H4zM6 7h.01M6 17h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Servidores</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <a href="profile" class="btn-sidebar deshabilitado" id="menuLinkPerfil">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Perfil</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkFavoritos">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span>Favoritos</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a id="menuLinkSugerir" href="post" class="btn-sidebar activo-link">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M22 2L2 9l8.5 2.5L13 20zM22 2l-11.5 9.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Publicar</span>
+            </div>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <div class="sidebar-redes-fila">
+            <a href="https://discord.gg/9EkhYdV325" class="btn-red-cuadrado" title="Discord">
+                <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.77-11,68.43,68.43,0,0,1-10.75-5.13c.91-.66,1.8-1.34,2.65-2a75.58,75.58,0,0,0,72.93,0c.85.69,1.74,1.37,2.65,2A68.44,68.44,0,0,1,96.1,85.37a74.49,74.49,0,0,0,6.77,11,105.73,105.73,0,0,0,31.06-18.83C130.1,49.22,124.27,26.4,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.88,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.12,46,96.12,53,91,65.69,84.69,65.69Z"/></svg>
+                <span>Discord</span>
+            </a>
+            <a href="https://www.tiktok.com/@mcpixelmx?_r=1&_t=ZS-97XdPkGNtKP" class="btn-red-cuadrado" title="TikTok">
+                <svg viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/></svg>
+                <span>TikTok</span>
+            </a>
+        </div>
+
+        <button class="sidebar-toggle-pc" id="toggleCollapseBtn">
+            <svg viewBox="0 0 24 24" id="collapseIcon"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+    </aside>
+
+    <main class="contenedor-principal">
+        <div class="formulario-post-envoltura">
+            <h1 class="formulario-post-titulo-principal">Publica tu Add-On</h1>
+            <p class="formulario-post-subtitulo">Completa la información para compartir tu creación con la comunidad de MCPixel.</p>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span>Foto de Portada</span>
+                </div>
+                <div class="zona-portada" id="zonaPortada">
+                    <img class="zona-portada-preview" id="previewPortada" alt="Portada">
+                    <svg class="zona-portada-icono" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span class="zona-portada-texto">Toca para subir tu foto de portada</span>
+                    <span class="zona-portada-subtexto">Recomendado formato horizontal</span>
+                    <button type="button" class="btn-quitar-portada" id="btnQuitarPortada">
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <input type="file" id="inputPortada" accept="image/*">
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span>Añadir Fotos de Referencia</span>
+                    <span class="campo-opcional-tag">Opcional</span>
+                </div>
+                <div class="zona-referencias" id="zonaReferencias">
+                    <div class="zona-referencias-izq">
+                        <svg class="zona-referencias-icono" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span class="zona-referencias-texto">Añadir Fotos de Referencia</span>
+                    </div>
+                    <span class="zona-referencias-contador" id="contadorReferencias">0 / 10</span>
+                </div>
+                <input type="file" id="inputReferencias" accept="image/*" multiple>
+                <div class="carrusel-referencias-envoltura" id="carruselReferenciasEnvoltura">
+                    <div class="scroll-referencias" id="scrollReferencias"></div>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <span>Nombre del Complemento</span>
+                </div>
+                <input type="text" class="input-texto-base" id="inputNombreAddon" placeholder="Ej. Motosierras y Demonios Addon">
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    <span>Descripción del Addon</span>
+                </div>
+                <textarea class="input-texto-base" id="inputDescripcionAddon" placeholder="Describe de qué trata tu addon, sus características y cómo funciona..."></textarea>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="fila-dos-columnas">
+                    <div>
+                        <div class="campo-etiqueta">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            <span>Versión de Minecraft</span>
+                        </div>
+                        <input type="text" class="input-texto-base" id="inputVersionMc" placeholder="Ej. 1.21.0">
+                    </div>
+                    <div>
+                        <div class="campo-etiqueta">
+                            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg>
+                            <span>Etiquetas</span>
+                        </div>
+                        <input type="text" class="input-texto-base" id="inputEtiquetas" placeholder="Ej. armas, criaturas, magia">
+                    </div>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    <span>URL de Video de YouTube</span>
+                    <span class="campo-opcional-tag">Opcional</span>
+                </div>
+                <input type="text" class="input-texto-base" id="inputYoutube" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"/><rect x="2" y="13" width="20" height="9" rx="2"/></svg>
+                    <span>Plataforma</span>
+                </div>
+                <div class="selector-plataforma-fila">
+                    <button type="button" class="btn-plataforma" id="btnPlataformaBedrock">
+                        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+                        <span>Bedrock</span>
+                    </button>
+                    <button type="button" class="btn-plataforma" id="btnPlataformaJava">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                        <span>Java</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo-etiqueta">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Botones de Descarga</span>
+                </div>
+                <div class="lista-botones-descarga" id="listaBotonesDescarga"></div>
+                <button type="button" class="btn-agregar-descarga" id="btnAgregarDescarga">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Añadir Botón de Descarga</span>
+                </button>
+            </div>
+
+            <div class="zona-publicar">
+                <button type="button" class="btn-publicar-addon" id="btnPublicarAddon">Publicar Add-On</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const rutasNavegacionAndEnlacesMcpixel = {
+            login: "login",
+            register: "register",
+            inicio: "../",
+            explorar: "explore",
+            profile: "profile",
+            post: "post"
+        };
+
+        document.getElementById('btnAuthLoginMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.login);
+        document.getElementById('btnAuthRegistroMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.register);
+        document.getElementById('menuLinkInicio').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.inicio);
+        document.getElementById('menuLinkExplorar').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.explorar);
+        document.getElementById('menuLinkPerfil').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.profile);
+        document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+
+        let currentUser = null;
+
+        async function verificarSesion() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.login;
+                    return;
+                }
+
+                currentUser = session.user;
+                document.getElementById('contenedorAutenticacion').style.display = 'none';
+                const elementosBloqueados = ['menuLinkPerfil', 'menuLinkFavoritos'];
+                elementosBloqueados.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.classList.remove('deshabilitado');
+                        const bloqueoIcon = el.querySelector('.icon-bloqueo');
+                        if (bloqueoIcon) bloqueoIcon.remove();
+                    }
+                });
+                try {
+                    const { data: doc, error } = await supabaseClient
+                        .from('users')
+                        .select('avatar')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+
+                    if (doc && doc.avatar) {
+                        const contenedorPerfil = document.getElementById('perfilBtn');
+                        contenedorPerfil.innerHTML = `<img src="${doc.avatar}" alt="Avatar" class="perfil-img-activa">`;
+                    }
+                } catch (e) {
+                    console.log("Error al obtener el avatar:", e);
+                }
+            } catch (error) {
+                window.location.href = rutasNavegacionAndEnlacesMcpixel.login;
+            }
+        }
+
+        function inicializarPantalla() {
+            if (window.innerWidth >= 768) {
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+                sidebarMenu.classList.remove('activo');
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+                sidebarMenu.classList.remove('activo');
+            }
+        }
+
+        const perfilBtn = document.getElementById('perfilBtn');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const toggleCollapseBtn = document.getElementById('toggleCollapseBtn');
+        const cuerpo = document.body;
+
+        perfilBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-minimizado-pc')) {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            } else {
+                sidebarMenu.classList.toggle('activo');
+            }
+        });
+
+        toggleCollapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-abierto-pc')) {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'minimizado');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            }
+        });
+
+        sidebarMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebarMenu.classList.remove('activo');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebarMenu.classList.remove('activo');
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+            }
+        });
+
+        const zonaPortada = document.getElementById('zonaPortada');
+        const inputPortada = document.getElementById('inputPortada');
+        const previewPortada = document.getElementById('previewPortada');
+        const btnQuitarPortada = document.getElementById('btnQuitarPortada');
+        let archivoPortada = null;
+
+        zonaPortada.addEventListener('click', () => {
+            inputPortada.click();
+        });
+
+        inputPortada.addEventListener('change', (e) => {
+            const archivo = e.target.files && e.target.files[0];
+            if (archivo) {
+                archivoPortada = archivo;
+                const lector = new FileReader();
+                lector.onload = (evento) => {
+                    previewPortada.src = evento.target.result;
+                    zonaPortada.classList.add('tiene-imagen');
+                    validarFormulario();
+                };
+                lector.onerror = () => {
+                    archivoPortada = null;
+                    zonaPortada.classList.remove('tiene-imagen');
+                    validarFormulario();
+                };
+                lector.readAsDataURL(archivo);
+            }
+            inputPortada.value = '';
+        });
+
+        btnQuitarPortada.addEventListener('click', (e) => {
+            e.stopPropagation();
+            archivoPortada = null;
+            previewPortada.src = '';
+            inputPortada.value = '';
+            zonaPortada.classList.remove('tiene-imagen');
+            validarFormulario();
+        });
+
+        const zonaReferencias = document.getElementById('zonaReferencias');
+        const inputReferencias = document.getElementById('inputReferencias');
+        const contadorReferencias = document.getElementById('contadorReferencias');
+        const carruselReferenciasEnvoltura = document.getElementById('carruselReferenciasEnvoltura');
+        const scrollReferencias = document.getElementById('scrollReferencias');
+        let listaFotosReferencia = [];
+        let archivosReferencia = [];
+
+        zonaReferencias.addEventListener('click', () => {
+            if (listaFotosReferencia.length >= 10) return;
+            inputReferencias.click();
+        });
+
+        inputReferencias.addEventListener('change', (e) => {
+            const archivos = Array.from(e.target.files || []);
+            const espacioDisponible = 10 - listaFotosReferencia.length;
+            const archivosAUsar = archivos.slice(0, espacioDisponible);
+            
+            if(archivosAUsar.length === 0) return;
+
+            archivosAUsar.forEach(archivo => {
+                archivosReferencia.push(archivo);
+                const lector = new FileReader();
+                lector.onload = (evento) => {
+                    if (evento.target.result && listaFotosReferencia.length < 10) {
+                        listaFotosReferencia.push(evento.target.result);
+                    }
+                    if (listaFotosReferencia.length === archivosReferencia.length) {
+                        renderizarReferencias();
+                    }
+                };
+                lector.onerror = () => {
+                    if (listaFotosReferencia.length === archivosReferencia.length) {
+                        renderizarReferencias();
+                    }
+                };
+                lector.readAsDataURL(archivo);
+            });
+
+            inputReferencias.value = '';
+        });
+
+        function renderizarReferencias() {
+            scrollReferencias.innerHTML = '';
+
+            listaFotosReferencia.forEach((src, indice) => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-referencia';
+                tarjeta.innerHTML = `
+                    <div class="tarjeta-referencia-orden">${indice + 1}</div>
+                    <div class="tarjeta-referencia-eliminar" data-indice="${indice}">
+                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2 2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </div>
+                    <img src="${src}" alt="Referencia ${indice + 1}">
+                `;
+                scrollReferencias.appendChild(tarjeta);
+            });
+
+            scrollReferencias.querySelectorAll('.tarjeta-referencia-eliminar').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const indiceEliminar = parseInt(btn.getAttribute('data-indice'));
+                    listaFotosReferencia.splice(indiceEliminar, 1);
+                    archivosReferencia.splice(indiceEliminar, 1);
+                    renderizarReferencias();
+                });
+            });
+
+            contadorReferencias.textContent = `${listaFotosReferencia.length} / 10`;
+            carruselReferenciasEnvoltura.classList.toggle('activo', listaFotosReferencia.length > 0);
+            zonaReferencias.classList.toggle('deshabilitada', listaFotosReferencia.length >= 10);
+        }
+
+        const inputNombreAddon = document.getElementById('inputNombreAddon');
+        const inputDescripcionAddon = document.getElementById('inputDescripcionAddon');
+        const inputVersionMc = document.getElementById('inputVersionMc');
+        const inputEtiquetas = document.getElementById('inputEtiquetas');
+        const inputYoutube = document.getElementById('inputYoutube');
+        const btnPlataformaBedrock = document.getElementById('btnPlataformaBedrock');
+        const btnPlataformaJava = document.getElementById('btnPlataformaJava');
+        const btnPublicarAddon = document.getElementById('btnPublicarAddon');
+
+        let plataformaSeleccionada = null;
+
+        btnPlataformaBedrock.addEventListener('click', () => {
+            const yaActivo = btnPlataformaBedrock.classList.contains('seleccionado');
+            btnPlataformaBedrock.classList.toggle('seleccionado', !yaActivo);
+            btnPlataformaJava.classList.remove('seleccionado');
+            plataformaSeleccionada = !yaActivo ? 'bedrock' : null;
+            validarFormulario();
+        });
+
+        btnPlataformaJava.addEventListener('click', () => {
+            const yaActivo = btnPlataformaJava.classList.contains('seleccionado');
+            btnPlataformaJava.classList.toggle('seleccionado', !yaActivo);
+            btnPlataformaBedrock.classList.remove('seleccionado');
+            plataformaSeleccionada = !yaActivo ? 'java' : null;
+            validarFormulario();
+        });
+
+        const listaBotonesDescarga = document.getElementById('listaBotonesDescarga');
+        const btnAgregarDescarga = document.getElementById('btnAgregarDescarga');
+        let contadorIdBotonesDescarga = 0;
+        const MAXIMO_BOTONES_DESCARGA = 3;
+
+        function nombreEsInvalido(valor) {
+            const texto = valor.trim();
+            if (texto === '') return false;
+            const textoMinuscula = texto.toLowerCase();
+            if (textoMinuscula.includes('http://') || textoMinuscula.includes('https://')) return true;
+            const patronExtension = /\.(com|net|org|io|gg|co|es|mx|app|dev|html|php|info|xyz|me|link)$/i;
+            if (patronExtension.test(texto)) return true;
+            return false;
+        }
+
+        function urlEsInvalida(valor) {
+            const texto = valor.trim();
+            if (texto === '') return false;
+            return !/^https?:\/\/.+/i.test(texto);
+        }
+
+        function crearFilaBotonDescarga(valorUrlInicial, valorNombreInicial) {
+            if (listaBotonesDescarga.children.length >= MAXIMO_BOTONES_DESCARGA) return;
+
+            contadorIdBotonesDescarga++;
+            const idUnico = contadorIdBotonesDescarga;
+
+            const fila = document.createElement('div');
+            fila.className = 'fila-boton-descarga';
+            fila.setAttribute('data-id', idUnico);
+            fila.innerHTML = `
+                <div class="fila-boton-descarga-campo">
+                    <input type="text" class="input-texto-base campo-url-descarga" placeholder="URL de descarga">
+                    <span class="mensaje-error-campo campo-url-error">El enlace debe ser una URL válida.</span>
+                </div>
+                <div class="fila-boton-descarga-campo">
+                    <input type="text" class="input-texto-base campo-nombre-descarga" placeholder="Nombre del botón">
+                    <span class="mensaje-error-campo campo-nombre-error">Nombre inválido, no uses http(s):// ni extensiones de dominio.</span>
+                </div>
+                <button type="button" class="btn-eliminar-descarga">
+                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2 2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+            `;
+
+            listaBotonesDescarga.appendChild(fila);
+
+            const campoUrl = fila.querySelector('.campo-url-descarga');
+            const campoNombre = fila.querySelector('.campo-nombre-descarga');
+            const errorUrl = fila.querySelector('.campo-url-error');
+            const errorNombre = fila.querySelector('.campo-nombre-error');
+            const btnEliminar = fila.querySelector('.btn-eliminar-descarga');
+
+            if (valorUrlInicial) campoUrl.value = valorUrlInicial;
+            if (valorNombreInicial) campoNombre.value = valorNombreInicial;
+
+            campoUrl.addEventListener('input', () => {
+                if (urlEsInvalida(campoUrl.value)) {
+                    campoUrl.classList.add('invalido');
+                    errorUrl.classList.add('visible');
+                } else {
+                    campoUrl.classList.remove('invalido');
+                    errorUrl.classList.remove('visible');
+                }
+                validarFormulario();
+            });
+
+            campoNombre.addEventListener('input', () => {
+                if (nombreEsInvalido(campoNombre.value)) {
+                    campoNombre.classList.add('invalido');
+                    errorNombre.classList.add('visible');
+                } else {
+                    campoNombre.classList.remove('invalido');
+                    errorNombre.classList.remove('visible');
+                }
+                validarFormulario();
+            });
+
+            btnEliminar.addEventListener('click', () => {
+                fila.remove();
+                actualizarVisibilidadBtnAgregar();
+                validarFormulario();
+            });
+
+            actualizarVisibilidadBtnAgregar();
+            validarFormulario();
+        }
+
+        function actualizarVisibilidadBtnAgregar() {
+            btnAgregarDescarga.classList.toggle('oculto', listaBotonesDescarga.children.length >= MAXIMO_BOTONES_DESCARGA);
+        }
+
+        btnAgregarDescarga.addEventListener('click', () => {
+            crearFilaBotonDescarga();
+        });
+
+        function validarFormulario() {
+            const tienePortada = archivoPortada !== null;
+            const tieneNombre = inputNombreAddon.value.trim() !== '';
+            const tieneDescripcion = inputDescripcionAddon.value.trim() !== '';
+            const tieneVersion = inputVersionMc.value.trim() !== '';
+            const tieneEtiquetas = inputEtiquetas.value.trim() !== '';
+            const tienePlataforma = plataformaSeleccionada !== null;
+
+            let botonesDescargaValidos = true;
+            let hayAlMenosUnBotonCompleto = false;
+
+            listaBotonesDescarga.querySelectorAll('.fila-boton-descarga').forEach(fila => {
+                const valorUrl = fila.querySelector('.campo-url-descarga').value.trim();
+                const valorNombre = fila.querySelector('.campo-nombre-descarga').value.trim();
+
+                if (valorUrl !== '' || valorNombre !== '') {
+                    if (valorUrl === '' || valorNombre === '' || urlEsInvalida(valorUrl) || nombreEsInvalido(valorNombre)) {
+                        botonesDescargaValidos = false;
+                    } else {
+                        hayAlMenosUnBotonCompleto = true;
+                    }
+                }
+            });
+
+            const formularioCompleto = tienePortada && tieneNombre && tieneDescripcion && tieneVersion && tieneEtiquetas && tienePlataforma && botonesDescargaValidos && hayAlMenosUnBotonCompleto;
+
+            btnPublicarAddon.classList.toggle('habilitado', formularioCompleto);
+        }
+
+        function recolectarBotonesDescarga() {
+            const botones = [];
+            listaBotonesDescarga.querySelectorAll('.fila-boton-descarga').forEach(fila => {
+                botones.push({
+                    url: fila.querySelector('.campo-url-descarga').value,
+                    nombre: fila.querySelector('.campo-nombre-descarga').value
+                });
+            });
+            return botones;
+        }
+
+        async function subirImagenStorage(archivo) {
+            try {
+                const archivoPath = `portadas/${Date.now()}_${archivo.name}`;
+                const { data, error } = await supabaseClient.storage
+                    .from('portadas')
+                    .upload(archivoPath, archivo);
+
+                if (error) throw error;
+
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('portadas')
+                    .getPublicUrl(archivoPath);
+
+                return publicUrlData.publicUrl;
+            } catch (error) {
+                console.error('Error al subir imagen:', error);
+                throw error;
+            }
+        }
+
+        function extraerIdYoutube(url) {
+            if (!url || url.trim() === '') return '';
+            const patrones = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?#]+)/,
+                /youtube\.com\/embed\/([^?]+)/
+            ];
+            for (const patron of patrones) {
+                const match = url.match(patron);
+                if (match) return match[1];
+            }
+            return url.trim();
+        }
+
+        btnPublicarAddon.addEventListener('click', async () => {
+            if (!btnPublicarAddon.classList.contains('habilitado')) return;
+
+            if (!currentUser) {
+                window.location.href = rutasNavegacionAndEnlacesMcpixel.login;
+                return;
+            }
+
+            btnPublicarAddon.textContent = 'Publicando...';
+            btnPublicarAddon.classList.remove('habilitado');
+
+            try {
+                let portadaUrl = null;
+                if (archivoPortada) {
+                    portadaUrl = await subirImagenStorage(archivoPortada);
+                }
+
+                let referenciasUrls = [];
+                if (archivosReferencia.length > 0) {
+                    for (const archivo of archivosReferencia) {
+                        const url = await subirImagenStorage(archivo);
+                        referenciasUrls.push(url);
+                    }
+                }
+
+                const botonesDescarga = recolectarBotonesDescarga();
+
+                const nuevoAddon = {
+                    user_id: currentUser.id,
+                    nombre: inputNombreAddon.value.trim(),
+                    descripcion: inputDescripcionAddon.value.trim(),
+                    version: inputVersionMc.value.trim(),
+                    etiquetas: inputEtiquetas.value.trim(),
+                    portada: portadaUrl,
+                    referencias: JSON.stringify(referenciasUrls),
+                    botones_descarga: JSON.stringify(botonesDescarga),
+                    plataforma: plataformaSeleccionada,
+                    youtube_id: extraerIdYoutube(inputYoutube.value.trim()),
+                    descargas: 0,
+                    likes: 0,
+                    fecha: new Date().toISOString()
+                };
+
+                const { error } = await supabaseClient
+                    .from('addons')
+                    .insert(nuevoAddon);
+
+                if (error) throw error;
+
+                window.location.href = rutasNavegacionAndEnlacesMcpixel.explorar;
+
+            } catch (error) {
+                console.error('Error al publicar el addon:', error);
+                btnPublicarAddon.textContent = 'Error al publicar';
+                setTimeout(() => {
+                    btnPublicarAddon.textContent = 'Publicar Add-On';
+                    validarFormulario();
+                }, 3000);
+            }
+        });
+
+        [inputNombreAddon, inputDescripcionAddon, inputVersionMc, inputEtiquetas, inputYoutube].forEach(campo => {
+            campo.addEventListener('input', validarFormulario);
+        });
+
+        inicializarPantalla();
+        verificarSesion();
+        crearFilaBotonDescarga();
+    </script>
+</body>
+</html>
