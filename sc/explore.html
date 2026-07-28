@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="../img/logo.jpg">
+    <title>Explorar - MCPixel</title>
+    <style>
+        :root {
+            --bg-principal: #0b0c10;
+            --bg-tarjeta: rgba(26, 29, 38, 0.65);
+            --bg-barra: rgba(17, 19, 25, 0.95);
+            --borde-glass: rgba(255, 255, 255, 0.08);
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --color-acento: #6366f1;
+            --color-hover: #4f46e5;
+            --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radio-suave: 12px;
+            --radio-banner: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--fuente);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 200;
+        }
+
+        .header-izquierda {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: var(--radio-suave);
+            cursor: pointer;
+        }
+
+        .header-titulo-pagina {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            margin-left: 12px;
+        }
+
+        .perfil-contenedor {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #272a37;
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--texto-secundario);
+            overflow: hidden;
+        }
+
+        .perfil-contenedor:hover {
+            border-color: var(--color-acento);
+            color: var(--texto-principal);
+            background: #2e3242;
+        }
+
+        .perfil-contenedor svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .perfil-img-activa {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--borde-glass);
+            z-index: 300;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar.activo {
+            transform: translateX(0);
+        }
+
+        .sidebar-cuenta-estado {
+            padding: 8px 16px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cuenta-anonima-texto {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.4;
+        }
+
+        .sidebar-auth-botones {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-auth-login {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-acento);
+            border: none;
+            color: #ffffff;
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-login:hover {
+            background: var(--color-hover);
+        }
+
+        .btn-auth-registro {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-principal);
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-registro:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-sidebar-contenido {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .btn-sidebar svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-sidebar:hover:not(.deshabilitado) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .btn-sidebar.activo-link {
+            background: var(--color-acento);
+            color: #ffffff;
+        }
+
+        .btn-sidebar.deshabilitado {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .icon-bloqueo {
+            width: 14px !important;
+            height: 14px !important;
+            color: var(--texto-secundario);
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .sidebar-divisor {
+            height: 1px;
+            background: var(--borde-glass);
+            margin: 12px 16px;
+        }
+
+        .sidebar-redes-fila {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 6px 16px;
+            width: 100%;
+        }
+
+        .btn-red-cuadrado {
+            flex: 1;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 12px;
+            gap: 8px;
+            color: var(--texto-secundario);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-width: 0;
+        }
+
+        .btn-red-cuadrado:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--texto-principal);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-red-cuadrado svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-red-cuadrado span {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-toggle-pc {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #1a1d26;
+            border: 1px solid var(--borde-glass);
+            border-radius: 8px;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            margin-top: auto;
+            align-self: flex-end;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-pc:hover {
+            background: var(--color-acento);
+            color: #ffffff;
+            border-color: var(--color-acento);
+        }
+
+        .sidebar-toggle-pc svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .contenedor-principal {
+            margin-top: 70px;
+            padding: 24px 16px;
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+        }
+
+        .explorar-contenedor {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .buscador-contenedor {
+            width: 100%;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .buscador-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .buscador-input {
+            width: 100%;
+            padding: 16px 20px 16px 52px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-banner);
+            color: var(--texto-principal);
+            font-size: 16px;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .buscador-input:focus {
+            border-color: var(--color-acento);
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .buscador-input::placeholder {
+            color: var(--texto-secundario);
+            opacity: 0.7;
+        }
+
+        .buscador-icono {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: var(--texto-secundario);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+            transition: stroke 0.3s ease;
+        }
+
+        .buscador-input:focus + .buscador-icono {
+            stroke: var(--color-acento);
+        }
+
+        .buscador-placeholder-animado {
+            position: absolute;
+            left: 52px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--texto-secundario);
+            opacity: 0.7;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 70px);
+            transition: opacity 0.3s ease;
+        }
+
+        .buscador-input:focus + .buscador-icono + .buscador-placeholder-animado,
+        .buscador-input:not(:placeholder-shown) + .buscador-icono + .buscador-placeholder-animado {
+            opacity: 0;
+        }
+
+        .buscador-busquedas-recientes {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            padding: 12px 0;
+            z-index: 50;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .buscador-busquedas-recientes.activo {
+            display: block;
+        }
+
+        .buscador-busquedas-recientes::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .buscador-busquedas-recientes::-webkit-scrollbar-thumb {
+            background: var(--borde-glass);
+            border-radius: 10px;
+        }
+
+        .busqueda-reciente-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--texto-secundario);
+            font-size: 14px;
+        }
+
+        .busqueda-reciente-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .busqueda-reciente-item .icono-lupa-pequena {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .busqueda-reciente-item .texto-busqueda {
+            flex: 1;
+        }
+
+        .busqueda-reciente-item .btn-eliminar-busqueda {
+            background: none;
+            border: none;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .busqueda-reciente-item:hover .btn-eliminar-busqueda {
+            opacity: 0.6;
+        }
+
+        .busqueda-reciente-item .btn-eliminar-busqueda:hover {
+            opacity: 1;
+            color: #ef4444;
+        }
+
+        .busqueda-reciente-item .btn-eliminar-busqueda svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .busqueda-reciente-titulo {
+            padding: 6px 18px 10px 18px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--texto-secundario);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.6;
+            border-bottom: 1px solid var(--borde-glass);
+        }
+
+        .filtros-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--borde-glass);
+            padding-bottom: 12px;
+        }
+
+        .filtro-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            color: var(--texto-secundario);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radio-suave);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .filtro-tab:hover {
+            color: var(--texto-principal);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filtro-tab.activo {
+            color: var(--texto-principal);
+            background: var(--color-acento);
+        }
+
+        .filtro-tab .badge-cantidad {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        .filtro-tab.activo .badge-cantidad {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .resultados-contenedor {
+            width: 100%;
+        }
+
+        .grid-resultados {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+
+        .tarjeta-premium-addon {
+            background: linear-gradient(145deg, rgba(26, 29, 38, 0.8) 0%, rgba(17, 19, 25, 0.8) 100%);
+            border: 1px solid var(--borde-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tarjeta-premium-addon:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15);
+        }
+
+        .addon-premium-cabecera {
+            width: 100%;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .addon-premium-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .tarjeta-premium-addon:hover .addon-premium-img {
+            transform: scale(1.04);
+        }
+
+        .addon-premium-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .addon-badge-votos {
+            background: rgba(11, 12, 16, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f5f5f7;
+        }
+
+        .addon-badge-votos svg {
+            width: 14px;
+            height: 14px;
+            fill: #eab308;
+        }
+
+        .addon-badge-version {
+            background: var(--color-acento);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .addon-premium-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            gap: 8px;
+        }
+
+        .addon-premium-titulo {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .addon-premium-descripcion {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 38px;
+            margin-bottom: 6px;
+        }
+
+        .addon-premium-detalles-linea {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            margin-top: auto;
+        }
+
+        .addon-premium-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--texto-secundario);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .addon-premium-meta-item svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: var(--color-acento);
+            stroke-width: 2;
+        }
+
+        .usuario-resultado {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-tarjeta);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .usuario-resultado:hover {
+            border-color: var(--color-acento);
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateX(4px);
+        }
+
+        .usuario-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #2a2d38;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid var(--borde-glass);
+        }
+
+        .usuario-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .usuario-avatar svg {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: var(--texto-secundario);
+            stroke-width: 1.5;
+            padding: 12px;
+        }
+
+        .usuario-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .usuario-nombre-visible {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+        }
+
+        .usuario-nombre-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .usuario-nombre {
+            font-size: 14px;
+            color: var(--texto-secundario);
+            font-weight: 500;
+        }
+
+        .usuario-badge-verificado {
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .usuario-badge-verificado.visible {
+            display: block;
+        }
+
+        .usuario-badge-verificado svg {
+            width: 16px;
+            height: 16px;
+            fill: #1d9bf0;
+        }
+
+        .mensaje-sin-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 16px;
+            color: var(--texto-secundario);
+            text-align: center;
+            width: 100%;
+        }
+
+        .mensaje-sin-resultados svg {
+            width: 56px;
+            height: 56px;
+            fill: none;
+            stroke: var(--texto-secundario);
+            stroke-width: 1.5;
+            opacity: 0.5;
+        }
+
+        .mensaje-sin-resultados span {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .mensaje-sin-resultados .sub {
+            font-size: 14px;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        @media (min-width: 768px) {
+            .contenedor-principal {
+                padding: 32px 40px;
+            }
+
+            .grid-resultados {
+                grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+                gap: 20px;
+            }
+
+            body.sidebar-abierto-pc .sidebar {
+                transform: translateX(0);
+            }
+
+            body.sidebar-abierto-pc .contenedor-principal {
+                margin-left: 280px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar {
+                width: 80px;
+                transform: translateX(0);
+                padding: 24px 12px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-cuenta-estado,
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar span,
+            body.sidebar-minimizado-pc .sidebar .icon-bloqueo,
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado span {
+                display: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar {
+                justify-content: center;
+                padding: 12px;
+                width: 46px;
+                height: 46px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-divisor {
+                width: 32px;
+                margin: 12px 0;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-redes-fila {
+                flex-direction: column;
+                padding: 6px 0;
+                width: 46px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                justify-content: center;
+                flex: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc {
+                align-self: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc svg {
+                transform: rotate(180deg);
+            }
+
+            body.sidebar-minimizado-pc .contenedor-principal {
+                margin-left: 80px;
+            }
+
+            .sidebar-toggle-pc {
+                display: flex;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-izquierda">
+            <img src="../img/logo.jpg" alt="MCPixel Logo" class="logo" id="logoInicio">
+            <span class="header-titulo-pagina">Explorar</span>
+        </div>
+
+        <div class="perfil-contenedor" id="perfilBtn">
+            <svg viewBox="0 0 24 24" id="perfilIconSvg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebarMenu">
+        <div class="sidebar-cuenta-estado" id="contenedorAutenticacion">
+            <span class="cuenta-anonima-texto">Disfruta de MCPixel al máximo creando una cuenta.</span>
+            <div class="sidebar-auth-botones">
+                <a id="btnAuthLoginMenu" href="login" class="btn-auth-login">Entrar</a>
+                <a id="btnAuthRegistroMenu" href="register" class="btn-auth-registro">Registro</a>
+            </div>
+        </div>
+
+        <div class="sidebar-divisor"></div>
+
+        <a id="menuLinkInicio" href="../" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Inicio</span>
+            </div>
+        </a>
+        <a id="menuLinkCategorias" href="#" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zm10 0h7v7h-7zM4 14h7v7H4zm10 0h7v7h-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Categorías</span>
+            </div>
+        </a>
+        <a id="menuLinkExplorar" href="explore" class="btn-sidebar activo-link">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Explorar</span>
+            </div>
+        </a>
+        <a id="menuLinkSkins" href="#" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5zM4 22h16v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Skins</span>
+            </div>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkServidores">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 14h16v7H4zm0-10h16v7H4zM6 7h.01M6 17h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Servidores</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <a href="profile" class="btn-sidebar" id="menuLinkPerfil">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Perfil</span>
+            </div>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkFavoritos">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span>Favoritos</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a id="menuLinkSugerir" href="post" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M22 2L2 9l8.5 2.5L13 20zM22 2l-11.5 9.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Publicar</span>
+            </div>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <div class="sidebar-redes-fila">
+            <a href="https://discord.gg/9EkhYdV325" class="btn-red-cuadrado" title="Discord">
+                <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.77-11,68.43,68.43,0,0,1-10.75-5.13c.91-.66,1.8-1.34,2.65-2a75.58,75.58,0,0,0,72.93,0c.85.69,1.74,1.37,2.65,2A68.44,68.44,0,0,1,96.1,85.37a74.49,74.49,0,0,0,6.77,11,105.73,105.73,0,0,0,31.06-18.83C130.1,49.22,124.27,26.4,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.88,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.12,46,96.12,53,91,65.69,84.69,65.69Z"/></svg>
+                <span>Discord</span>
+            </a>
+            <a href="https://www.tiktok.com/@mcpixelmx?_r=1&_t=ZS-97XdPkGNtKP" class="btn-red-cuadrado" title="TikTok">
+                <svg viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/></svg>
+                <span>TikTok</span>
+            </a>
+        </div>
+
+        <button class="sidebar-toggle-pc" id="toggleCollapseBtn">
+            <svg viewBox="0 0 24 24" id="collapseIcon"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+    </aside>
+
+    <main class="contenedor-principal">
+        <div class="explorar-contenedor">
+            <div class="buscador-contenedor">
+                <div class="buscador-input-wrapper">
+                    <input type="text" class="buscador-input" id="buscadorInput" placeholder=" " autocomplete="off">
+                    <svg class="buscador-icono" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span class="buscador-placeholder-animado" id="placeholderAnimado">Buscar: Motosierras</span>
+
+                    <div class="buscador-busquedas-recientes" id="busquedasRecientes">
+                        <div class="busqueda-reciente-titulo">Búsquedas recientes</div>
+                        <div id="listaBusquedasRecientes"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filtros-tabs">
+                <button class="filtro-tab activo" data-tab="addons">
+                    <span>Complementos</span>
+                    <span class="badge-cantidad" id="badgeAddons">0</span>
+                </button>
+                <button class="filtro-tab" data-tab="usuarios">
+                    <span>Usuarios</span>
+                    <span class="badge-cantidad" id="badgeUsuarios">0</span>
+                </button>
+            </div>
+
+            <div class="resultados-contenedor">
+                <div class="grid-resultados" id="resultadosGrid"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const rutasNavegacionAndEnlacesMcpixel = {
+            login: "login",
+            register: "register",
+            inicio: "../",
+            explorar: "explore",
+            profile: "profile",
+            view: "view",
+            post: "post",
+            favorites: "favorites",
+            profileView: "profile_view"
+        };
+
+        document.getElementById('logoInicio').addEventListener('click', () => {
+            window.location.href = rutasNavegacionAndEnlacesMcpixel.inicio;
+        });
+        document.getElementById('btnAuthLoginMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.login);
+        document.getElementById('btnAuthRegistroMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.register);
+        document.getElementById('menuLinkInicio').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.inicio);
+        document.getElementById('menuLinkExplorar').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.explorar);
+        document.getElementById('menuLinkPerfil').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.profile);
+        document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+        document.getElementById('menuLinkFavoritos').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.favorites);
+
+        const perfilBtn = document.getElementById('perfilBtn');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const toggleCollapseBtn = document.getElementById('toggleCollapseBtn');
+        const cuerpo = document.body;
+        let currentUser = null;
+
+        async function verificarSesion() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    document.getElementById('contenedorAutenticacion').style.display = 'flex';
+                    return;
+                }
+
+                currentUser = session.user;
+                document.getElementById('contenedorAutenticacion').style.display = 'none';
+
+                const elementosBloqueados = ['menuLinkPerfil', 'menuLinkFavoritos'];
+
+                elementosBloqueados.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.classList.remove('deshabilitado');
+                        const bloqueoIcon = el.querySelector('.icon-bloqueo');
+                        if (bloqueoIcon) bloqueoIcon.remove();
+                    }
+                });
+
+                document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+
+                try {
+                    const { data: doc, error } = await supabaseClient
+                        .from('users')
+                        .select('avatar')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+
+                    if (doc && doc.avatar) {
+                        const contenedorPerfil = document.getElementById('perfilBtn');
+                        contenedorPerfil.innerHTML = `<img src="${doc.avatar}" alt="Avatar" class="perfil-img-activa">`;
+                    }
+                } catch (e) {
+                    console.log("Error al obtener el avatar:", e);
+                }
+
+            } catch (error) {
+                document.getElementById('contenedorAutenticacion').style.display = 'flex';
+                document.getElementById('menuLinkSugerir').setAttribute('href', '#');
+            }
+        }
+
+        function inicializarPantalla() {
+            if (window.innerWidth >= 768) {
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+                sidebarMenu.classList.remove('activo');
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+                sidebarMenu.classList.remove('activo');
+            }
+        }
+
+        perfilBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-minimizado-pc')) {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            } else {
+                sidebarMenu.classList.toggle('activo');
+            }
+        });
+
+        toggleCollapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-abierto-pc')) {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'minimizado');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            }
+        });
+
+        sidebarMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebarMenu.classList.remove('activo');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebarMenu.classList.remove('activo');
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+            }
+        });
+
+        function formatearNumero(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        async function obtenerAddonsPublicados() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('addons')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                return data || [];
+            } catch (e) {
+                console.error("Error al obtener addons:", e);
+                return [];
+            }
+        }
+
+        async function obtenerUsuarios() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*');
+
+                if (error) throw error;
+                return data || [];
+            } catch (e) {
+                console.error("Error al obtener usuarios:", e);
+                return [];
+            }
+        }
+
+        const CLAVE_BUSQUEDAS_RECIENTES = 'mcpixel_busquedas_recientes';
+
+        function obtenerBusquedasRecientes() {
+            let busquedas = [];
+            try {
+                const data = localStorage.getItem(CLAVE_BUSQUEDAS_RECIENTES);
+                if (data) busquedas = JSON.parse(data);
+            } catch (e) {
+                busquedas = [];
+            }
+            return busquedas;
+        }
+
+        function guardarBusquedaReciente(texto) {
+            if (!texto || texto.trim() === '') return;
+            const textoLimpio = texto.trim();
+            let busquedas = obtenerBusquedasRecientes();
+            busquedas = busquedas.filter(b => b.toLowerCase() !== textoLimpio.toLowerCase());
+            busquedas.unshift(textoLimpio);
+            if (busquedas.length > 10) busquedas = busquedas.slice(0, 10);
+            localStorage.setItem(CLAVE_BUSQUEDAS_RECIENTES, JSON.stringify(busquedas));
+            renderizarBusquedasRecientes();
+        }
+
+        function eliminarBusquedaReciente(texto) {
+            let busquedas = obtenerBusquedasRecientes();
+            busquedas = busquedas.filter(b => b.toLowerCase() !== texto.toLowerCase());
+            localStorage.setItem(CLAVE_BUSQUEDAS_RECIENTES, JSON.stringify(busquedas));
+            renderizarBusquedasRecientes();
+        }
+
+        const buscadorInput = document.getElementById('buscadorInput');
+        const placeholderAnimado = document.getElementById('placeholderAnimado');
+        const resultadosGrid = document.getElementById('resultadosGrid');
+        const badgeAddons = document.getElementById('badgeAddons');
+        const badgeUsuarios = document.getElementById('badgeUsuarios');
+        const tabs = document.querySelectorAll('.filtro-tab');
+        const busquedasRecientes = document.getElementById('busquedasRecientes');
+        const listaBusquedasRecientes = document.getElementById('listaBusquedasRecientes');
+
+        let tabActual = 'addons';
+        let todosLosAddons = [];
+        let todosLosUsuarios = [];
+        let listaNombresPlaceholder = [];
+        let indicePlaceholder = 0;
+        let intervaloPlaceholder = null;
+        let busquedasAbierto = false;
+
+        function renderizarBusquedasRecientes() {
+            const busquedas = obtenerBusquedasRecientes();
+            listaBusquedasRecientes.innerHTML = '';
+
+            if (busquedas.length === 0) {
+                busquedasRecientes.classList.remove('activo');
+                return;
+            }
+
+            busquedas.forEach(busqueda => {
+                const item = document.createElement('div');
+                item.className = 'busqueda-reciente-item';
+                item.innerHTML = `
+                    <svg class="icono-lupa-pequena" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span class="texto-busqueda">${busqueda}</span>
+                    <button class="btn-eliminar-busqueda">
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                `;
+
+                item.querySelector('.texto-busqueda').addEventListener('click', () => {
+                    buscadorInput.value = busqueda;
+                    buscar(busqueda);
+                    busquedasRecientes.classList.remove('activo');
+                    busquedasAbierto = false;
+                });
+
+                item.querySelector('.btn-eliminar-busqueda').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    eliminarBusquedaReciente(busqueda);
+                });
+
+                listaBusquedasRecientes.appendChild(item);
+            });
+
+            busquedasRecientes.classList.add('activo');
+        }
+
+        async function cargarDatos() {
+            const addons = await obtenerAddonsPublicados();
+            const usuarios = await obtenerUsuarios();
+
+            todosLosAddons = addons;
+            todosLosUsuarios = usuarios;
+
+            const nombresAddons = todosLosAddons.map(a => a.nombre || 'Complemento').filter(n => n);
+            const nombresUsuarios = todosLosUsuarios.map(u => u.nombre_visible || u.username || 'Usuario').filter(n => n);
+
+            const todosLosNombres = [...nombresAddons, ...nombresUsuarios];
+
+            listaNombresPlaceholder = todosLosNombres.length > 0 ? todosLosNombres : ['Motosierras', 'Demonios', 'Magia', 'Aventura', 'Explorar', 'Minecraft', 'Complementos'];
+
+            badgeAddons.textContent = todosLosAddons.length;
+            badgeUsuarios.textContent = todosLosUsuarios.length;
+
+            if (tabActual === 'addons') {
+                mostrarAddons(todosLosAddons);
+            } else {
+                mostrarUsuarios(todosLosUsuarios);
+            }
+
+            iniciarAnimacionPlaceholder();
+            renderizarBusquedasRecientes();
+        }
+
+        function iniciarAnimacionPlaceholder() {
+            if (intervaloPlaceholder) clearInterval(intervaloPlaceholder);
+
+            const nombres = listaNombresPlaceholder;
+            if (nombres.length === 0) {
+                placeholderAnimado.textContent = 'Buscar: ...';
+                return;
+            }
+
+            indicePlaceholder = 0;
+            placeholderAnimado.textContent = 'Buscar: ' + nombres[0];
+
+            intervaloPlaceholder = setInterval(() => {
+                indicePlaceholder = (indicePlaceholder + 1) % nombres.length;
+                placeholderAnimado.textContent = 'Buscar: ' + nombres[indicePlaceholder];
+            }, 2500);
+        }
+
+        function mostrarAddons(addons) {
+            resultadosGrid.innerHTML = '';
+
+            if (!addons || addons.length === 0) {
+                resultadosGrid.innerHTML = `
+                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>No se encontraron resultados</span>
+                        <span class="sub">Prueba con otra palabra clave</span>
+                    </div>
+                `;
+                return;
+            }
+
+            addons.forEach(addon => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-premium-addon';
+                tarjeta.addEventListener('click', () => {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.view + '?id=' + addon.id;
+                });
+
+                const fecha = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Reciente';
+                const descripcion = addon.descripcion || 'Sin descripción disponible.';
+                const portadaUrl = addon.portada || '';
+
+                tarjeta.innerHTML = `
+                    <div class="addon-premium-cabecera">
+                        <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" class="addon-premium-img" onerror="this.style.display='none'">
+                        <div class="addon-premium-badges">
+                            <div class="addon-badge-votos">
+                                <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                <span>${formatearNumero(addon.likes || 0)}</span>
+                            </div>
+                            <div class="addon-badge-version">${addon.version || '1.0.0'}</div>
+                        </div>
+                    </div>
+                    <div class="addon-premium-info">
+                        <h4 class="addon-premium-titulo">${addon.nombre || 'Sin nombre'}</h4>
+                        <p class="addon-premium-descripcion">${descripcion}</p>
+                        <div class="addon-premium-detalles-linea">
+                            <div class="addon-premium-meta-item">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>${formatearNumero(addon.descargas || 0)}</span>
+                            </div>
+                            <div class="addon-premium-meta-item">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>${fecha}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultadosGrid.appendChild(tarjeta);
+            });
+        }
+
+        function mostrarUsuarios(usuarios) {
+            resultadosGrid.innerHTML = '';
+
+            if (!usuarios || usuarios.length === 0) {
+                resultadosGrid.innerHTML = `
+                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>No se encontraron resultados</span>
+                        <span class="sub">Prueba con otra palabra clave</span>
+                    </div>
+                `;
+                return;
+            }
+
+            usuarios.forEach(usuario => {
+                const div = document.createElement('div');
+                div.className = 'usuario-resultado';
+                div.addEventListener('click', () => {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.profileView + '?id=' + usuario.id;
+                });
+
+                const nombreVisible = usuario.nombre_visible || usuario.username || 'Usuario';
+                const nombreUsuario = usuario.username || '@usuario';
+                const avatarUrl = usuario.avatar || '';
+                const isVerified = usuario.verificado || false;
+
+                let avatarHtml = '';
+                if (avatarUrl) {
+                    avatarHtml = `<img src="${avatarUrl}" alt="Avatar">`;
+                } else {
+                    avatarHtml = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+                }
+
+                const verifiedClass = isVerified ? 'visible' : '';
+
+                div.innerHTML = `
+                    <div class="usuario-avatar">${avatarHtml}</div>
+                    <div class="usuario-info">
+                        <span class="usuario-nombre-visible">${nombreVisible}</span>
+                        <div class="usuario-nombre-wrapper">
+                            <span class="usuario-nombre">${nombreUsuario.startsWith('@') ? nombreUsuario : '@' + nombreUsuario}</span>
+                            <span class="usuario-badge-verificado ${verifiedClass}">
+                                <svg viewBox="0 0 24 24"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/></svg>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                resultadosGrid.appendChild(div);
+            });
+        }
+
+        function buscar(query) {
+            const texto = query.toLowerCase().trim();
+
+            if (texto === '') {
+                if (tabActual === 'addons') {
+                    mostrarAddons(todosLosAddons);
+                } else {
+                    mostrarUsuarios(todosLosUsuarios);
+                }
+                return;
+            }
+
+            if (tabActual === 'addons') {
+                const resultados = todosLosAddons.filter(addon => {
+                    const nombre = (addon.nombre || '').toLowerCase();
+                    const descripcion = (addon.descripcion || '').toLowerCase();
+                    const etiquetas = (addon.etiquetas || '').toLowerCase();
+                    return nombre.includes(texto) || descripcion.includes(texto) || etiquetas.includes(texto);
+                });
+                mostrarAddons(resultados);
+            } else {
+                const resultados = todosLosUsuarios.filter(usuario => {
+                    const nombreVisible = (usuario.nombre_visible || '').toLowerCase();
+                    const username = (usuario.username || '').toLowerCase();
+                    return nombreVisible.includes(texto) || username.includes(texto);
+                });
+                mostrarUsuarios(resultados);
+            }
+        }
+
+        buscadorInput.addEventListener('focus', () => {
+            renderizarBusquedasRecientes();
+            busquedasAbierto = true;
+        });
+
+        buscadorInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                busquedasRecientes.classList.remove('activo');
+                busquedasAbierto = false;
+            }, 200);
+        });
+
+        buscadorInput.addEventListener('input', (e) => {
+            const valor = e.target.value;
+            if (valor.trim() !== '') {
+                busquedasRecientes.classList.remove('activo');
+                busquedasAbierto = false;
+            }
+            buscar(valor);
+        });
+
+        buscadorInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && buscadorInput.value.trim() !== '') {
+                guardarBusquedaReciente(buscadorInput.value);
+                busquedasRecientes.classList.remove('activo');
+                busquedasAbierto = false;
+                buscar(buscadorInput.value);
+            }
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('activo'));
+                tab.classList.add('activo');
+                tabActual = tab.dataset.tab;
+
+                if (tabActual === 'addons') {
+                    buscar(buscadorInput.value);
+                } else {
+                    buscar(buscadorInput.value);
+                }
+            });
+        });
+
+        (async function iniciarApp() {
+            inicializarPantalla();
+            await verificarSesion();
+            await cargarDatos();
+        })();
+    </script>
+</body>
+</html>
