@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="../img/logo.jpg">
+    <title>Registro - MCPixel</title>
+    <style>
+        :root {
+            --bg-principal: #0b0c10;
+            --bg-tarjeta: rgba(26, 29, 38, 0.65);
+            --bg-barra: rgba(17, 19, 25, 0.95);
+            --borde-glass: rgba(255, 255, 255, 0.08);
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --color-acento: #6366f1;
+            --color-hover: #4f46e5;
+            --color-error: #ef4444;
+            --color-exito: #10b981;
+            --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radio-suave: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--fuente);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .pantalla-contenedor {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(145deg, rgba(26, 29, 38, 0.8) 0%, rgba(17, 19, 25, 0.8) 100%);
+            border: 1px solid var(--borde-glass);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            overflow: hidden;
+            animation: aparecerContenedor 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .panel-lateral {
+            display: none;
+            flex: 1;
+            padding: 48px;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.05) 100%);
+            border-left: 1px solid var(--borde-glass);
+            order: 2;
+            animation: deslizarDerecha 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .panel-lateral h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(to right, #ffffff, var(--texto-secundario));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .panel-lateral p {
+            font-size: 16px;
+            color: var(--texto-secundario);
+            line-height: 1.6;
+        }
+
+        .login-contenedor {
+            width: 100%;
+            max-width: 450px;
+            padding: 48px;
+            margin: 0 auto;
+            order: 1;
+            animation: deslizarIzquierda 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        @media (min-width: 768px) {
+            .panel-lateral {
+                display: flex;
+            }
+            .login-contenedor {
+                width: 50%;
+                max-width: none;
+            }
+        }
+
+        .login-cabecera {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: var(--radio-suave);
+            margin-bottom: 16px;
+        }
+
+        .login-titulo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitulo {
+            font-size: 14px;
+            color: var(--texto-secundario);
+        }
+
+        .grupo-formulario {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .label-formulario {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--texto-secundario);
+        }
+
+        .input-contenedor {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-contenedor .icono-principal {
+            position: absolute;
+            left: 14px;
+            width: 18px;
+            height: 18px;
+            color: var(--texto-secundario);
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            pointer-events: none;
+        }
+
+        .btn-visibilidad {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            outline: none;
+        }
+
+        .btn-visibilidad:hover {
+            color: var(--texto-principal);
+        }
+
+        .btn-visibilidad svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .input-formulario {
+            width: 100%;
+            padding: 12px 42px 12px 42px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            color: var(--texto-principal);
+            font-size: 15px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-formulario:focus {
+            border-color: var(--color-acento);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .msg-validacion {
+            font-size: 12px;
+            display: none;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .msg-error {
+            color: var(--color-error);
+        }
+
+        .msg-exito {
+            color: var(--color-exito);
+        }
+
+        .btn-enviar {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-acento);
+            border: none;
+            color: #ffffff;
+            border-radius: var(--radio-suave);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-enviar:hover {
+            background: var(--color-hover);
+        }
+
+        .login-pie {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--texto-secundario);
+        }
+
+        .login-pie a {
+            color: var(--color-acento);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-pie a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes aparecerContenedor {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes deslizarIzquierda {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes deslizarDerecha {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animacion-salida {
+            animation: salirContenedor 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes salirContenedor {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+    </style>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="pantalla-contenedor" id="contenedorPrincipal">
+        <div class="panel-lateral">
+            <h1>¡Registrate Ahora!</h1>
+            <p>Crea tu perfil dentro de MCPixel y empieza a publicar tus propias creaciones, recibir valoraciones de la comunidad y conectar con otros creadores de contenido de Bedrock.</p>
+        </div>
+
+        <div class="login-contenedor">
+            <div class="login-cabecera">
+                <img src="../img/logo.jpg" alt="MCPixel Logo" class="logo">
+                <h2 class="login-titulo">Crear Cuenta</h2>
+                <p class="login-subtitulo">Únete a la comunidad de MCPixel</p>
+            </div>
+
+            <form id="formularioRegistro" onsubmit="procesarRegistro(event)">
+                <div class="grupo-formulario">
+                    <label class="label-formulario">Nombre Visible</label>
+                    <div class="input-contenedor">
+                        <svg class="icono-principal" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="regNombreVisible" class="input-formulario" required placeholder="Mi Nombre" style="padding-right: 14px;">
+                    </div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label class="label-formulario">Nombre De Usuario</label>
+                    <div class="input-contenedor">
+                        <svg class="icono-principal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
+                        <input type="text" id="regUsuario" class="input-formulario" required placeholder="usuario" oninput="verificarDisponibilidadUsuario()" style="padding-right: 14px;">
+                    </div>
+                    <div class="msg-validacion" id="regUsuarioFeedback"></div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label class="label-formulario">Contraseña</label>
+                    <div class="input-contenedor">
+                        <svg class="icono-principal" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="regContrasena" class="input-formulario" required placeholder="••••••••">
+                        <button type="button" class="btn-visibilidad" id="btnAlternarRegPassword" onclick="alternarVisibilidadRegPassword('regContrasena', 'iconoOjoReg1')">
+                            <svg id="iconoOjoReg1" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grupo-formulario">
+                    <label class="label-formulario">Confirmar Contraseña</label>
+                    <div class="input-contenedor">
+                        <svg class="icono-principal" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="regConfirmarContrasena" class="input-formulario" required placeholder="••••••••">
+                        <button type="button" class="btn-visibilidad" id="btnAlternarRegConfirmPassword" onclick="alternarVisibilidadRegPassword('regConfirmarContrasena', 'iconoOjoReg2')">
+                            <svg id="iconoOjoReg2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div class="msg-validacion msg-error" id="errorConfirmacion">Las contraseñas no coinciden.</div>
+                </div>
+
+                <button type="submit" class="btn-enviar" id="btnSubmit">Registrarse</button>
+            </form>
+
+            <div class="login-pie">
+                ¿Ya tienes cuenta? <a href="login" id="enlaceLogin" onclick="transicionSalida(event, 'login.html')">Inicia Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioDisponible = false;
+        let timeoutBusqueda = null;
+
+        function alternarVisibilidadRegPassword(idCampo, idIcono) {
+            const campoPassword = document.getElementById(idCampo);
+            const iconoOjo = document.getElementById(idIcono);
+            
+            if (campoPassword.type === 'password') {
+                campoPassword.type = 'text';
+                iconoOjo.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                campoPassword.type = 'password';
+                iconoOjo.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+
+        function transicionSalida(e, url) {
+            e.preventDefault();
+            const contenedor = document.getElementById('contenedorPrincipal');
+            contenedor.classList.add('animacion-salida');
+            setTimeout(function() {
+                window.location.href = url;
+            }, 350);
+        }
+
+        function verificarDisponibilidadUsuario() {
+            const usuarioInput = document.getElementById('regUsuario').value.trim().toLowerCase();
+            const feedback = document.getElementById('regUsuarioFeedback');
+            
+            if (usuarioInput === '') {
+                feedback.style.display = 'none';
+                usuarioDisponible = false;
+                return;
+            }
+
+            feedback.style.display = 'block';
+            feedback.className = 'msg-validacion';
+            feedback.style.color = '#94a3b8';
+            feedback.textContent = 'Verificando...';
+
+            clearTimeout(timeoutBusqueda);
+            timeoutBusqueda = setTimeout(async () => {
+                try {
+                    // Consulta en la tabla pública 'users' de Supabase
+                    const { data, error } = await supabaseClient
+                        .from('users')
+                        .select('username')
+                        .eq('username', usuarioInput);
+                    
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        feedback.className = 'msg-validacion msg-error';
+                        feedback.textContent = 'El nombre ya está en uso';
+                        usuarioDisponible = false;
+                    } else {
+                        feedback.className = 'msg-validacion msg-exito';
+                        feedback.textContent = 'Nombre de usuario disponible';
+                        usuarioDisponible = true;
+                    }
+                } catch (error) {
+                    feedback.style.display = 'none';
+                    usuarioDisponible = true;
+                }
+            }, 500);
+        }
+
+        async function procesarRegistro(e) {
+            e.preventDefault();
+            
+            const nombreVisible = document.getElementById('regNombreVisible').value.trim();
+            const usuario = document.getElementById('regUsuario').value.trim().toLowerCase();
+            const contrasena = document.getElementById('regContrasena').value;
+            const confirmarContrasena = document.getElementById('regConfirmarContrasena').value;
+            
+            const errorConfirmacion = document.getElementById('errorConfirmacion');
+            errorConfirmacion.style.display = 'none';
+
+            if (contrasena !== confirmarContrasena) {
+                errorConfirmacion.style.display = 'block';
+                return;
+            }
+
+            if (!usuarioDisponible) {
+                return;
+            }
+
+            const emailFantasma = `${usuario}@mcpixel.com`;
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.textContent = 'Registrando...';
+            btnSubmit.disabled = true;
+
+            try {
+                 handle_new_user()
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: emailFantasma,
+                    password: contrasena,
+                    options: {
+                        data: {
+                            username: usuario,
+                            nombre_visible: nombreVisible,
+                            avatar: ''
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                localStorage.setItem('mcpixel_interfaz_v2_sesion', nombreVisible);
+                window.location.href = '../';
+
+            } catch (error) {
+                btnSubmit.textContent = 'Registrarse';
+                btnSubmit.disabled = false;
+
+                if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+                    alert('Este nombre de usuario ya existe en el sistema. Por favor, intenta con otro.');
+                } else {
+                    alert(error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
