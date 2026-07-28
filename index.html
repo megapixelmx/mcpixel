@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="img/logo.jpg">
-    <title>MCPixel - En Mantenimiento</title>
+    <title>MCPixel</title>
     <style>
         :root {
             --bg-principal: #0b0c10;
@@ -33,8 +33,41 @@
             color: var(--texto-principal);
             overflow-x: hidden;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        }
+
+        @keyframes esqueleto-carga {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .cargando-animacion {
+            animation: esqueleto-carga 1.5s infinite linear;
+            background: linear-gradient(90deg, #2d313f 25%, #41475a 50%, #2d313f 75%);
+            background-size: 200% 100%;
+            color: transparent !important;
+        }
+
+        .cargando-animacion * {
+            visibility: hidden !important;
+        }
+
+        @keyframes shimmer-img {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .img-placeholder-skeleton {
+            background: #1a1d26 linear-gradient(90deg, #1a1d26 0%, #2a2e3d 50%, #1a1d26 100%);
+            background-size: 200% 100%;
+            animation: shimmer-img 1.5s infinite ease-in-out;
         }
 
         .header {
@@ -67,79 +100,1843 @@
             cursor: pointer;
         }
 
+        .header-centro {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            padding: 4px;
+            border-radius: 30px;
+        }
+
+        .burbuja-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--texto-secundario);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .burbuja-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform 0.25s ease;
+        }
+
+        .burbuja-btn.activo {
+            background: var(--color-acento);
+            color: #ffffff;
+        }
+
+        .burbuja-btn:hover:not(.activo) {
+            color: var(--texto-principal);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .burbuja-btn:hover svg {
+            transform: scale(1.1);
+        }
+
+        .perfil-contenedor {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #272a37;
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--texto-secundario);
+            overflow: hidden;
+        }
+
+        .perfil-contenedor:hover {
+            border-color: var(--color-acento);
+            color: var(--texto-principal);
+            background: #2e3242;
+        }
+
+        .perfil-contenedor svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .perfil-img-activa {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--borde-glass);
+            z-index: 300;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar.activo {
+            transform: translateX(0);
+        }
+
+        .sidebar-cuenta-estado {
+            padding: 8px 16px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cuenta-anonima-texto {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.4;
+        }
+
+        .sidebar-auth-botones {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-auth-login {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-acento);
+            border: none;
+            color: #ffffff;
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-auth-login:hover {
+            background: var(--color-hover);
+        }
+
+        .btn-auth-registro {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-principal);
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-auth-registro:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .btn-sidebar-contenido {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .btn-sidebar svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-sidebar:hover:not(.deshabilitado) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .btn-sidebar.activo-link {
+            background: var(--color-acento);
+            color: #ffffff;
+        }
+
+        .btn-sidebar.deshabilitado {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .icon-bloqueo {
+            width: 14px !important;
+            height: 14px !important;
+            color: var(--texto-secundario);
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .notificacion-proximamente::after {
+            content: "Próximamente";
+            position: absolute;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-secundario);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+            pointer-events: none;
+        }
+
+        body.sidebar-minimizado-pc .notificacion-proximamente::after {
+            display: none;
+        }
+
+        .sidebar-divisor {
+            height: 1px;
+            background: var(--borde-glass);
+            margin: 12px 16px;
+        }
+
+        .sidebar-redes-fila {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 6px 16px;
+            width: 100%;
+        }
+
+        .btn-red-cuadrado {
+            flex: 1;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 12px;
+            gap: 8px;
+            color: var(--texto-secundario);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-width: 0;
+        }
+
+        .btn-red-cuadrado:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--texto-principal);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-red-cuadrado svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-red-cuadrado span {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-toggle-pc {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #1a1d26;
+            border: 1px solid var(--borde-glass);
+            border-radius: 8px;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            margin-top: auto;
+            align-self: flex-end;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-pc:hover {
+            background: var(--color-acento);
+            color: #ffffff;
+            border-color: var(--color-acento);
+        }
+
+        .sidebar-toggle-pc svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .contenedor-principal {
             margin-top: 70px;
             padding: 24px 16px;
-            min-height: calc(100vh - 70px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
         }
 
-        .mantenimiento-contenedor {
+        .carrusel-seccion {
+            position: relative;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .carrusel-seccion.oculto {
+            display: none;
+        }
+
+        .carrusel-contenedor {
+            width: 100%;
+            overflow: hidden;
+            border-radius: var(--radio-banner);
+        }
+
+        .carrusel-pistas {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 500%;
+        }
+
+        .banner-item {
+            position: relative;
+            width: 20%;
+            height: 220px;
+            flex-shrink: 0;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .banner-img.cargado {
+            opacity: 1;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(11, 12, 16, 1) 0%, rgba(11, 12, 16, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            max-width: 520px;
-            width: 100%;
+            justify-content: flex-end;
             padding: 20px;
         }
 
-        .mantenimiento-img {
-            max-width: 260px;
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            margin-bottom: 24px;
+        .banner-tag {
+            align-self: flex-start;
+            background: var(--color-acento);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
-        .mantenimiento-titulo {
-            font-size: 28px;
+        .banner-titulo {
+            font-size: 20px;
             font-weight: 800;
-            color: var(--texto-principal);
-            margin-bottom: 12px;
+            margin-bottom: 6px;
+            line-height: 1.2;
         }
 
-        .mantenimiento-descripcion {
-            font-size: 15px;
+        .banner-descripcion {
+            font-size: 13px;
             color: var(--texto-secundario);
-            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+
+        .carrusel-nav {
+            position: absolute;
+            bottom: 16px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .carrusel-nav.oculto {
+            display: none;
+        }
+
+        .carrusel-indicador {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carrusel-indicador.activo {
+            background: var(--color-acento);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .seccion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .seccion-titulo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seccion-titulo svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--color-acento);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .btn-ver-mas {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            color: var(--color-acento);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-ver-mas:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-ver-mas svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .bloque-carrusel-horizontal {
+            position: relative;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .bloque-carrusel-horizontal.oculto {
+            display: none;
+        }
+
+        .scroll-carrusel {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        .scroll-carrusel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tarjeta-viendo {
+            flex: 0 0 260px;
+            height: 145px;
+            background: var(--bg-tarjeta);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+
+        .tarjeta-viendo:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .viendo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .viendo-img.cargado {
+            opacity: 1;
+        }
+
+        .viendo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(11, 12, 16, 0.95) 0%, rgba(11, 12, 16, 0.4) 60%, rgba(0, 0, 0, 0) 100%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px 12px 16px 12px;
+        }
+
+        .viendo-titulo {
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tarjeta-valorada {
+            flex: 0 0 260px;
+            height: 145px;
+            background: var(--bg-tarjeta);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+
+        .tarjeta-valorada:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .tag-likes {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 4;
+            background: rgba(11, 12, 16, 0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid var(--borde-glass);
+            padding: 4px 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .tag-likes svg {
+            width: 14px;
+            height: 14px;
+            fill: #eab308;
+        }
+
+        .pc-flecha-nav {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(17, 19, 25, 0.9);
+            border: 1px solid var(--borde-glass);
+            border-radius: 50%;
+            color: #ffffff;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .pc-flecha-nav:hover {
+            background: var(--color-acento);
+            border-color: var(--color-acento);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .pc-flecha-izq {
+            left: -20px;
+        }
+
+        .pc-flecha-der {
+            right: -20px;
+        }
+
+        .pc-flecha-nav svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .seccion-dinamica-todos {
+            display: none;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .seccion-dinamica-todos.activo {
+            display: block;
+        }
+
+        .grid-todos-addons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+
+        .tarjeta-premium-addon {
+            background: linear-gradient(145deg, rgba(26, 29, 38, 0.8) 0%, rgba(17, 19, 25, 0.8) 100%);
+            border: 1px solid var(--borde-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tarjeta-premium-addon:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15);
+        }
+
+        .addon-premium-cabecera {
+            width: 100%;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .addon-premium-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .addon-premium-img.cargado {
+            opacity: 1;
+        }
+
+        .tarjeta-premium-addon:hover .addon-premium-img {
+            transform: scale(1.04);
+        }
+
+        .addon-premium-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .addon-badge-votos {
+            background: rgba(11, 12, 16, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f5f5f7;
+        }
+
+        .addon-badge-votos svg {
+            width: 14px;
+            height: 14px;
+            fill: #eab308;
+        }
+
+        .addon-badge-version {
+            background: var(--color-acento);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .addon-premium-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            gap: 8px;
+        }
+
+        .addon-premium-titulo {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .addon-premium-descripcion {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 38px;
+            margin-bottom: 6px;
+        }
+
+        .addon-premium-detalles-linea {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            margin-top: auto;
+        }
+
+        .addon-premium-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--texto-secundario);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .addon-premium-meta-item svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: var(--color-acento);
+            stroke-width: 2;
+        }
+
+        .mensaje-vacio-categoria {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 16px;
+            color: var(--texto-secundario);
+            border-radius: var(--radio-suave);
+            width: 100%;
+            text-align: center;
+            background: transparent;
+        }
+
+        .icono-vacio-gif {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.35));
+        }
+
+        .mensaje-vacio-categoria span {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .mensaje-vacio-categoria .sub {
+            font-size: 14px;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .banner-skeleton {
+            background: #1a1d26;
+        }
+
+        .mensaje-inicio-vacio {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            gap: 16px;
+            color: var(--texto-secundario);
+            text-align: center;
+            width: 100%;
+        }
+
+        .mensaje-inicio-vacio span {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .mensaje-inicio-vacio .sub {
+            font-size: 15px;
+            opacity: 0.7;
+            font-weight: 400;
         }
 
         @media (max-width: 767px) {
             .header {
                 padding: 0 16px;
             }
-            .mantenimiento-titulo {
-                font-size: 24px;
+            .header-centro {
+                position: static;
+                transform: none;
+                width: auto;
+                max-width: calc(100% - 80px);
+                margin: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.25);
+                padding: 3px;
+                border-radius: 24px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 4px;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
             }
-            .mantenimiento-descripcion {
-                font-size: 14px;
+            .burbuja-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+                gap: 6px;
+                border-radius: 20px;
+                flex: 1;
+                justify-content: center;
+                white-space: nowrap;
+                color: rgba(245, 245, 247, 0.6);
+                font-weight: 600;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             }
-            .mantenimiento-img {
-                max-width: 200px;
+            .burbuja-btn svg {
+                width: 15px;
+                height: 15px;
+                stroke-width: 2.2;
+                transition: transform 0.3s ease;
+            }
+            .burbuja-btn.activo {
+                background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                color: #ffffff;
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+            .burbuja-btn:hover:not(.activo) {
+                color: var(--texto-principal);
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .contenedor-principal {
+                padding: 32px 40px;
+            }
+
+            .banner-item {
+                height: 380px;
+            }
+
+            .banner-overlay {
+                padding: 40px;
+            }
+
+            .banner-titulo {
+                font-size: 36px;
+                margin-bottom: 12px;
+            }
+
+            .banner-descripcion {
+                font-size: 15px;
+                -webkit-line-clamp: 3;
+            }
+
+            .tarjeta-viendo {
+                flex: 0 0 280px;
+                height: 155px;
+            }
+
+            .tarjeta-valorada {
+                flex: 0 0 280px;
+                height: 155px;
+            }
+
+            .grid-todos-addons {
+                grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+                gap: 20px;
+            }
+
+            body.sidebar-abierto-pc .sidebar {
+                transform: translateX(0);
+            }
+
+            body.sidebar-abierto-pc .contenedor-principal {
+                margin-left: 280px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar {
+                width: 80px;
+                transform: translateX(0);
+                padding: 24px 12px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-cuenta-estado {
+                padding: 8px 0 14px 0;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .cuenta-anonima-texto {
+                display: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-auth-botones {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-auth-login,
+            body.sidebar-minimizado-pc .sidebar .btn-auth-registro {
+                padding: 8px 4px;
+                font-size: 11px;
+                text-align: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar span,
+            body.sidebar-minimizado-pc .sidebar .icon-bloqueo,
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado span {
+                display: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar {
+                justify-content: center;
+                padding: 12px;
+                width: 46px;
+                height: 46px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-divisor {
+                width: 32px;
+                margin: 12px 0;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-redes-fila {
+                flex-direction: column;
+                padding: 6px 0;
+                width: 46px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                justify-content: center;
+                flex: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc {
+                align-self: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc svg {
+                transform: rotate(180deg);
+            }
+
+            body.sidebar-minimizado-pc .contenedor-principal {
+                margin-left: 80px;
+            }
+
+            .sidebar-toggle-pc {
+                display: flex;
+            }
+
+            .pc-flecha-nav {
+                display: flex;
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <header class="header">
         <div class="header-izquierda">
-            <img src="img/logo.jpg" alt="MCPixel Logo" class="logo">
+            <img src="img/logo.jpg" alt="MCPixel Logo" class="logo" id="logoInicio">
+        </div>
+        
+        <div class="header-centro">
+            <button class="burbuja-btn activo" id="burbujaInicio">
+                <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Inicio</span>
+            </button>
+            <button class="burbuja-btn" id="burbujaVerTodos">
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span>Ver Todos</span>
+            </button>
+        </div>
+
+        <div class="perfil-contenedor" id="perfilBtn">
+            <svg viewBox="0 0 24 24" id="perfilIconSvg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
     </header>
 
-    <main class="contenedor-principal">
-        <div class="mantenimiento-contenedor">
-            <img src="img/error.gif" alt="En Mantenimiento" class="mantenimiento-img">
-            <h1 class="mantenimiento-titulo">¡En Mantenimiento!</h1>
-            <p class="mantenimiento-descripcion">Ooh ya veo que intentas acceder a todo el nuevo contenido pero no te preocupes mi querido amigo estamos trabajando para que hoy o mañana puedas descargar tus complementos</p>
+    <aside class="sidebar" id="sidebarMenu">
+        <div class="sidebar-cuenta-estado" id="contenedorAutenticacion">
+            <span class="cuenta-anonima-texto">Disfruta de MCPixel al máximo creando una cuenta.</span>
+            <div class="sidebar-auth-botones">
+                <a id="btnAuthLoginMenu" href="sc/login.html" class="btn-auth-login">Entrar</a>
+                <a id="btnAuthRegistroMenu" href="sc/register.html" class="btn-auth-registro">Registro</a>
+            </div>
         </div>
+
+        <div class="sidebar-divisor"></div>
+
+        <a id="menuLinkInicio" href="/" class="btn-sidebar activo-link">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Inicio</span>
+            </div>
+        </a>
+        <a id="menuLinkCategorias" href="#" class="btn-sidebar notificacion-proximamente">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zm10 0h7v7h-7zM4 14h7v7H4zm10 0h7v7h-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Categorías</span>
+            </div>
+        </a>
+        <a id="menuLinkExplorar" href="sc/explore.html" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Explorar</span>
+            </div>
+        </a>
+        <a id="menuLinkSkins" href="#" class="btn-sidebar notificacion-proximamente">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5zM4 22h16v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Skins</span>
+            </div>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkServidores">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 14h16v7H4zm0-10h16v7H4zM6 7h.01M6 17h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Servidores</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <a href="sc/profile.html" class="btn-sidebar deshabilitado" id="menuLinkPerfil">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Perfil</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a href="sc/favorites.html" class="btn-sidebar deshabilitado" id="menuLinkFavoritos">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span>Favoritos</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a id="menuLinkSugerir" href="sc/post.html" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M22 2L2 9l8.5 2.5L13 20zM22 2l-11.5 9.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Publicar</span>
+            </div>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <div class="sidebar-redes-fila">
+            <a href="https://discord.gg/9EkhYdV325" class="btn-red-cuadrado" title="Discord">
+                <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.77-11,68.43,68.43,0,0,1-10.75-5.13c.91-.66,1.8-1.34,2.65-2a75.58,75.58,0,0,0,72.93,0c.85.69,1.74,1.37,2.65,2A68.44,68.44,0,0,1,96.1,85.37a74.49,74.49,0,0,0,6.77,11,105.73,105.73,0,0,0,31.06-18.83C130.1,49.22,124.27,26.4,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.88,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.12,46,96.12,53,91,65.69,84.69,65.69Z"/></svg>
+                <span>Discord</span>
+            </a>
+            <a href="https://www.tiktok.com/@mcpixelmx?_r=1&_t=ZS-97XdPkGNtKP" class="btn-red-cuadrado" title="TikTok">
+                <svg viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/></svg>
+                <span>TikTok</span>
+            </a>
+        </div>
+
+        <button class="sidebar-toggle-pc" id="toggleCollapseBtn">
+            <svg viewBox="0 0 24 24" id="collapseIcon"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+    </aside>
+
+    <main class="contenedor-principal">
+        
+        <div class="seccion-dinamica-todos" id="seccionTodosLosAddons">
+            <div class="seccion-header">
+                <h3 class="seccion-titulo">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span>Todos los Add-Ons</span>
+                </h3>
+            </div>
+            <div class="grid-todos-addons" id="contenedorGridTodos"></div>
+        </div>
+
+        <div id="vistasContenidoInicio">
+            <section class="carrusel-seccion" id="carruselSeccionPrincipal">
+                <div class="carrusel-contenedor">
+                    <div class="carrusel-pistas" id="carruselPistas">
+                    </div>
+                </div>
+                <div class="carrusel-nav" id="carruselNav"></div>
+            </section>
+
+            <section class="bloque-carrusel-horizontal" id="seccionRecientes">
+                <div class="seccion-header">
+                    <h3 class="seccion-titulo">Add-Ons Recientes</h3>
+                    <button class="btn-ver-mas url-ver-mas-ref">
+                        <span>Ver Más</span>
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+                <button class="pc-flecha-nav pc-flecha-izq">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="scroll-carrusel" id="scrollRecientes"></div>
+                <button class="pc-flecha-nav pc-flecha-der">
+                    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </section>
+
+            <section class="bloque-carrusel-horizontal" id="seccionValorados">
+                <div class="seccion-header">
+                    <h3 class="seccion-titulo">Mejor Valorados</h3>
+                    <button class="btn-ver-mas url-ver-mas-ref">
+                        <span>Ver Más</span>
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+                <button class="pc-flecha-nav pc-flecha-izq">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="scroll-carrusel" id="scrollValorados"></div>
+                <button class="pc-flecha-nav pc-flecha-der">
+                    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </section>
+
+            <section class="bloque-carrusel-horizontal" id="seccionMapas">
+                <div class="seccion-header">
+                    <h3 class="seccion-titulo">Mapas</h3>
+                    <button class="btn-ver-mas url-ver-mas-ref">
+                        <span>Ver Más</span>
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+                <button class="pc-flecha-nav pc-flecha-izq">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="scroll-carrusel" id="scrollMapas"></div>
+                <button class="pc-flecha-nav pc-flecha-der">
+                    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </section>
+
+            <section class="bloque-carrusel-horizontal" id="seccionRecomendados">
+                <div class="seccion-header">
+                    <h3 class="seccion-titulo">Recomendados</h3>
+                    <button class="btn-ver-mas url-ver-mas-ref">
+                        <span>Ver Más</span>
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+                <button class="pc-flecha-nav pc-flecha-izq">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="scroll-carrusel" id="scrollRecomendados"></div>
+                <button class="pc-flecha-nav pc-flecha-der">
+                    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </section>
+
+            <div class="mensaje-inicio-vacio" id="mensajeInicioVacio" style="display:none;">
+                <img src="img/icons/ic1.gif" alt="Sin complementos" class="icono-vacio-gif">
+                <span>No hay complementos disponibles</span>
+                <span class="sub">Vuelve más tarde, la comunidad está creando contenido increíble</span>
+            </div>
+        </div>
+
     </main>
 
+    <script>
+        const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TABLE_USERS = 'users';
+        const TABLE_ADDONS = 'addons';
+        const TABLE_LIKES = 'likes';
+        const BUCKET_PORTADAS = 'portadas';
+        const BUCKET_AVATARS = 'avatars';
+
+        const rutasNavegacionAndEnlacesMcpixel = {
+            login: "sc/login",
+            register: "sc/register",
+            inicio: "/",
+            explorar: "sc/explore",
+            profile: "sc/profile",
+            view: "sc/view",
+            post: "sc/post",
+            favorites: "sc/favorites"
+        };
+
+        document.getElementById('btnAuthLoginMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.login);
+        document.getElementById('btnAuthRegistroMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.register);
+        document.getElementById('menuLinkInicio').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.inicio);
+        document.getElementById('menuLinkExplorar').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.explorar);
+        document.getElementById('menuLinkPerfil').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.profile);
+        document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+        document.getElementById('menuLinkFavoritos').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.favorites);
+        document.getElementById('logoInicio').addEventListener('click', () => {
+            window.location.href = rutasNavegacionAndEnlacesMcpixel.inicio;
+        });
+
+        let currentUser = null;
+        let userLikes = {};
+
+        function obtenerUrlImagen(filePath, bucket = BUCKET_PORTADAS) {
+            if (!filePath) return '';
+            if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+                return filePath;
+            }
+            const { data } = supabaseClient.storage.from(bucket).getPublicUrl(filePath);
+            return data ? data.publicUrl : '';
+        }
+
+        function aplicarCargaImagen(imgElement, parentContainer) {
+            parentContainer.classList.add('img-placeholder-skeleton');
+            if (imgElement.complete && imgElement.naturalHeight !== 0) {
+                parentContainer.classList.remove('img-placeholder-skeleton');
+                imgElement.classList.add('cargado');
+            } else {
+                imgElement.onload = () => {
+                    parentContainer.classList.remove('img-placeholder-skeleton');
+                    imgElement.classList.add('cargado');
+                };
+                imgElement.onerror = () => {
+                    parentContainer.classList.remove('img-placeholder-skeleton');
+                    imgElement.style.display = 'none';
+                };
+            }
+        }
+
+        async function verificarSesionYBloquearPublicar() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session || !session.user) throw new Error("No hay sesión activa");
+                
+                const sessionUser = session.user;
+                currentUser = sessionUser;
+                document.getElementById('contenedorAutenticacion').style.display = 'none';
+                
+                const elementosBloqueados = ['menuLinkPerfil', 'menuLinkFavoritos', 'menuLinkSugerir'];
+                elementosBloqueados.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.classList.remove('deshabilitado');
+                        const bloqueoIcon = el.querySelector('.icon-bloqueo');
+                        if (bloqueoIcon) bloqueoIcon.remove();
+                    }
+                });
+
+                document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+
+                try {
+                    const { data: doc, error } = await supabaseClient
+                        .from(TABLE_USERS)
+                        .select('*')
+                        .eq('id', sessionUser.id)
+                        .single();
+
+                    if (doc && doc.avatar) {
+                        const avatarUrl = obtenerUrlImagen(doc.avatar, BUCKET_AVATARS);
+                        const contenedorPerfil = document.getElementById('perfilBtn');
+                        contenedorPerfil.innerHTML = `<img src="${avatarUrl}" alt="Avatar" class="perfil-img-activa">`;
+                    }
+                } catch (e) {
+                    console.log("Error al obtener el avatar:", e);
+                }
+
+                await obtenerLikesUsuario();
+
+            } catch (error) {
+                document.getElementById('contenedorAutenticacion').style.display = 'flex';
+                
+                const elementosBloquear = ['menuLinkPerfil', 'menuLinkFavoritos', 'menuLinkSugerir'];
+                elementosBloquear.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.classList.add('deshabilitado');
+                        if (id !== 'menuLinkSugerir' && !el.querySelector('.icon-bloqueo')) {
+                            const lockSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                            lockSvg.setAttribute("viewBox", "0 0 24 24");
+                            lockSvg.setAttribute("class", "icon-bloqueo");
+                            lockSvg.innerHTML = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+                            el.appendChild(lockSvg);
+                        }
+                    }
+                });
+                document.getElementById('menuLinkSugerir').setAttribute('href', '#');
+            }
+        }
+
+        async function obtenerLikesUsuario() {
+            if (!currentUser) return;
+            try {
+                const { data: likes, error } = await supabaseClient
+                    .from(TABLE_LIKES)
+                    .select('addon_id')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                userLikes = {};
+                if (likes) {
+                    likes.forEach(doc => {
+                        userLikes[doc.addon_id] = true;
+                    });
+                }
+            } catch (e) {
+                console.log("Error al obtener likes del usuario:", e);
+            }
+        }
+
+        async function obtenerAddonsPublicados() {
+            try {
+                const { data: addons, error } = await supabaseClient
+                    .from(TABLE_ADDONS)
+                    .select('*');
+
+                if (error) throw error;
+                return addons || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function formatearNumero(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        function crearMensajeVacio(contenedor) {
+            contenedor.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'mensaje-vacio-categoria';
+            div.innerHTML = `
+                <img src="img/icons/ic1.gif" alt="Sin complementos" class="icono-vacio-gif">
+                <span>No hay complementos disponibles</span>
+                <span class="sub">Vuelve más tarde, la comunidad está creando contenido increíble</span>
+            `;
+            contenedor.appendChild(div);
+        }
+
+        function renderizarTarjetas(contenedor, addons, limite, mostrarLikes) {
+            contenedor.innerHTML = '';
+            if (!addons || addons.length === 0) {
+                crearMensajeVacio(contenedor);
+                return;
+            }
+            const items = limite ? addons.slice(0, limite) : addons;
+            items.forEach(addon => {
+                const tarjeta = document.createElement('div');
+                if (mostrarLikes) {
+                    tarjeta.className = 'tarjeta-valorada';
+                } else {
+                    tarjeta.className = 'tarjeta-viendo';
+                }
+                const fecha = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : (addon.created_at ? new Date(addon.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Fecha desconocida');
+                tarjeta.setAttribute('data-descargas', addon.descargas || '0');
+                tarjeta.setAttribute('data-version', addon.version || '1.0.0');
+                tarjeta.setAttribute('data-fecha', fecha);
+                tarjeta.setAttribute('data-likes', addon.likes || addon.meGustas || 0);
+                tarjeta.setAttribute('data-descripcion', addon.descripcion || '');
+                
+                let likesHtml = '';
+                if (mostrarLikes) {
+                    const likes = addon.likes || addon.meGustas || 0;
+                    likesHtml = `<div class="tag-likes"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg><span>${formatearNumero(likes)}</span></div>`;
+                }
+                
+                const portadaUrl = addon.portada ? obtenerUrlImagen(addon.portada, BUCKET_PORTADAS) : '';
+                
+                tarjeta.innerHTML = `
+                    ${likesHtml}
+                    <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" class="viendo-img">
+                    <div class="viendo-overlay"><h4 class="viendo-titulo">${addon.nombre || 'Sin nombre'}</h4></div>
+                `;
+                const imgEl = tarjeta.querySelector('.viendo-img');
+                aplicarCargaImagen(imgEl, tarjeta);
+
+                tarjeta.addEventListener('click', () => {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.view + '?id=' + (addon.id || addon.addonId);
+                });
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        async function renderizarBanners() {
+            const addons = await obtenerAddonsPublicados();
+            const pistes = document.getElementById('carruselPistas');
+            const nav = document.getElementById('carruselNav');
+            pistes.innerHTML = '';
+            nav.innerHTML = '';
+
+            if (!addons || addons.length === 0) {
+                document.getElementById('carruselSeccionPrincipal').classList.add('oculto');
+                return;
+            }
+
+            document.getElementById('carruselSeccionPrincipal').classList.remove('oculto');
+
+            const banners = addons.slice(0, 5);
+            banners.forEach((addon, index) => {
+                const item = document.createElement('div');
+                item.className = 'banner-item';
+                item.style.width = '20%';
+                const portadaUrl = addon.portada ? obtenerUrlImagen(addon.portada, BUCKET_PORTADAS) : '';
+                item.innerHTML = `
+                    <img src="${portadaUrl}" alt="Banner" class="banner-img">
+                    <div class="banner-overlay">
+                        <span class="banner-tag">${index === 0 ? 'Destacado' : 'Reciente'}</span>
+                        <h2 class="banner-titulo">${addon.nombre || 'Addon'}</h2>
+                        <p class="banner-descripcion">${addon.descripcion || 'Descubre este increíble complemento para tu mundo.'}</p>
+                    </div>
+                `;
+                const imgEl = item.querySelector('.banner-img');
+                aplicarCargaImagen(imgEl, item);
+
+                item.addEventListener('click', () => {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.view + '?id=' + (addon.id || addon.addonId);
+                });
+                pistes.appendChild(item);
+            });
+
+            for (let i = 0; i < banners.length; i++) {
+                const indicador = document.createElement('button');
+                indicador.classList.add('carrusel-indicador');
+                if (i === 0) indicador.classList.add('activo');
+                indicador.addEventListener('click', () => cambiarBanner(i, banners.length));
+                nav.appendChild(indicador);
+            }
+
+            window.bannerTotal = banners.length;
+            window.bannerActual = 0;
+            if (window.carruselInterval) clearInterval(window.carruselInterval);
+            window.carruselInterval = setInterval(() => {
+                let prox = (window.bannerActual + 1) % window.bannerTotal;
+                cambiarBanner(prox, window.bannerTotal);
+            }, 6000);
+        }
+
+        function cambiarBanner(indice, total) {
+            const pistes = document.getElementById('carruselPistas');
+            const indicadores = document.querySelectorAll('.carrusel-indicador');
+            window.bannerActual = indice;
+            pistes.style.transform = `translateX(-${indice * 20}%)`;
+            indicadores.forEach((ind, i) => {
+                if (i === indice) ind.classList.add('activo');
+                else ind.classList.remove('activo');
+            });
+        }
+
+        async function renderizarSecciones() {
+            const addons = await obtenerAddonsPublicados();
+
+            const seccionRecientes = document.getElementById('seccionRecientes');
+            const seccionValorados = document.getElementById('seccionValorados');
+            const seccionMapas = document.getElementById('seccionMapas');
+            const seccionRecomendados = document.getElementById('seccionRecomendados');
+            const mensajeVacio = document.getElementById('mensajeInicioVacio');
+
+            if (!addons || addons.length === 0) {
+                seccionRecientes.classList.add('oculto');
+                seccionValorados.classList.add('oculto');
+                seccionMapas.classList.add('oculto');
+                seccionRecomendados.classList.add('oculto');
+                mensajeVacio.style.display = 'flex';
+                return;
+            } else {
+                mensajeVacio.style.display = 'none';
+            }
+
+            const recientes = [...addons].sort((a, b) => {
+                const fechaA = a.fecha ? new Date(a.fecha) : (a.created_at ? new Date(a.created_at) : new Date(0));
+                const fechaB = b.fecha ? new Date(b.fecha) : (b.created_at ? new Date(b.created_at) : new Date(0));
+                return fechaB - fechaA;
+            });
+
+            seccionRecientes.classList.remove('oculto');
+            renderizarTarjetas(document.getElementById('scrollRecientes'), recientes, 10, false);
+
+            const valorados = [...addons].sort((a, b) => {
+                const likesA = parseInt(a.likes || a.meGustas) || 0;
+                const likesB = parseInt(b.likes || b.meGustas) || 0;
+                return likesB - likesA;
+            });
+
+            seccionValorados.classList.remove('oculto');
+            renderizarTarjetas(document.getElementById('scrollValorados'), valorados, 10, true);
+
+            const etiquetasMapa = ['map', 'template', 'plantilla', 'mapa'];
+            const mapas = addons.filter(addon => {
+                const etiquetas = (addon.etiquetas || '').toLowerCase();
+                return etiquetasMapa.some(tag => etiquetas.includes(tag));
+            }).sort((a, b) => {
+                const fechaA = a.fecha ? new Date(a.fecha) : (a.created_at ? new Date(a.created_at) : new Date(0));
+                const fechaB = b.fecha ? new Date(b.fecha) : (b.created_at ? new Date(b.created_at) : new Date(0));
+                return fechaB - fechaA;
+            });
+
+            if (mapas.length === 0) {
+                seccionMapas.classList.add('oculto');
+            } else {
+                seccionMapas.classList.remove('oculto');
+                renderizarTarjetas(document.getElementById('scrollMapas'), mapas, 10, false);
+            }
+
+            const recomendados = recientes.length > 0 ? recientes.slice(0, 10) : [];
+
+            if (recomendados.length === 0) {
+                seccionRecomendados.classList.add('oculto');
+            } else {
+                seccionRecomendados.classList.remove('oculto');
+                renderizarTarjetas(document.getElementById('scrollRecomendados'), recomendados, 10, false);
+            }
+        }
+
+        async function compilarTodosLosAddons() {
+            const contenedor = document.getElementById('contenedorGridTodos');
+            const addons = await obtenerAddonsPublicados();
+            contenedor.innerHTML = '';
+
+            if (!addons || addons.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'mensaje-vacio-categoria';
+                div.style.gridColumn = '1 / -1';
+                div.innerHTML = `
+                    <img src="img/icons/ic1.gif" alt="Sin complementos" class="icono-vacio-gif">
+                    <span>No hay complementos disponibles</span>
+                    <span class="sub">Sé el primero en publicar un complemento</span>
+                `;
+                contenedor.appendChild(div);
+                return;
+            }
+
+            const mezclados = [...addons].sort(() => Math.random() - 0.5);
+            mezclados.forEach(addon => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-premium-addon';
+                const fecha = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : (addon.created_at ? new Date(addon.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Fecha desconocida');
+                const portadaUrl = addon.portada ? obtenerUrlImagen(addon.portada, BUCKET_PORTADAS) : '';
+                tarjeta.innerHTML = `
+                    <div class="addon-premium-cabecera">
+                        <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" class="addon-premium-img">
+                        <div class="addon-premium-badges">
+                            <div class="addon-badge-votos">
+                                <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                <span>${formatearNumero(addon.likes || addon.meGustas || 0)}</span>
+                            </div>
+                            <div class="addon-badge-version">${addon.version || '1.0.0'}</div>
+                        </div>
+                    </div>
+                    <div class="addon-premium-info">
+                        <h4 class="addon-premium-titulo">${addon.nombre || 'Sin nombre'}</h4>
+                        <p class="addon-premium-descripcion">${addon.descripcion || 'Sin descripción'}</p>
+                        <div class="addon-premium-detalles-linea">
+                            <div class="addon-premium-meta-item">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>${formatearNumero(addon.descargas || 0)}</span>
+                            </div>
+                            <div class="addon-premium-meta-item">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
+                                <span>${fecha}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                const cabeceraEl = tarjeta.querySelector('.addon-premium-cabecera');
+                const imgEl = tarjeta.querySelector('.addon-premium-img');
+                aplicarCargaImagen(imgEl, cabeceraEl);
+
+                tarjeta.addEventListener('click', () => {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.view + '?id=' + (addon.id || addon.addonId);
+                });
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        function activarVistaVerTodos() {
+            btnBurbujaInicio.classList.remove('activo');
+            btnBurbujaVerTodos.classList.add('activo');
+            vistasContenidoInicio.style.display = 'none';
+            const carruselNavRef = document.getElementById('carruselNav');
+            if(carruselNavRef) carruselNavRef.classList.add('oculto');
+            compilarTodosLosAddons();
+            seccionDinamicaTodos.classList.add('activo');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (window.carruselInterval) clearInterval(window.carruselInterval);
+        }
+
+        document.querySelectorAll('.url-ver-mas-ref').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                activarVistaVerTodos();
+            });
+        });
+
+        const perfilBtn = document.getElementById('perfilBtn');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const toggleCollapseBtn = document.getElementById('toggleCollapseBtn');
+        const cuerpo = document.body;
+
+        function inicializarPantalla() {
+            if (window.innerWidth >= 768) {
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+                sidebarMenu.classList.remove('activo');
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+                sidebarMenu.classList.remove('activo');
+            }
+        }
+
+        perfilBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-minimizado-pc')) {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            } else {
+                sidebarMenu.classList.toggle('activo');
+            }
+        });
+
+        toggleCollapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-abierto-pc')) {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'minimizado');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            }
+        });
+
+        sidebarMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebarMenu.classList.remove('activo');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebarMenu.classList.remove('activo');
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+            }
+        });
+
+        document.querySelectorAll('.bloque-carrusel-horizontal').forEach(bloque => {
+            const scrollContenedorActual = bloque.querySelector('.scroll-carrusel');
+            const btnIzq = bloque.querySelector('.pc-flecha-izq');
+            const btnDer = bloque.querySelector('.pc-flecha-der');
+
+            if (scrollContenedorActual && btnIzq && btnDer) {
+                btnIzq.addEventListener('click', () => {
+                    scrollContenedorActual.scrollBy({ left: -300, behavior: 'smooth' });
+                });
+                btnDer.addEventListener('click', () => {
+                    scrollContenedorActual.scrollBy({ left: 300, behavior: 'smooth' });
+                });
+            }
+        });
+
+        const btnBurbujaInicio = document.getElementById('burbujaInicio');
+        const btnBurbujaVerTodos = document.getElementById('burbujaVerTodos');
+        const vistasContenidoInicio = document.getElementById('vistasContenidoInicio');
+        const seccionDinamicaTodos = document.getElementById('seccionTodosLosAddons');
+
+        btnBurbujaInicio.addEventListener('click', async () => {
+            btnBurbujaVerTodos.classList.remove('activo');
+            btnBurbujaInicio.classList.add('activo');
+            seccionDinamicaTodos.classList.remove('activo');
+            vistasContenidoInicio.style.display = 'block';
+            const carruselNavRef = document.getElementById('carruselNav');
+            if(carruselNavRef) carruselNavRef.classList.remove('oculto');
+            await renderizarBanners();
+            await renderizarSecciones();
+        });
+
+        btnBurbujaVerTodos.addEventListener('click', () => {
+            btnBurbujaInicio.classList.remove('activo');
+            btnBurbujaVerTodos.classList.add('activo');
+            vistasContenidoInicio.style.display = 'none';
+            const carruselNavRef = document.getElementById('carruselNav');
+            if(carruselNavRef) carruselNavRef.classList.add('oculto');
+            compilarTodosLosAddons();
+            seccionDinamicaTodos.classList.add('activo');
+            if (window.carruselInterval) clearInterval(window.carruselInterval);
+        });
+
+        (async function iniciarApp() {
+            inicializarPantalla();
+            await verificarSesionYBloquearPublicar();
+            await renderizarBanners();
+            await renderizarSecciones();
+            const addons = await obtenerAddonsPublicados();
+            if (addons.length === 0) {
+                document.getElementById('carruselSeccionPrincipal').classList.add('oculto');
+            }
+        })();
+    </script>
 </body>
 </html>
