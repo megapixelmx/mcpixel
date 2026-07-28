@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="../img/logo.jpg">
+    <title>Ver Add-On - MCPixel</title>
+    <style>
+        :root {
+            --bg-principal: #0b0c10;
+            --bg-tarjeta: rgba(26, 29, 38, 0.65);
+            --bg-barra: rgba(17, 19, 25, 0.95);
+            --borde-glass: rgba(255, 255, 255, 0.08);
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --color-acento: #6366f1;
+            --color-hover: #4f46e5;
+            --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radio-suave: 12px;
+            --radio-banner: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--fuente);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 200;
+        }
+
+        .header-izquierda {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: var(--radio-suave);
+            cursor: pointer;
+        }
+
+        .header-titulo-pagina {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+        }
+
+        .perfil-contenedor {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #272a37;
+            border: 1px solid var(--borde-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--texto-secundario);
+            overflow: hidden;
+        }
+
+        .perfil-contenedor:hover {
+            border-color: var(--color-acento);
+            color: var(--texto-principal);
+            background: #2e3242;
+        }
+
+        .perfil-contenedor svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .perfil-img-activa {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--borde-glass);
+            z-index: 300;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar.activo {
+            transform: translateX(0);
+        }
+
+        .sidebar-cuenta-estado {
+            padding: 8px 16px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cuenta-anonima-texto {
+            font-size: 13px;
+            color: var(--texto-secundario);
+            line-height: 1.4;
+        }
+
+        .sidebar-auth-botones {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-auth-login {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-acento);
+            border: none;
+            color: #ffffff;
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-login:hover {
+            background: var(--color-hover);
+        }
+
+        .btn-auth-registro {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-principal);
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-auth-registro:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .btn-sidebar-contenido {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .btn-sidebar svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-sidebar:hover:not(.deshabilitado) {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .btn-sidebar.activo-link {
+            background: var(--color-acento);
+            color: #ffffff;
+        }
+
+        .btn-sidebar.deshabilitado {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .icon-bloqueo {
+            width: 14px !important;
+            height: 14px !important;
+            color: var(--texto-secundario);
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        .notificacion-proximamente::after {
+            content: "Próximamente";
+            position: absolute;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--borde-glass);
+            color: var(--texto-secundario);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+            pointer-events: none;
+        }
+
+        body.sidebar-minimizado-pc .notificacion-proximamente::after {
+            display: none;
+        }
+
+        .sidebar-divisor {
+            height: 1px;
+            background: var(--borde-glass);
+            margin: 12px 16px;
+        }
+
+        .sidebar-redes-fila {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 6px 16px;
+            width: 100%;
+        }
+
+        .btn-red-cuadrado {
+            flex: 1;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 12px;
+            gap: 8px;
+            color: var(--texto-secundario);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-width: 0;
+        }
+
+        .btn-red-cuadrado:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--texto-principal);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-red-cuadrado svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-red-cuadrado span {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-toggle-pc {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #1a1d26;
+            border: 1px solid var(--borde-glass);
+            border-radius: 8px;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            margin-top: auto;
+            align-self: flex-end;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-pc:hover {
+            background: var(--color-acento);
+            color: #ffffff;
+            border-color: var(--color-acento);
+        }
+
+        .sidebar-toggle-pc svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .contenedor-principal {
+            margin-top: 70px;
+            padding: 24px 16px;
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+        }
+
+        .contenedor-view {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .galeria-principal {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radio-banner);
+            overflow: hidden;
+            background: #1a1d26;
+            aspect-ratio: 16 / 9;
+            margin-bottom: 16px;
+        }
+
+        .galeria-principal img,
+        .galeria-principal iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none;
+            display: block;
+        }
+
+        .galeria-principal iframe {
+            aspect-ratio: 16 / 9;
+        }
+
+        .galeria-thumbnails {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scrollbar-width: none;
+            margin-bottom: 20px;
+        }
+
+        .galeria-thumbnails::-webkit-scrollbar {
+            display: none;
+        }
+
+        .galeria-thumbnails .thumb {
+            flex: 0 0 120px;
+            height: 70px;
+            border-radius: var(--radio-suave);
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .galeria-thumbnails .thumb.activo {
+            border-color: var(--color-acento);
+        }
+
+        .galeria-thumbnails .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .galeria-thumbnails .thumb .thumb-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .galeria-thumbnails .thumb .thumb-play svg {
+            width: 14px;
+            height: 14px;
+            fill: #ffffff;
+        }
+
+        .pc-flecha-galeria {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(17, 19, 25, 0.85);
+            border: 1px solid var(--borde-glass);
+            border-radius: 50%;
+            color: #ffffff;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .pc-flecha-galeria:hover {
+            background: var(--color-acento);
+            border-color: var(--color-acento);
+        }
+
+        .pc-flecha-galeria.izq {
+            left: 12px;
+        }
+
+        .pc-flecha-galeria.der {
+            right: 12px;
+        }
+
+        .pc-flecha-galeria svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .info-addon {
+            margin-bottom: 24px;
+        }
+
+        .info-addon h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .info-creador-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .info-creador-wrapper .avatar-creador {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #2a2d38;
+            border: 1px solid var(--borde-glass);
+            cursor: pointer;
+        }
+
+        .info-creador-wrapper .nombre-creador {
+            font-size: 14px;
+            color: var(--texto-secundario);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .info-creador-wrapper .nombre-creador:hover {
+            color: var(--color-acento);
+        }
+
+        .info-creador-wrapper .badge-verificado {
+            width: 16px;
+            height: 16px;
+            fill: #1d9bf0;
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .info-creador-wrapper .badge-verificado.visible {
+            display: block;
+        }
+
+        .info-creador-wrapper .texto-by {
+            font-size: 14px;
+            color: var(--texto-secundario);
+        }
+
+        .acciones-superior {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .acciones-superior .accion-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            color: var(--texto-secundario);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .acciones-superior .accion-btn:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .acciones-superior .accion-btn.me-gusta.activo {
+            color: var(--color-acento);
+            border-color: var(--color-acento);
+        }
+
+        .acciones-superior .accion-btn.me-gusta.activo svg {
+            fill: var(--color-acento);
+        }
+
+        .acciones-superior .accion-btn.favorito.activo {
+            color: #eab308;
+            border-color: #eab308;
+        }
+
+        .acciones-superior .accion-btn.favorito.activo svg {
+            fill: #eab308;
+        }
+
+        .acciones-superior .accion-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px 0;
+            border-top: 1px solid var(--borde-glass);
+            border-bottom: 1px solid var(--borde-glass);
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radio-suave);
+            border: 1px solid var(--borde-glass);
+        }
+
+        .stat-item svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: var(--texto-secundario);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .stat-item .stat-label {
+            font-size: 12px;
+            color: var(--texto-secundario);
+            font-weight: 500;
+        }
+
+        .stat-item .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            margin-left: auto;
+        }
+
+        .etiquetas-addon {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .etiquetas-addon .tag {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--color-acento);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .seccion-descripcion {
+            margin-bottom: 24px;
+        }
+
+        .seccion-descripcion .seccion-subtitulo {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            margin-bottom: 8px;
+        }
+
+        .descripcion-addon {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--texto-principal);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .descripcion-addon strong {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .descripcion-addon a {
+            color: var(--color-acento);
+            text-decoration: underline;
+        }
+
+        .descripcion-addon a:hover {
+            color: var(--color-hover);
+        }
+
+        .seccion-botones-descarga {
+            margin-bottom: 30px;
+        }
+
+        .seccion-botones-descarga .seccion-subtitulo {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            margin-bottom: 12px;
+        }
+
+        .botones-descarga {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .botones-descarga .btn-descarga {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            color: var(--texto-principal);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .botones-descarga .btn-descarga:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--color-acento);
+        }
+
+        .botones-descarga .btn-descarga .btn-descarga-izq {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .botones-descarga .btn-descarga .btn-descarga-izq svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .botones-descarga .btn-descarga .btn-descarga-der {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .botones-descarga .btn-descarga .diseno-divisor-flecha {
+            height: 24px;
+            width: 1px;
+            background: var(--borde-glass);
+        }
+
+        .botones-descarga .btn-descarga .contenedor-icono-flecha {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-acento);
+        }
+
+        .botones-descarga .btn-descarga .contenedor-icono-flecha svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .mensaje-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            gap: 16px;
+            color: var(--texto-secundario);
+            text-align: center;
+        }
+
+        .mensaje-error img {
+            width: 56px;
+            height: 56px;
+            opacity: 0.6;
+        }
+
+        .mensaje-error span {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .seccion-para-ti {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .seccion-para-ti .seccion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .seccion-para-ti .seccion-titulo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seccion-para-ti .seccion-titulo svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--color-acento);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .scroll-para-ti {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        .scroll-para-ti::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tarjeta-para-ti {
+            flex: 0 0 200px;
+            height: 120px;
+            border-radius: var(--radio-suave);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            background: var(--bg-tarjeta);
+            border: 1px solid var(--borde-glass);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .tarjeta-para-ti:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .tarjeta-para-ti img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tarjeta-para-ti .overlay-para-ti {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(11,12,16,0.9) 0%, rgba(11,12,16,0.3) 60%, transparent 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 12px;
+        }
+
+        .tarjeta-para-ti .overlay-para-ti span {
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .pc-flecha-para-ti {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            background: rgba(17,19,25,0.9);
+            border: 1px solid var(--borde-glass);
+            border-radius: 50%;
+            color: #ffffff;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .pc-flecha-para-ti:hover {
+            background: var(--color-acento);
+            border-color: var(--color-acento);
+        }
+
+        .pc-flecha-para-ti.izq {
+            left: -18px;
+        }
+
+        .pc-flecha-para-ti.der {
+            right: -18px;
+        }
+
+        .pc-flecha-para-ti svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .bloque-para-ti {
+            position: relative;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .mensaje-vacio-para-ti {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 12px;
+            color: var(--texto-secundario);
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radio-suave);
+            border: 1px dashed var(--borde-glass);
+            width: 100%;
+            text-align: center;
+        }
+
+        .mensaje-vacio-para-ti img {
+            width: 48px;
+            height: 48px;
+            opacity: 0.6;
+        }
+
+        .mensaje-vacio-para-ti span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .contenedor-principal {
+                padding: 32px 40px;
+            }
+
+            body.sidebar-abierto-pc .sidebar {
+                transform: translateX(0);
+            }
+
+            body.sidebar-abierto-pc .contenedor-principal {
+                margin-left: 280px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar {
+                width: 80px;
+                transform: translateX(0);
+                padding: 24px 12px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-cuenta-estado,
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar span,
+            body.sidebar-minimizado-pc .sidebar .icon-bloqueo,
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado span {
+                display: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-sidebar {
+                justify-content: center;
+                padding: 12px;
+                width: 46px;
+                height: 46px;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-divisor {
+                width: 32px;
+                margin: 12px 0;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-redes-fila {
+                flex-direction: column;
+                padding: 6px 0;
+                width: 46px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .btn-red-cuadrado {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                justify-content: center;
+                flex: none;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc {
+                align-self: center;
+            }
+
+            body.sidebar-minimizado-pc .sidebar .sidebar-toggle-pc svg {
+                transform: rotate(180deg);
+            }
+
+            body.sidebar-minimizado-pc .contenedor-principal {
+                margin-left: 80px;
+            }
+
+            .sidebar-toggle-pc {
+                display: flex;
+            }
+
+            .pc-flecha-galeria {
+                display: flex;
+            }
+
+            .pc-flecha-para-ti {
+                display: flex;
+            }
+
+            .galeria-thumbnails .thumb {
+                flex: 0 0 160px;
+                height: 90px;
+            }
+
+            .info-addon h1 {
+                font-size: 32px;
+            }
+
+            .tarjeta-para-ti {
+                flex: 0 0 220px;
+                height: 130px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-izquierda">
+            <img src="../img/logo.jpg" alt="MCPixel Logo" class="logo" id="logoInicio">
+            <span class="header-titulo-pagina">Ver Add-On</span>
+        </div>
+
+        <div class="perfil-contenedor" id="perfilBtn">
+            <svg viewBox="0 0 24 24" id="perfilIconSvg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebarMenu">
+        <div class="sidebar-cuenta-estado" id="contenedorAutenticacion">
+            <span class="cuenta-anonima-texto">Disfruta de MCPixel al máximo creando una cuenta.</span>
+            <div class="sidebar-auth-botones">
+                <a id="btnAuthLoginMenu" href="login" class="btn-auth-login">Entrar</a>
+                <a id="btnAuthRegistroMenu" href="register" class="btn-auth-registro">Registro</a>
+            </div>
+        </div>
+
+        <div class="sidebar-divisor"></div>
+
+        <a id="menuLinkInicio" href="../" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Inicio</span>
+            </div>
+        </a>
+        <a id="menuLinkCategorias" href="#" class="btn-sidebar notificacion-proximamente">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zm10 0h7v7h-7zM4 14h7v7H4zm10 0h7v7h-7z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Categorías</span>
+            </div>
+        </a>
+        <a id="menuLinkExplorar" href="explore" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Explorar</span>
+            </div>
+        </a>
+        <a id="menuLinkSkins" href="#" class="btn-sidebar notificacion-proximamente">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5zM4 22h16v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Skins</span>
+            </div>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkServidores">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M4 14h16v7H4zm0-10h16v7H4zM6 7h.01M6 17h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Servidores</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <a href="profile" class="btn-sidebar deshabilitado" id="menuLinkPerfil">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Perfil</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a href="#" class="btn-sidebar deshabilitado" id="menuLinkFavoritos">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span>Favoritos</span>
+            </div>
+            <svg viewBox="0 0 24 24" class="icon-bloqueo"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </a>
+        <a id="menuLinkSugerir" href="post" class="btn-sidebar">
+            <div class="btn-sidebar-contenido">
+                <svg viewBox="0 0 24 24"><path d="M22 2L2 9l8.5 2.5L13 20zM22 2l-11.5 9.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Publicar</span>
+            </div>
+        </a>
+
+        <div class="sidebar-divisor"></div>
+
+        <div class="sidebar-redes-fila">
+            <a href="https://discord.gg/9EkhYdV325" class="btn-red-cuadrado" title="Discord">
+                <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.77-11,68.43,68.43,0,0,1-10.75-5.13c.91-.66,1.8-1.34,2.65-2a75.58,75.58,0,0,0,72.93,0c.85.69,1.74,1.37,2.65,2A68.44,68.44,0,0,1,96.1,85.37a74.49,74.49,0,0,0,6.77,11,105.73,105.73,0,0,0,31.06-18.83C130.1,49.22,124.27,26.4,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.88,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.12,46,96.12,53,91,65.69,84.69,65.69Z"/></svg>
+                <span>Discord</span>
+            </a>
+            <a href="https://www.tiktok.com/@mcpixelmx?_r=1&_t=ZS-97XdPkGNtKP" class="btn-red-cuadrado" title="TikTok">
+                <svg viewBox="0 0 448 512"><path d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/></svg>
+                <span>TikTok</span>
+            </a>
+        </div>
+
+        <button class="sidebar-toggle-pc" id="toggleCollapseBtn">
+            <svg viewBox="0 0 24 24" id="collapseIcon"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+    </aside>
+
+    <main class="contenedor-principal">
+        <div class="contenedor-view" id="contenedorView">
+            <div class="mensaje-error" id="mensajeError" style="display:none;">
+                <img src="../img/icons/ic4.png" alt="Error">
+                <span>Complemento no encontrado</span>
+                <span style="font-size:14px;font-weight:400;">El complemento que buscas no existe o fue eliminado.</span>
+            </div>
+            <div id="contenidoAddon" style="display:none;">
+                <div class="galeria-principal" id="galeriaPrincipal">
+                    <div id="contenedorPrincipal"></div>
+                    <button class="pc-flecha-galeria izq" id="flechaIzq">
+                        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button class="pc-flecha-galeria der" id="flechaDer">
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+                <div class="galeria-thumbnails" id="galeriaThumbnails"></div>
+
+                <div class="info-addon">
+                    <h1 id="tituloAddon"></h1>
+                    <div class="info-creador-wrapper">
+                        <span class="texto-by">By</span>
+                        <img class="avatar-creador" id="avatarCreador" src="" alt="Avatar">
+                        <span class="nombre-creador" id="nombreCreador"></span>
+                        <svg class="badge-verificado" id="badgeVerificado" viewBox="0 0 24 24"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.01s-2.62-1.27-4.01-.81C14.67 2.53 13.43 1.65 12 1.65s-2.67.88-3.34 2.19c-1.39-.46-2.97-.2-4.01.81s-1.27 2.62-.81 4.01C2.53 9.33 1.65 10.57 1.65 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.01s2.62 1.27 4.01.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.97.2 4.01-.81s1.27-2.62.81-4.01c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"></path></svg>
+                    </div>
+                    <div class="acciones-superior">
+                        <button class="accion-btn me-gusta" id="btnMeGusta">
+                            <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        </button>
+                        <button class="accion-btn favorito" id="btnFavorito">
+                            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                        <a href="../tools/conversor.html" class="accion-btn conversor-link" id="btnConversorHerramienta" title="Conversor">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="2"/><polyline points="14 2 14 8 20 8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/><line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/><polyline points="10 9 9 9 8 9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        <span class="stat-label">Me Gustas</span>
+                        <span class="stat-value" id="meGustasStat">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                        <span class="stat-label">Descargas</span>
+                        <span class="stat-value" id="descargasContador">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span class="stat-label">Publicación</span>
+                        <span class="stat-value" id="fechaPublicacion"></span>
+                    </div>
+                    <div class="stat-item">
+                        <svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><polyline points="20 10 12 18 8 14"/></svg>
+                        <span class="stat-label">Actualización</span>
+                        <span class="stat-value" id="fechaActualizacion"></span>
+                    </div>
+                </div>
+
+                <div class="etiquetas-addon" id="etiquetasAddon"></div>
+
+                <div class="seccion-descripcion">
+                    <div class="seccion-subtitulo">Descripción</div>
+                    <div class="descripcion-addon" id="descripcionAddon"></div>
+                </div>
+
+                <div class="seccion-botones-descarga">
+                    <div class="seccion-subtitulo">Descargas</div>
+                    <div class="botones-descarga" id="botonesDescarga"></div>
+                </div>
+
+                <div class="seccion-para-ti">
+                    <div class="bloque-para-ti">
+                        <div class="seccion-header">
+                            <h3 class="seccion-titulo">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                <span>Para Ti</span>
+                            </h3>
+                        </div>
+                        <button class="pc-flecha-para-ti izq" id="paraTiIzq">
+                            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <div class="scroll-para-ti" id="scrollParaTi"></div>
+                        <button class="pc-flecha-para-ti der" id="paraTiDer">
+                            <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const rutasNavegacionAndEnlacesMcpixel = {
+            login: "login",
+            register: "register",
+            inicio: "../",
+            explorar: "explore",
+            profile: "profile",
+            view: "view",
+            post: "post.html",
+            favorites: "favorites",
+            profileView: "profile_view",
+            conversor: "../tools/conversor"
+        };
+
+        document.getElementById('btnAuthLoginMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.login);
+        document.getElementById('btnAuthRegistroMenu').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.register);
+        document.getElementById('menuLinkInicio').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.inicio);
+        document.getElementById('menuLinkExplorar').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.explorar);
+        document.getElementById('menuLinkPerfil').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.profile);
+        document.getElementById('menuLinkSugerir').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.post);
+        document.getElementById('menuLinkFavoritos').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.favorites);
+        document.getElementById('btnConversorHerramienta').setAttribute('href', rutasNavegacionAndEnlacesMcpixel.conversor);
+        document.getElementById('logoInicio').addEventListener('click', () => {
+            window.location.href = rutasNavegacionAndEnlacesMcpixel.inicio;
+        });
+
+        let currentUser = null;
+        let userLikes = {};
+        let userFavorites = {};
+
+        async function verificarSesion() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    document.getElementById('contenedorAutenticacion').style.display = 'flex';
+                    return;
+                }
+
+                currentUser = session.user;
+                document.getElementById('contenedorAutenticacion').style.display = 'none';
+                const elementosBloqueados = ['menuLinkPerfil', 'menuLinkFavoritos'];
+                elementosBloqueados.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.classList.remove('deshabilitado');
+                        const bloqueoIcon = el.querySelector('.icon-bloqueo');
+                        if (bloqueoIcon) bloqueoIcon.remove();
+                    }
+                });
+                try {
+                    const { data: doc, error } = await supabaseClient
+                        .from('users')
+                        .select('avatar')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
+
+                    if (doc && doc.avatar) {
+                        const contenedorPerfil = document.getElementById('perfilBtn');
+                        contenedorPerfil.innerHTML = `<img src="${doc.avatar}" alt="Avatar" class="perfil-img-activa">`;
+                    }
+                } catch (e) {
+                    console.log("Error al obtener el avatar:", e);
+                }
+                await obtenerLikesUsuario();
+                await obtenerFavoritosUsuario();
+            } catch (error) {
+                document.getElementById('contenedorAutenticacion').style.display = 'flex';
+            }
+        }
+
+        async function obtenerLikesUsuario() {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('likes')
+                    .select('addon_id')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+                userLikes = {};
+                data.forEach(doc => {
+                    userLikes[doc.addon_id] = true;
+                });
+            } catch (e) {
+                console.log("Error al obtener likes del usuario:", e);
+            }
+        }
+
+        async function obtenerFavoritosUsuario() {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('favorites')
+                    .select('addon_id')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+                userFavorites = {};
+                data.forEach(doc => {
+                    userFavorites[doc.addon_id] = true;
+                });
+            } catch (e) {
+                console.log("Error al obtener favoritos del usuario:", e);
+            }
+        }
+
+        async function obtenerAddonPorId(id) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('addons')
+                    .select('*')
+                    .eq('id', id)
+                    .maybeSingle();
+
+                if (error) throw error;
+                return data;
+            } catch (e) {
+                console.log("Error al obtener addon:", e);
+                return null;
+            }
+        }
+
+        async function obtenerAddonsPublicados() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('addons')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                return data || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        async function obtenerUsuario(userId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (error) throw error;
+                return data;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function formatearNumero(num) {
+            if (num < 0) return '0';
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        function procesarDescripcion(texto) {
+            if (!texto) return '';
+            let html = texto;
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/^\* (.*)$/gm, '• $1');
+            html = html.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        function extraerIdYoutube(url) {
+            if (!url || url.trim() === '') return null;
+            const patrones = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?#]+)/,
+                /youtube\.com\/embed\/([^?]+)/
+            ];
+            for (const patron of patrones) {
+                const match = url.match(patron);
+                if (match) return match[1];
+            }
+            return url.trim();
+        }
+
+        async function renderizarParaTi(addonActualId) {
+            const contenedor = document.getElementById('scrollParaTi');
+            const addons = await obtenerAddonsPublicados();
+            contenedor.innerHTML = '';
+
+            if (!addons || addons.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'mensaje-vacio-para-ti';
+                div.innerHTML = `
+                    <img src="../img/icons/ic4.png" alt="Sin complementos">
+                    <span>No hay complementos disponibles</span>
+                `;
+                contenedor.appendChild(div);
+                return;
+            }
+
+            const filtrados = addons.filter(a => a.id !== addonActualId);
+            const mezclados = [...filtrados].sort(() => Math.random() - 0.5);
+            const seleccionados = mezclados.slice(0, 10);
+
+            if (seleccionados.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'mensaje-vacio-para-ti';
+                div.innerHTML = `
+                    <img src="../img/icons/ic4.png" alt="Sin complementos">
+                    <span>No hay más complementos disponibles</span>
+                `;
+                contenedor.appendChild(div);
+                return;
+            }
+
+            seleccionados.forEach(addon => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-para-ti';
+                const portadaUrl = addon.portada || '';
+                tarjeta.innerHTML = `
+                    <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" onerror="this.style.display='none'">
+                    <div class="overlay-para-ti"><span>${addon.nombre || 'Sin nombre'}</span></div>
+                `;
+                tarjeta.addEventListener('click', () => {
+                    window.location.href = window.location.pathname + '?id=' + addon.id;
+                });
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        async function renderizarView() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const contenedorError = document.getElementById('mensajeError');
+            const contenedorContenido = document.getElementById('contenidoAddon');
+
+            if (!id) {
+                contenedorError.style.display = 'flex';
+                contenedorContenido.style.display = 'none';
+                await renderizarParaTi(null);
+                return;
+            }
+
+            const addon = await obtenerAddonPorId(id);
+            if (!addon) {
+                contenedorError.style.display = 'flex';
+                contenedorContenido.style.display = 'none';
+                await renderizarParaTi(null);
+                return;
+            }
+
+            document.title = addon.nombre + ' - MCPixel';
+
+            contenedorError.style.display = 'none';
+            contenedorContenido.style.display = 'block';
+
+            let nombreVisibleCreador = 'Anónimo';
+            let avatarUrlCreador = '';
+            let creadorId = addon.user_id;
+            let isVerified = false;
+
+            if (creadorId) {
+                try {
+                    const creador = await obtenerUsuario(creadorId);
+                    if (creador) {
+                        nombreVisibleCreador = creador.nombre_visible || creador.username || 'Anónimo';
+                        avatarUrlCreador = creador.avatar || '';
+                        isVerified = creador.verificado || false;
+                    }
+                } catch (e) {
+                    console.log("Error al obtener creador:", e);
+                }
+            }
+
+            document.getElementById('tituloAddon').textContent = addon.nombre || 'Sin nombre';
+
+            const avatarCreador = document.getElementById('avatarCreador');
+            avatarCreador.src = avatarUrlCreador || '';
+            avatarCreador.alt = nombreVisibleCreador;
+            avatarCreador.onerror = function() {
+                this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+            };
+
+            const nombreCreador = document.getElementById('nombreCreador');
+            nombreCreador.textContent = nombreVisibleCreador;
+            nombreCreador.addEventListener('click', () => {
+                if (creadorId) {
+                    window.location.href = rutasNavegacionAndEnlacesMcpixel.profileView + '?id=' + creadorId;
+                }
+            });
+
+            const badgeVerificado = document.getElementById('badgeVerificado');
+            if (isVerified) {
+                badgeVerificado.classList.add('visible');
+            } else {
+                badgeVerificado.classList.remove('visible');
+            }
+
+            let likes = parseInt(addon.likes) || 0;
+            if (likes < 0) likes = 0;
+            document.getElementById('meGustasStat').textContent = formatearNumero(likes);
+            document.getElementById('descargasContador').textContent = formatearNumero(addon.descargas || 0);
+
+            const fechaPub = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Desconocida';
+            document.getElementById('fechaPublicacion').textContent = fechaPub;
+            const fechaAct = addon.created_at ? new Date(addon.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : fechaPub;
+            document.getElementById('fechaActualizacion').textContent = fechaAct;
+
+            const etiquetas = (addon.etiquetas || '').split(',').map(e => e.trim()).filter(e => e);
+            const contenedorEtiquetas = document.getElementById('etiquetasAddon');
+            contenedorEtiquetas.innerHTML = '';
+            etiquetas.forEach(et => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = '#' + et;
+                contenedorEtiquetas.appendChild(span);
+            });
+
+            const descripcionHtml = procesarDescripcion(addon.descripcion || '');
+            document.getElementById('descripcionAddon').innerHTML = descripcionHtml;
+
+            const botonesContainer = document.getElementById('botonesDescarga');
+            botonesContainer.innerHTML = '';
+            let botonesDescarga = [];
+            try {
+                botonesDescarga = JSON.parse(addon.botones_descarga || '[]');
+            } catch (e) {
+                botonesDescarga = [];
+            }
+            if (botonesDescarga.length > 0) {
+                botonesDescarga.forEach(boton => {
+                    const a = document.createElement('a');
+                    a.className = 'btn-descarga';
+                    a.href = boton.url || '#';
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.innerHTML = `
+                        <div class="btn-descarga-izq">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                            ${boton.nombre || 'Descargar'}
+                        </div>
+                        <div class="btn-descarga-der">
+                            <div class="diseno-divisor-flecha"></div>
+                            <div class="contenedor-icono-flecha">
+                                <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/></svg>
+                            </div>
+                        </div>
+                    `;
+                    a.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const ahora = Date.now();
+                        const ultimaDescarga = parseInt(localStorage.getItem('mcpixel_ultima_descarga_' + addon.id)) || 0;
+                        const cooldown = 10 * 60 * 1000;
+                        if (ahora - ultimaDescarga >= cooldown) {
+                            let descargas = parseInt(addon.descargas) || 0;
+                            descargas++;
+                            addon.descargas = descargas;
+                            document.getElementById('descargasContador').textContent = formatearNumero(descargas);
+                            try {
+                                await supabaseClient
+                                    .from('addons')
+                                    .update({ descargas: descargas })
+                                    .eq('id', addon.id);
+                            } catch (err) {
+                                console.log("Error al actualizar descargas:", err);
+                            }
+                            localStorage.setItem('mcpixel_ultima_descarga_' + addon.id, ahora.toString());
+                        }
+                        if (boton.url && boton.url.startsWith('http')) {
+                            window.open(boton.url, '_blank');
+                        }
+                    });
+                    botonesContainer.appendChild(a);
+                });
+            }
+
+            const imagenes = [];
+            if (addon.portada) imagenes.push({ tipo: 'imagen', src: addon.portada });
+            let referencias = [];
+            try {
+                referencias = JSON.parse(addon.referencias || '[]');
+            } catch (e) {
+                referencias = [];
+            }
+            if (referencias.length > 0) {
+                referencias.forEach(ref => {
+                    imagenes.push({ tipo: 'imagen', src: ref });
+                });
+            }
+            if (addon.youtube_id && addon.youtube_id.trim() !== '') {
+                const videoId = extraerIdYoutube(addon.youtube_id);
+                if (videoId) {
+                    imagenes.unshift({ tipo: 'video', src: 'https://www.youtube.com/embed/' + videoId + '?autoplay=0&rel=0' });
+                }
+            }
+
+            let indiceActual = 0;
+            const contenedorPrincipal = document.getElementById('contenedorPrincipal');
+            const thumbnailsContainer = document.getElementById('galeriaThumbnails');
+            const flechaIzq = document.getElementById('flechaIzq');
+            const flechaDer = document.getElementById('flechaDer');
+
+            function renderizarPrincipal(indice) {
+                contenedorPrincipal.innerHTML = '';
+                const item = imagenes[indice];
+                if (!item) return;
+                if (item.tipo === 'video') {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = item.src;
+                    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                    iframe.allowFullscreen = true;
+                    contenedorPrincipal.appendChild(iframe);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = 'Imagen';
+                    img.onerror = function() { this.style.display = 'none'; };
+                    contenedorPrincipal.appendChild(img);
+                }
+                actualizarThumbnails(indice);
+            }
+
+            function actualizarThumbnails(indice) {
+                thumbnailsContainer.innerHTML = '';
+                imagenes.forEach((item, i) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'thumb' + (i === indice ? ' activo' : '');
+                    if (item.tipo === 'video') {
+                        const portadaUrl = addon.portada || '';
+                        thumb.innerHTML = `
+                            <img src="${portadaUrl}" alt="Video" onerror="this.src=''">
+                            <div class="thumb-play"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg></div>
+                        `;
+                    } else {
+                        thumb.innerHTML = `<img src="${item.src}" alt="Thumb" onerror="this.style.display='none'">`;
+                    }
+                    thumb.addEventListener('click', () => {
+                        indiceActual = i;
+                        renderizarPrincipal(indiceActual);
+                    });
+                    thumbnailsContainer.appendChild(thumb);
+                });
+            }
+
+            if (imagenes.length > 0) {
+                renderizarPrincipal(0);
+            } else {
+                contenedorPrincipal.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--texto-secundario);">Sin imágenes</div>';
+            }
+
+            flechaIzq.addEventListener('click', () => {
+                if (imagenes.length === 0) return;
+                indiceActual = (indiceActual - 1 + imagenes.length) % imagenes.length;
+                renderizarPrincipal(indiceActual);
+            });
+            flechaDer.addEventListener('click', () => {
+                if (imagenes.length === 0) return;
+                indiceActual = (indiceActual + 1) % imagenes.length;
+                renderizarPrincipal(indiceActual);
+            });
+
+            const btnMeGusta = document.getElementById('btnMeGusta');
+            if (currentUser && userLikes[addon.id]) {
+                btnMeGusta.classList.add('activo');
+            }
+            btnMeGusta.addEventListener('click', async () => {
+                if (!currentUser) {
+                    alert('Inicia sesión para dar me gusta.');
+                    return;
+                }
+                const ya = userLikes[addon.id] || false;
+                let likes = parseInt(addon.likes) || 0;
+                if (likes < 0) likes = 0;
+                try {
+                    if (ya) {
+                        if (likes > 0) {
+                            likes--;
+                            userLikes[addon.id] = false;
+                            btnMeGusta.classList.remove('activo');
+                            await supabaseClient
+                                .from('likes')
+                                .delete()
+                                .eq('user_id', currentUser.id)
+                                .eq('addon_id', addon.id);
+                        } else {
+                            userLikes[addon.id] = false;
+                            btnMeGusta.classList.remove('activo');
+                        }
+                    } else {
+                        likes++;
+                        userLikes[addon.id] = true;
+                        btnMeGusta.classList.add('activo');
+                        await supabaseClient
+                            .from('likes')
+                            .insert({ user_id: currentUser.id, addon_id: addon.id });
+                    }
+                    if (likes < 0) likes = 0;
+                    addon.likes = likes;
+                    document.getElementById('meGustasStat').textContent = formatearNumero(likes);
+                    await supabaseClient
+                        .from('addons')
+                        .update({ likes: likes })
+                        .eq('id', addon.id);
+                } catch (e) {
+                    console.log("Error al actualizar like:", e);
+                }
+            });
+
+            const btnFavorito = document.getElementById('btnFavorito');
+            if (currentUser && userFavorites[addon.id]) {
+                btnFavorito.classList.add('activo');
+            }
+            btnFavorito.addEventListener('click', async () => {
+                if (!currentUser) {
+                    alert('Inicia sesión para guardar en favoritos.');
+                    return;
+                }
+                const ya = userFavorites[addon.id] || false;
+                try {
+                    if (ya) {
+                        userFavorites[addon.id] = false;
+                        btnFavorito.classList.remove('activo');
+                        await supabaseClient
+                            .from('favorites')
+                            .delete()
+                            .eq('user_id', currentUser.id)
+                            .eq('addon_id', addon.id);
+                    } else {
+                        userFavorites[addon.id] = true;
+                        btnFavorito.classList.add('activo');
+                        await supabaseClient
+                            .from('favorites')
+                            .insert({ user_id: currentUser.id, addon_id: addon.id });
+                    }
+                } catch (e) {
+                    console.log("Error al actualizar favorito:", e);
+                }
+            });
+
+            await renderizarParaTi(addon.id);
+        }
+
+        const perfilBtn = document.getElementById('perfilBtn');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const toggleCollapseBtn = document.getElementById('toggleCollapseBtn');
+        const cuerpo = document.body;
+
+        function inicializarPantalla() {
+            if (window.innerWidth >= 768) {
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+                sidebarMenu.classList.remove('activo');
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+                sidebarMenu.classList.remove('activo');
+            }
+        }
+
+        perfilBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-minimizado-pc')) {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            } else {
+                sidebarMenu.classList.toggle('activo');
+            }
+        });
+
+        toggleCollapseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                if (cuerpo.classList.contains('sidebar-abierto-pc')) {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'minimizado');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                    localStorage.setItem('mcpixel_interfaz_v2_sidebar_pc', 'abierto');
+                }
+            }
+        });
+
+        sidebarMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebarMenu.classList.remove('activo');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebarMenu.classList.remove('activo');
+                const estadoGuardado = localStorage.getItem('mcpixel_interfaz_v2_sidebar_pc');
+                if (estadoGuardado === 'minimizado') {
+                    cuerpo.classList.remove('sidebar-abierto-pc');
+                    cuerpo.classList.add('sidebar-minimizado-pc');
+                } else {
+                    cuerpo.classList.remove('sidebar-minimizado-pc');
+                    cuerpo.classList.add('sidebar-abierto-pc');
+                }
+            } else {
+                cuerpo.classList.remove('sidebar-abierto-pc', 'sidebar-minimizado-pc');
+            }
+        });
+
+        const paraTiIzq = document.getElementById('paraTiIzq');
+        const paraTiDer = document.getElementById('paraTiDer');
+        const scrollParaTi = document.getElementById('scrollParaTi');
+
+        paraTiIzq.addEventListener('click', () => {
+            scrollParaTi.scrollBy({ left: -280, behavior: 'smooth' });
+        });
+
+        paraTiDer.addEventListener('click', () => {
+            scrollParaTi.scrollBy({ left: 280, behavior: 'smooth' });
+        });
+
+        (async function iniciarApp() {
+            inicializarPantalla();
+            await verificarSesion();
+            await renderizarView();
+        })();
+    </script>
+</body>
+</html>
