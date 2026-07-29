@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="img/logo.jpg">
     <title>MCPixel</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mcpixel.indevs.in">
+    <meta property="og:title" content="MCPixel">
+    <meta property="og:description" content="Una plataforma de complementos donde puedes subir tus propios complementos o compartir otros, además de descargarlos y valorarlos.
+
+• Gratuito
+• No tenemos muchos anuncios
+• Publicación rápida
+• Registro fácil
+• Comunidad activa">
+    <meta property="og:image" content="https://mcpixel.indevs.in/img/ft/f1.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mcpixel.indevs.in">
+    <meta name="twitter:title" content="MCPixel">
+    <meta name="twitter:description" content="Una plataforma de complementos donde puedes subir tus propios complementos o compartir otros, además de descargarlos y valorarlos.
+
+• Gratuito
+• No tenemos muchos anuncios
+• Publicación rápida
+• Registro fácil
+• Comunidad activa">
+    <meta name="twitter:image" content="https://mcpixel.indevs.in/img/ft/f1.jpg">
+
     <style>
         :root {
             --bg-principal: #0b0c10;
@@ -1302,7 +1327,7 @@
 
             <section class="bloque-carrusel-horizontal" id="seccionRecientes">
                 <div class="seccion-header">
-                    <h3 class="seccion-titulo">Add-Ons Recientes</h3>
+                    <h3 class="seccion-titulo">Recientes</h3>
                     <button class="btn-ver-mas url-ver-mas-ref">
                         <span>Ver Más</span>
                         <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
@@ -1346,6 +1371,23 @@
                     <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
                 <div class="scroll-carrusel" id="scrollMapas"></div>
+                <button class="pc-flecha-nav pc-flecha-der">
+                    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </section>
+
+            <section class="bloque-carrusel-horizontal" id="seccionTexturas">
+                <div class="seccion-header">
+                    <h3 class="seccion-titulo">Texturas</h3>
+                    <button class="btn-ver-mas url-ver-mas-ref">
+                        <span>Ver Más</span>
+                        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    </button>
+                </div>
+                <button class="pc-flecha-nav pc-flecha-izq">
+                    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="scroll-carrusel" id="scrollTexturas"></div>
                 <button class="pc-flecha-nav pc-flecha-der">
                     <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
                 </button>
@@ -1613,8 +1655,59 @@
 
             document.getElementById('carruselSeccionPrincipal').classList.remove('oculto');
 
-            const banners = addons.slice(0, 5);
-            banners.forEach((addon, index) => {
+            let candidatos = [];
+            let idsUsados = new Set();
+
+            let masDescargado = [...addons].sort((a, b) => (parseInt(b.descargas) || 0) - (parseInt(a.descargas) || 0))[0];
+            if (masDescargado) {
+                candidatos.push({ addon: masDescargado, tag: 'MÁS DESCARGADO' });
+                idsUsados.add(masDescargado.id || masDescargado.addonId);
+            }
+
+            let mejorValorado = [...addons].filter(a => !idsUsados.has(a.id || a.addonId)).sort((a, b) => (parseInt(b.likes || b.meGustas) || 0) - (parseInt(a.likes || a.meGustas) || 0))[0];
+            if (mejorValorado) {
+                candidatos.push({ addon: mejorValorado, tag: 'MEJORES VALORADOS' });
+                idsUsados.add(mejorValorado.id || mejorValorado.addonId);
+            }
+
+            let nuevo = [...addons].filter(a => !idsUsados.has(a.id || a.addonId)).sort((a, b) => {
+                const fechaA = a.fecha ? new Date(a.fecha) : (a.created_at ? new Date(a.created_at) : new Date(0));
+                const fechaB = b.fecha ? new Date(b.fecha) : (b.created_at ? new Date(b.created_at) : new Date(0));
+                return fechaB - fechaA;
+            })[0];
+            if (nuevo) {
+                candidatos.push({ addon: nuevo, tag: 'NUEVO' });
+                idsUsados.add(nuevo.id || nuevo.addonId);
+            }
+
+            let disponibles = addons.filter(a => !idsUsados.has(a.id || a.addonId)).sort(() => Math.random() - 0.5);
+
+            if (disponibles.length > 0) {
+                let recomendacion = disponibles.pop();
+                candidatos.push({ addon: recomendacion, tag: 'RECOMENDACION' });
+                idsUsados.add(recomendacion.id || recomendacion.addonId);
+            }
+
+            if (disponibles.length > 0) {
+                let otro = disponibles.pop();
+                candidatos.push({ addon: otro, tag: 'OTRO' });
+                idsUsados.add(otro.id || otro.addonId);
+            }
+
+            if (candidatos.length < 5) {
+                let restantes = addons.filter(a => !idsUsados.has(a.id || a.addonId)).sort(() => Math.random() - 0.5);
+                const tagsDisponibles = ['MÁS DESCARGADO', 'MEJORES VALORADOS', 'NUEVO', 'RECOMENDACION', 'OTRO'];
+                while (candidatos.length < 5 && restantes.length > 0) {
+                    let item = restantes.pop();
+                    let tagUsado = tagsDisponibles[candidatos.length % tagsDisponibles.length];
+                    candidatos.push({ addon: item, tag: tagUsado });
+                    idsUsados.add(item.id || item.addonId);
+                }
+            }
+
+            const banners = candidatos.slice(0, 5);
+            banners.forEach((itemObj, index) => {
+                const addon = itemObj.addon;
                 const item = document.createElement('div');
                 item.className = 'banner-item';
                 item.style.width = '20%';
@@ -1622,7 +1715,7 @@
                 item.innerHTML = `
                     <img src="${portadaUrl}" alt="Banner" class="banner-img">
                     <div class="banner-overlay">
-                        <span class="banner-tag">${index === 0 ? 'Destacado' : 'Reciente'}</span>
+                        <span class="banner-tag">${itemObj.tag}</span>
                         <h2 class="banner-titulo">${addon.nombre || 'Addon'}</h2>
                         <p class="banner-descripcion">${addon.descripcion || 'Descubre este increíble complemento para tu mundo.'}</p>
                     </div>
@@ -1670,6 +1763,7 @@
             const seccionRecientes = document.getElementById('seccionRecientes');
             const seccionValorados = document.getElementById('seccionValorados');
             const seccionMapas = document.getElementById('seccionMapas');
+            const seccionTexturas = document.getElementById('seccionTexturas');
             const seccionRecomendados = document.getElementById('seccionRecomendados');
             const mensajeVacio = document.getElementById('mensajeInicioVacio');
 
@@ -1677,6 +1771,7 @@
                 seccionRecientes.classList.add('oculto');
                 seccionValorados.classList.add('oculto');
                 seccionMapas.classList.add('oculto');
+                seccionTexturas.classList.add('oculto');
                 seccionRecomendados.classList.add('oculto');
                 mensajeVacio.style.display = 'flex';
                 return;
@@ -1719,7 +1814,24 @@
                 renderizarTarjetas(document.getElementById('scrollMapas'), mapas, 10, false);
             }
 
-            const recomendados = recientes.length > 0 ? recientes.slice(0, 10) : [];
+            const etiquetasTexturas = ['texture', 'textura', 'textures', 'texturas', 'resourcepack', 'resource pack'];
+            const texturas = addons.filter(addon => {
+                const etiquetas = (addon.etiquetas || '').toLowerCase();
+                return etiquetasTexturas.some(tag => etiquetas.includes(tag));
+            }).sort((a, b) => {
+                const fechaA = a.fecha ? new Date(a.fecha) : (a.created_at ? new Date(a.created_at) : new Date(0));
+                const fechaB = b.fecha ? new Date(b.fecha) : (b.created_at ? new Date(b.created_at) : new Date(0));
+                return fechaB - fechaA;
+            });
+
+            if (texturas.length === 0) {
+                seccionTexturas.classList.add('oculto');
+            } else {
+                seccionTexturas.classList.remove('oculto');
+                renderizarTarjetas(document.getElementById('scrollTexturas'), texturas, 10, false);
+            }
+
+            const recomendados = [...addons].sort(() => Math.random() - 0.5);
 
             if (recomendados.length === 0) {
                 seccionRecomendados.classList.add('oculto');
