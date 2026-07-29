@@ -348,12 +348,15 @@
         .buscador-contenedor {
             width: 100%;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             position: relative;
         }
 
         .buscador-input-wrapper {
             position: relative;
-            width: 100%;
+            flex: 1;
         }
 
         .buscador-input {
@@ -419,6 +422,99 @@
         .buscador-input:focus + .buscador-icono + .buscador-placeholder-animado,
         .buscador-input:not(:placeholder-shown) + .buscador-icono + .buscador-placeholder-animado {
             opacity: 0;
+        }
+
+        .filtro-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .filtro-btn-cuadrado {
+            width: 54px;
+            height: 54px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-banner);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filtro-btn-cuadrado:hover, .filtro-btn-cuadrado.activo {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--color-acento);
+            color: var(--texto-principal);
+        }
+
+        .filtro-btn-cuadrado svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .filtro-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: var(--bg-barra);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            padding: 8px 0;
+            z-index: 100;
+            width: 230px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .filtro-dropdown.activo {
+            display: block;
+        }
+
+        .filtro-opcion {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filtro-opcion:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-principal);
+        }
+
+        .filtro-opcion.seleccionada {
+            color: var(--color-acento);
+            font-weight: 700;
+        }
+
+        .filtro-opcion .icono-check {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .filtro-opcion.seleccionada .icono-check {
+            opacity: 1;
         }
 
         .buscador-busquedas-recientes {
@@ -525,6 +621,7 @@
 
         .filtros-tabs {
             display: flex;
+            align-items: center;
             gap: 12px;
             margin-bottom: 24px;
             border-bottom: 1px solid var(--borde-glass);
@@ -805,8 +902,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px 20px;
-            gap: 16px;
+            padding: 40px 20px;
+            gap: 12px;
             color: var(--texto-secundario);
             text-align: center;
             width: 100%;
@@ -830,6 +927,41 @@
             font-size: 14px;
             opacity: 0.7;
             font-weight: 400;
+        }
+
+        .quisiste-decir-contenedor {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 15px;
+            color: var(--texto-secundario);
+        }
+
+        .btn-quisiste-decir {
+            color: var(--color-acento);
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            font-size: inherit;
+        }
+
+        .seccion-recomendados {
+            width: 100%;
+            margin-top: 32px;
+            border-top: 1px solid var(--borde-glass);
+            padding-top: 24px;
+        }
+
+        .titulo-seccion-recomendados {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         @media (min-width: 768px) {
@@ -1020,6 +1152,34 @@
                         <div id="listaBusquedasRecientes"></div>
                     </div>
                 </div>
+
+                <div class="filtro-wrapper">
+                    <button class="filtro-btn-cuadrado" id="btnFiltrosDropdown" title="Filtrar por">
+                        <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    </button>
+                    <div class="filtro-dropdown" id="filtroDropdownMenu">
+                        <div class="filtro-opcion seleccionada" data-sort="defecto">
+                            <span>Por Defecto (Aleatorio)</span>
+                            <svg class="icono-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="filtro-opcion" data-sort="reciente">
+                            <span>Más Reciente</span>
+                            <svg class="icono-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="filtro-opcion" data-sort="actualizado">
+                            <span>Más Actualizado</span>
+                            <svg class="icono-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="filtro-opcion" data-sort="valorados">
+                            <span>Mejor Valorados</span>
+                            <svg class="icono-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="filtro-opcion" data-sort="descargados">
+                            <span>Más Descargados</span>
+                            <svg class="icono-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="filtros-tabs">
@@ -1034,7 +1194,9 @@
             </div>
 
             <div class="resultados-contenedor">
+                <div id="quisisteDecirContenedor"></div>
                 <div class="grid-resultados" id="resultadosGrid"></div>
+                <div id="recomendadosContenedor"></div>
             </div>
         </div>
     </main>
@@ -1111,7 +1273,6 @@
                         contenedorPerfil.innerHTML = `<img src="${doc.avatar}" alt="Avatar" class="perfil-img-activa">`;
                     }
                 } catch (e) {
-                    console.log("Error al obtener el avatar:", e);
                 }
 
             } catch (error) {
@@ -1200,17 +1361,24 @@
             return num.toString();
         }
 
+        function mezclarArreglo(arreglo) {
+            const copia = [...arreglo];
+            for (let i = copia.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copia[i], copia[j]] = [copia[j], copia[i]];
+            }
+            return copia;
+        }
+
         async function obtenerAddonsPublicados() {
             try {
                 const { data, error } = await supabaseClient
                     .from('addons')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                    .select('*');
 
                 if (error) throw error;
                 return data || [];
             } catch (e) {
-                console.error("Error al obtener addons:", e);
                 return [];
             }
         }
@@ -1224,7 +1392,6 @@
                 if (error) throw error;
                 return data || [];
             } catch (e) {
-                console.error("Error al obtener usuarios:", e);
                 return [];
             }
         }
@@ -1268,14 +1435,44 @@
         const tabs = document.querySelectorAll('.filtro-tab');
         const busquedasRecientes = document.getElementById('busquedasRecientes');
         const listaBusquedasRecientes = document.getElementById('listaBusquedasRecientes');
+        const btnFiltrosDropdown = document.getElementById('btnFiltrosDropdown');
+        const filtroDropdownMenu = document.getElementById('filtroDropdownMenu');
+        const opcionesFiltro = document.querySelectorAll('.filtro-opcion');
+        const quisisteDecirContenedor = document.getElementById('quisisteDecirContenedor');
+        const recomendadosContenedor = document.getElementById('recomendadosContenedor');
 
         let tabActual = 'addons';
+        let ordenActual = 'defecto';
         let todosLosAddons = [];
         let todosLosUsuarios = [];
         let listaNombresPlaceholder = [];
         let indicePlaceholder = 0;
         let intervaloPlaceholder = null;
         let busquedasAbierto = false;
+
+        btnFiltrosDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filtroDropdownMenu.classList.toggle('activo');
+            btnFiltrosDropdown.classList.toggle('activo');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!btnFiltrosDropdown.contains(e.target) && !filtroDropdownMenu.contains(e.target)) {
+                filtroDropdownMenu.classList.remove('activo');
+                btnFiltrosDropdown.classList.remove('activo');
+            }
+        });
+
+        opcionesFiltro.forEach(opcion => {
+            opcion.addEventListener('click', () => {
+                opcionesFiltro.forEach(o => o.classList.remove('seleccionada'));
+                opcion.classList.add('seleccionada');
+                ordenActual = opcion.dataset.sort;
+                filtroDropdownMenu.classList.remove('activo');
+                btnFiltrosDropdown.classList.remove('activo');
+                actualizarEstadoYBuscar();
+            });
+        });
 
         function renderizarBusquedasRecientes() {
             const busquedas = obtenerBusquedasRecientes();
@@ -1299,7 +1496,7 @@
 
                 item.querySelector('.texto-busqueda').addEventListener('click', () => {
                     buscadorInput.value = busqueda;
-                    buscar(busqueda);
+                    actualizarEstadoYBuscar();
                     busquedasRecientes.classList.remove('activo');
                     busquedasAbierto = false;
                 });
@@ -1313,6 +1510,34 @@
             });
 
             busquedasRecientes.classList.add('activo');
+        }
+
+        function ordenarAddons(lista, criterio) {
+            let copia = [...lista];
+            if (criterio === 'defecto') {
+                return mezclarArreglo(copia);
+            } else if (criterio === 'reciente') {
+                return copia.sort((a, b) => new Date(b.created_at || b.fecha || 0) - new Date(a.created_at || a.fecha || 0));
+            } else if (criterio === 'actualizado') {
+                return copia.sort((a, b) => new Date(b.updated_at || b.created_at || b.fecha || 0) - new Date(a.updated_at || a.created_at || a.fecha || 0));
+            } else if (criterio === 'valorados') {
+                return copia.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            } else if (criterio === 'descargados') {
+                return copia.sort((a, b) => (b.descargas || 0) - (a.descargas || 0));
+            }
+            return copia;
+        }
+
+        function ordenarUsuarios(lista, criterio) {
+            let copia = [...lista];
+            if (criterio === 'defecto') {
+                return mezclarArreglo(copia);
+            } else if (criterio === 'reciente') {
+                return copia.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            } else if (criterio === 'valorados' || criterio === 'descargados') {
+                return copia.sort((a, b) => (b.verificado ? 1 : 0) - (a.verificado ? 1 : 0));
+            }
+            return mezclarArreglo(copia);
         }
 
         async function cargarDatos() {
@@ -1332,14 +1557,10 @@
             badgeAddons.textContent = todosLosAddons.length;
             badgeUsuarios.textContent = todosLosUsuarios.length;
 
-            if (tabActual === 'addons') {
-                mostrarAddons(todosLosAddons);
-            } else {
-                mostrarUsuarios(todosLosUsuarios);
-            }
-
             iniciarAnimacionPlaceholder();
             renderizarBusquedasRecientes();
+
+            leerParametrosURLYRestaurar();
         }
 
         function iniciarAnimacionPlaceholder() {
@@ -1360,32 +1581,13 @@
             }, 2500);
         }
 
-        function mostrarAddons(addons) {
-            resultadosGrid.innerHTML = '';
+        function crearTarjetaAddonHTML(addon) {
+            const fecha = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Reciente';
+            const descripcion = addon.descripcion || 'Sin descripción disponible.';
+            const portadaUrl = addon.portada || '';
 
-            if (!addons || addons.length === 0) {
-                resultadosGrid.innerHTML = `
-                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
-                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <span>No se encontraron resultados</span>
-                        <span class="sub">Prueba con otra palabra clave</span>
-                    </div>
-                `;
-                return;
-            }
-
-            addons.forEach(addon => {
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'tarjeta-premium-addon';
-                tarjeta.addEventListener('click', () => {
-                    window.location.href = rutasNavegacionAndEnlacesMcpixel.view + '?id=' + addon.id;
-                });
-
-                const fecha = addon.fecha ? new Date(addon.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Reciente';
-                const descripcion = addon.descripcion || 'Sin descripción disponible.';
-                const portadaUrl = addon.portada || '';
-
-                tarjeta.innerHTML = `
+            return `
+                <div class="tarjeta-premium-addon" onclick="guardarPosicionYNavegar('${rutasNavegacionAndEnlacesMcpixel.view}?id=${addon.id}')">
                     <div class="addon-premium-cabecera">
                         <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" class="addon-premium-img" onerror="this.style.display='none'">
                         <div class="addon-premium-badges">
@@ -1410,47 +1612,27 @@
                             </div>
                         </div>
                     </div>
-                `;
-                resultadosGrid.appendChild(tarjeta);
-            });
+                </div>
+            `;
         }
 
-        function mostrarUsuarios(usuarios) {
-            resultadosGrid.innerHTML = '';
+        function crearTarjetaUsuarioHTML(usuario) {
+            const nombreVisible = usuario.nombre_visible || usuario.username || 'Usuario';
+            const nombreUsuario = usuario.username || '@usuario';
+            const avatarUrl = usuario.avatar || '';
+            const isVerified = usuario.verificado || false;
 
-            if (!usuarios || usuarios.length === 0) {
-                resultadosGrid.innerHTML = `
-                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
-                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <span>No se encontraron resultados</span>
-                        <span class="sub">Prueba con otra palabra clave</span>
-                    </div>
-                `;
-                return;
+            let avatarHtml = '';
+            if (avatarUrl) {
+                avatarHtml = `<img src="${avatarUrl}" alt="Avatar">`;
+            } else {
+                avatarHtml = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
             }
 
-            usuarios.forEach(usuario => {
-                const div = document.createElement('div');
-                div.className = 'usuario-resultado';
-                div.addEventListener('click', () => {
-                    window.location.href = rutasNavegacionAndEnlacesMcpixel.profileView + '?id=' + usuario.id;
-                });
+            const verifiedClass = isVerified ? 'visible' : '';
 
-                const nombreVisible = usuario.nombre_visible || usuario.username || 'Usuario';
-                const nombreUsuario = usuario.username || '@usuario';
-                const avatarUrl = usuario.avatar || '';
-                const isVerified = usuario.verificado || false;
-
-                let avatarHtml = '';
-                if (avatarUrl) {
-                    avatarHtml = `<img src="${avatarUrl}" alt="Avatar">`;
-                } else {
-                    avatarHtml = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
-                }
-
-                const verifiedClass = isVerified ? 'visible' : '';
-
-                div.innerHTML = `
+            return `
+                <div class="usuario-resultado" onclick="guardarPosicionYNavegar('${rutasNavegacionAndEnlacesMcpixel.profileView}?id=${usuario.id}')">
                     <div class="usuario-avatar">${avatarHtml}</div>
                     <div class="usuario-info">
                         <span class="usuario-nombre-visible">${nombreVisible}</span>
@@ -1461,38 +1643,260 @@
                             </span>
                         </div>
                     </div>
+                </div>
+            `;
+        }
+
+        function guardarPosicionYNavegar(url) {
+            sessionStorage.setItem('mcpixel_explore_scroll', window.scrollY);
+            window.location.href = url;
+        }
+
+        function mostrarAddons(addons) {
+            resultadosGrid.innerHTML = '';
+            if (!addons || addons.length === 0) {
+                resultadosGrid.innerHTML = `
+                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>No se encontraron resultados</span>
+                        <span class="sub">Prueba con otra palabra clave</span>
+                    </div>
                 `;
-                resultadosGrid.appendChild(div);
+                return;
+            }
+            addons.forEach(addon => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = crearTarjetaAddonHTML(addon);
+                resultadosGrid.appendChild(tempDiv.firstElementChild);
             });
+        }
+
+        function mostrarUsuarios(usuarios) {
+            resultadosGrid.innerHTML = '';
+            if (!usuarios || usuarios.length === 0) {
+                resultadosGrid.innerHTML = `
+                    <div class="mensaje-sin-resultados" style="grid-column: 1 / -1;">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>No se encontraron resultados</span>
+                        <span class="sub">Prueba con otra palabra clave</span>
+                    </div>
+                `;
+                return;
+            }
+            usuarios.forEach(usuario => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = crearTarjetaUsuarioHTML(usuario);
+                resultadosGrid.appendChild(tempDiv.firstElementChild);
+            });
+        }
+
+        function calcularSimilitud(a, b) {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            if (a === b) return 1;
+            if (a.includes(b) || b.includes(a)) return 0.7;
+            let coincidencias = 0;
+            const palabrasA = a.split(' ');
+            const palabrasB = b.split(' ');
+            palabrasA.forEach(pa => {
+                palabrasB.forEach(pb => {
+                    if (pa && pb && (pa.includes(pb) || pb.includes(pa))) coincidencias++;
+                });
+            });
+            return coincidencias > 0 ? 0.5 : 0;
+        }
+
+        function obtenerSugerenciaQuisisteDecir(texto) {
+            let mejorCoincidencia = null;
+            let mayorPuntaje = 0;
+
+            todosLosAddons.forEach(a => {
+                const nombre = a.nombre || '';
+                const puntaje = calcularSimilitud(texto, nombre);
+                if (puntaje > mayorPuntaje) {
+                    mayorPuntaje = puntaje;
+                    mejorCoincidencia = nombre;
+                }
+            });
+
+            todosLosUsuarios.forEach(u => {
+                const nombre = u.nombre_visible || u.username || '';
+                const puntaje = calcularSimilitud(texto, nombre);
+                if (puntaje > mayorPuntaje) {
+                    mayorPuntaje = puntaje;
+                    mejorCoincidencia = nombre;
+                }
+            });
+
+            return mayorPuntaje >= 0.4 ? mejorCoincidencia : null;
+        }
+
+        function renderizarRecomendaciones(textoBusqueda) {
+            recomendadosContenedor.innerHTML = '';
+
+            let htmlRecomendados = `<div class="seccion-recomendados">`;
+            
+            let addonsRecomendados = mezclarArreglo(todosLosAddons).slice(0, 6);
+            if (addonsRecomendados.length > 0) {
+                htmlRecomendados += `
+                    <div class="titulo-seccion-recomendados">
+                        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--color-acento);stroke-width:2;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span>Complementos que te podrían interesar</span>
+                    </div>
+                    <div class="grid-resultados" style="margin-bottom: 32px;">
+                        ${addonsRecomendados.map(a => crearTarjetaAddonHTML(a)).join('')}
+                    </div>
+                `;
+            }
+
+            let usuariosRecomendados = mezclarArreglo(todosLosUsuarios).slice(0, 3);
+            if (usuariosRecomendados.length > 0) {
+                htmlRecomendados += `
+                    <div class="titulo-seccion-recomendados">
+                        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:var(--color-acento);stroke-width:2;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Perfiles sugeridos</span>
+                    </div>
+                    <div class="grid-resultados">
+                        ${usuariosRecomendados.map(u => crearTarjetaUsuarioHTML(u)).join('')}
+                    </div>
+                `;
+            }
+
+            htmlRecomendados += `</div>`;
+            recomendadosContenedor.innerHTML = htmlRecomendados;
         }
 
         function buscar(query) {
             const texto = query.toLowerCase().trim();
+            quisisteDecirContenedor.innerHTML = '';
+            recomendadosContenedor.innerHTML = '';
 
             if (texto === '') {
                 if (tabActual === 'addons') {
-                    mostrarAddons(todosLosAddons);
+                    mostrarAddons(ordenarAddons(todosLosAddons, ordenActual));
                 } else {
-                    mostrarUsuarios(todosLosUsuarios);
+                    mostrarUsuarios(ordenarUsuarios(todosLosUsuarios, ordenActual));
                 }
                 return;
             }
 
+            let resultados = [];
+
             if (tabActual === 'addons') {
-                const resultados = todosLosAddons.filter(addon => {
+                resultados = todosLosAddons.filter(addon => {
                     const nombre = (addon.nombre || '').toLowerCase();
                     const descripcion = (addon.descripcion || '').toLowerCase();
                     const etiquetas = (addon.etiquetas || '').toLowerCase();
                     return nombre.includes(texto) || descripcion.includes(texto) || etiquetas.includes(texto);
                 });
-                mostrarAddons(resultados);
+
+                if (resultados.length > 0) {
+                    mostrarAddons(ordenarAddons(resultados, ordenActual));
+                } else {
+                    const sugerencia = obtenerSugerenciaQuisisteDecir(texto);
+                    if (sugerencia) {
+                        quisisteDecirContenedor.innerHTML = `
+                            <div class="quisiste-decir-contenedor">
+                                ¿Quisiste decir <button class="btn-quisiste-decir" onclick="aplicarSugerencia('${sugerencia.replace(/'/g, "\\'")}')">${sugerencia}</button>?
+                            </div>
+                        `;
+                    }
+                    mostrarAddons([]);
+                    renderizarRecomendaciones(texto);
+                }
             } else {
-                const resultados = todosLosUsuarios.filter(usuario => {
+                resultados = todosLosUsuarios.filter(usuario => {
                     const nombreVisible = (usuario.nombre_visible || '').toLowerCase();
                     const username = (usuario.username || '').toLowerCase();
                     return nombreVisible.includes(texto) || username.includes(texto);
                 });
-                mostrarUsuarios(resultados);
+
+                if (resultados.length > 0) {
+                    mostrarUsuarios(ordenarUsuarios(resultados, ordenActual));
+                } else {
+                    const sugerencia = obtenerSugerenciaQuisisteDecir(texto);
+                    if (sugerencia) {
+                        quisisteDecirContenedor.innerHTML = `
+                            <div class="quisiste-decir-contenedor">
+                                ¿Quisiste decir <button class="btn-quisiste-decir" onclick="aplicarSugerencia('${sugerencia.replace(/'/g, "\\'")}')">${sugerencia}</button>?
+                            </div>
+                        `;
+                    }
+                    mostrarUsuarios([]);
+                    renderizarRecomendaciones(texto);
+                }
+            }
+        }
+
+        function aplicarSugerencia(texto) {
+            buscadorInput.value = texto;
+            actualizarEstadoYBuscar();
+        }
+
+        function actualizarURL() {
+            const url = new URL(window.location.href);
+            const query = buscadorInput.value.trim();
+
+            if (query) {
+                url.searchParams.set('q', query);
+            } else {
+                url.searchParams.delete('q');
+            }
+
+            if (tabActual !== 'addons') {
+                url.searchParams.set('tab', tabActual);
+            } else {
+                url.searchParams.delete('tab');
+            }
+
+            if (ordenActual !== 'defecto') {
+                url.searchParams.set('sort', ordenActual);
+            } else {
+                url.searchParams.delete('sort');
+            }
+
+            window.history.replaceState({}, '', url.toString());
+        }
+
+        function actualizarEstadoYBuscar() {
+            actualizarURL();
+            buscar(buscadorInput.value);
+        }
+
+        function leerParametrosURLYRestaurar() {
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q') || '';
+            const tab = params.get('tab') || 'addons';
+            const sort = params.get('sort') || 'defecto';
+
+            buscadorInput.value = q;
+            tabActual = tab;
+            ordenActual = sort;
+
+            tabs.forEach(t => {
+                if (t.dataset.tab === tabActual) {
+                    t.classList.add('activo');
+                } else {
+                    t.classList.remove('activo');
+                }
+            });
+
+            opcionesFiltro.forEach(o => {
+                if (o.dataset.sort === ordenActual) {
+                    o.classList.add('seleccionada');
+                } else {
+                    o.classList.remove('seleccionada');
+                }
+            });
+
+            buscar(q);
+
+            const savedScroll = sessionStorage.getItem('mcpixel_explore_scroll');
+            if (savedScroll !== null) {
+                setTimeout(() => {
+                    window.scrollTo(0, parseInt(savedScroll, 10));
+                    sessionStorage.removeItem('mcpixel_explore_scroll');
+                }, 100);
             }
         }
 
@@ -1514,7 +1918,7 @@
                 busquedasRecientes.classList.remove('activo');
                 busquedasAbierto = false;
             }
-            buscar(valor);
+            actualizarEstadoYBuscar();
         });
 
         buscadorInput.addEventListener('keydown', (e) => {
@@ -1522,7 +1926,7 @@
                 guardarBusquedaReciente(buscadorInput.value);
                 busquedasRecientes.classList.remove('activo');
                 busquedasAbierto = false;
-                buscar(buscadorInput.value);
+                actualizarEstadoYBuscar();
             }
         });
 
@@ -1531,12 +1935,7 @@
                 tabs.forEach(t => t.classList.remove('activo'));
                 tab.classList.add('activo');
                 tabActual = tab.dataset.tab;
-
-                if (tabActual === 'addons') {
-                    buscar(buscadorInput.value);
-                } else {
-                    buscar(buscadorInput.value);
-                }
+                actualizarEstadoYBuscar();
             });
         });
 
