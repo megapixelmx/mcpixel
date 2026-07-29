@@ -273,7 +273,6 @@
             to { opacity: 0; transform: scale(0.95); }
         }
     </style>
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -390,7 +389,6 @@
             clearTimeout(timeoutBusqueda);
             timeoutBusqueda = setTimeout(async () => {
                 try {
-                    // Consulta en la tabla pública 'users' de Supabase
                     const { data, error } = await supabaseClient
                         .from('users')
                         .select('username')
@@ -440,7 +438,6 @@
             btnSubmit.disabled = true;
 
             try {
-                 handle_new_user()
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: emailFantasma,
                     password: contrasena,
