@@ -1234,6 +1234,22 @@
                             <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
+
+                    <div class="bloque-para-ti">
+                        <div class="seccion-header">
+                            <h3 class="seccion-titulo">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Más Descargado</span>
+                            </h3>
+                        </div>
+                        <button class="pc-flecha-para-ti izq" id="masDescargadoIzq">
+                            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <div class="scroll-para-ti" id="scrollMasDescargado"></div>
+                        <button class="pc-flecha-para-ti der" id="masDescargadoDer">
+                            <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1475,6 +1491,52 @@
             });
         }
 
+        async function renderizarMasDescargado(addonActualId) {
+            const contenedor = document.getElementById('scrollMasDescargado');
+            const addons = await obtenerAddonsPublicados();
+            contenedor.innerHTML = '';
+
+            if (!addons || addons.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'mensaje-vacio-para-ti';
+                div.innerHTML = `
+                    <img src="../img/icons/ic4.png" alt="Sin complementos">
+                    <span>No hay complementos disponibles</span>
+                `;
+                contenedor.appendChild(div);
+                return;
+            }
+
+            const filtrados = addons.filter(a => a.id !== addonActualId);
+            const ordenados = [...filtrados].sort((a, b) => (parseInt(b.descargas) || 0) - (parseInt(a.descargas) || 0));
+            const seleccionados = ordenados.slice(0, 10);
+
+            if (seleccionados.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'mensaje-vacio-para-ti';
+                div.innerHTML = `
+                    <img src="../img/icons/ic4.png" alt="Sin complementos">
+                    <span>No hay más complementos disponibles</span>
+                `;
+                contenedor.appendChild(div);
+                return;
+            }
+
+            seleccionados.forEach(addon => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-para-ti';
+                const portadaUrl = addon.portada || '';
+                tarjeta.innerHTML = `
+                    <img src="${portadaUrl}" alt="${addon.nombre || 'Addon'}" onerror="this.style.display='none'">
+                    <div class="overlay-para-ti"><span>${addon.nombre || 'Sin nombre'}</span></div>
+                `;
+                tarjeta.addEventListener('click', () => {
+                    window.location.href = window.location.pathname + '?id=' + addon.id;
+                });
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
         async function renderizarView() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
@@ -1485,6 +1547,7 @@
                 contenedorError.style.display = 'flex';
                 contenedorContenido.style.display = 'none';
                 await renderizarParaTi(null);
+                await renderizarMasDescargado(null);
                 return;
             }
 
@@ -1493,10 +1556,17 @@
                 contenedorError.style.display = 'flex';
                 contenedorContenido.style.display = 'none';
                 await renderizarParaTi(null);
+                await renderizarMasDescargado(null);
                 return;
             }
 
             document.title = addon.nombre + ' - MCPixel';
+
+            if (addon.nombre) {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('name', addon.nombre);
+                window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+            }
 
             contenedorError.style.display = 'none';
             contenedorContenido.style.display = 'block';
@@ -1637,7 +1707,7 @@
             if (addon.youtube_id && addon.youtube_id.trim() !== '') {
                 const videoId = extraerIdYoutube(addon.youtube_id);
                 if (videoId) {
-                    imagenes.unshift({ tipo: 'video', src: 'https://www.youtube.com/embed/' + videoId + '?autoplay=0&rel=0' });
+                    imagenes.unshift({ tipo: 'video', src: 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&muted=1&rel=0' });
                 }
             }
 
@@ -1785,6 +1855,7 @@
             });
 
             await renderizarParaTi(addon.id);
+            await renderizarMasDescargado(addon.id);
         }
 
         const perfilBtn = document.getElementById('perfilBtn');
@@ -1873,6 +1944,18 @@
 
         paraTiDer.addEventListener('click', () => {
             scrollParaTi.scrollBy({ left: 280, behavior: 'smooth' });
+        });
+
+        const masDescargadoIzq = document.getElementById('masDescargadoIzq');
+        const masDescargadoDer = document.getElementById('masDescargadoDer');
+        const scrollMasDescargado = document.getElementById('scrollMasDescargado');
+
+        masDescargadoIzq.addEventListener('click', () => {
+            scrollMasDescargado.scrollBy({ left: -280, behavior: 'smooth' });
+        });
+
+        masDescargadoDer.addEventListener('click', () => {
+            scrollMasDescargado.scrollBy({ left: 280, behavior: 'smooth' });
         });
 
         (async function iniciarApp() {
