@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0c10">
+    <link rel="manifest" id="manifestPlaceholder">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3563815147474036" crossorigin="anonymous"></script>
     <link class="mcpixel-logo-ref" rel="icon" type="image/jpg" href="img/logo.jpg">
     <title>MCPixel</title>
@@ -62,12 +64,8 @@
         }
 
         @keyframes esqueleto-carga {
-            0% {
-                background-position: -200% 0;
-            }
-            100% {
-                background-position: 200% 0;
-            }
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
         .cargando-animacion {
@@ -82,12 +80,8 @@
         }
 
         @keyframes shimmer-img {
-            0% {
-                background-position: -200% 0;
-            }
-            100% {
-                background-position: 200% 0;
-            }
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
         .img-placeholder-skeleton {
@@ -1016,6 +1010,229 @@
             font-weight: 400;
         }
 
+        .tarjeta-horizontal-descarga {
+            width: 100%;
+            background: var(--bg-tarjeta);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .tarjeta-descarga-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icono-mediano-gif {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .tarjeta-descarga-texto {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--texto-principal);
+            line-height: 1.3;
+        }
+
+        .btn-descargar-reflejo {
+            position: relative;
+            background: var(--color-acento);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .btn-descargar-reflejo:hover {
+            background: var(--color-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-descargar-reflejo::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+            transform: rotate(30deg);
+        }
+
+        .btn-descargar-reflejo.animar-reflejo::after {
+            animation: efectoReflejo 1.2s ease-in-out;
+        }
+
+        @keyframes efectoReflejo {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        .ui-bottom-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            width: calc(100% - 32px);
+            max-width: 500px;
+            background: var(--bg-barra);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-banner);
+            padding: 18px 20px;
+            z-index: 1000;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .ui-bottom-prompt.activo {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .ui-bottom-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ui-bottom-texto {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ui-bottom-titulo {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--texto-principal);
+            line-height: 1.3;
+        }
+
+        .ui-bottom-sub {
+            font-size: 12px;
+            color: var(--texto-secundario);
+        }
+
+        .ui-bottom-botones {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-ui-descargar {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-acento);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-ui-descargar:hover {
+            background: var(--color-hover);
+        }
+
+        .btn-ui-cancelar {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--texto-secundario);
+            border: 1px solid var(--borde-glass);
+            border-radius: var(--radio-suave);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            text-align: center;
+        }
+
+        .btn-ui-cancelar:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--texto-principal);
+        }
+
+        .pantalla-offline {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-principal);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .pantalla-offline.activa {
+            display: flex;
+        }
+
+        .icono-offline {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.4));
+        }
+
+        .titulo-offline {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--texto-principal);
+        }
+
+        .sub-offline {
+            font-size: 14px;
+            color: var(--texto-secundario);
+            max-width: 340px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .btn-reintentar-offline {
+            padding: 12px 28px;
+            background: var(--color-acento);
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-reintentar-offline:hover {
+            background: var(--color-hover);
+        }
+
         @media (max-width: 767px) {
             .header {
                 padding: 0 16px;
@@ -1065,6 +1282,13 @@
             .burbuja-btn:hover:not(.activo) {
                 color: var(--texto-principal);
                 background: rgba(255, 255, 255, 0.06);
+            }
+            .tarjeta-horizontal-descarga {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-descargar-reflejo {
+                width: 100%;
             }
         }
 
@@ -1200,6 +1424,13 @@
 </head>
 <body>
 
+    <div class="pantalla-offline" id="pantallaOffline">
+        <img src="img/icons/ic3.gif" alt="Sin conexión" class="icono-offline">
+        <h2 class="titulo-offline">Sin conexión a Internet</h2>
+        <p class="sub-offline">No tienes acceso a la red en este momento. Revisa tu conexión para seguir explorando MCPixel.</p>
+        <button class="btn-reintentar-offline" id="btnReintentarOffline">Reintentar</button>
+    </div>
+
     <header class="header">
         <div class="header-izquierda">
             <img src="img/logo.jpg" alt="MCPixel Logo" class="logo" id="logoInicio">
@@ -1318,6 +1549,15 @@
         </div>
 
         <div id="vistasContenidoInicio">
+            
+            <div class="tarjeta-horizontal-descarga" id="tarjetaHorizontalDescarga">
+                <div class="tarjeta-descarga-info">
+                    <img src="img/icons/ic3.gif" alt="MCPixel App" class="icono-mediano-gif">
+                    <span class="tarjeta-descarga-texto">Descargar la app de MCPixel Web en tu teléfono</span>
+                </div>
+                <button class="btn-descargar-reflejo" id="btnDescargarBanner">Descargar</button>
+            </div>
+
             <section class="carrusel-seccion" id="carruselSeccionPrincipal">
                 <div class="carrusel-contenedor">
                     <div class="carrusel-pistas" id="carruselPistas">
@@ -1420,7 +1660,142 @@
 
     </main>
 
+    <div class="ui-bottom-prompt" id="uiBottomPrompt">
+        <div class="ui-bottom-header">
+            <img src="img/icons/ic3.gif" alt="App Icon" class="icono-mediano-gif">
+            <div class="ui-bottom-texto">
+                <span class="ui-bottom-titulo">¿Quieres Descargar esta Página de MCPixel?</span>
+                <span class="ui-bottom-sub">Para una ruta mas rapida.</span>
+            </div>
+        </div>
+        <div class="ui-bottom-botones">
+            <button class="btn-ui-descargar" id="btnUiDescargar">Descargar</button>
+            <button class="btn-ui-cancelar" id="btnUiCancelar">No Gracias</button>
+        </div>
+    </div>
+
     <script>
+        const manifestObject = {
+            "name": "MCPixel",
+            "short_name": "MCPixel",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#0b0c10",
+            "theme_color": "#0b0c10",
+            "icons": [
+                {
+                    "src": "img/logo.jpg",
+                    "sizes": "512x512",
+                    "type": "image/jpeg"
+                }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestObject)], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifestPlaceholder').setAttribute('href', manifestURL);
+
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'mcpixel-v1';
+                self.addEventListener('install', (e) => {
+                    self.skipWaiting();
+                });
+                self.addEventListener('activate', (e) => {
+                    e.waitUntil(clients.claim());
+                });
+                self.addEventListener('fetch', (e) => {
+                    e.respondWith(
+                        fetch(e.request).catch(() => caches.match(e.request))
+                    );
+                });
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swURL = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swURL).catch(() => {});
+        }
+
+        let deferredPrompt = null;
+        const uiBottomPrompt = document.getElementById('uiBottomPrompt');
+        const tarjetaHorizontalDescarga = document.getElementById('tarjetaHorizontalDescarga');
+        const btnDescargarBanner = document.getElementById('btnDescargarBanner');
+        const btnUiDescargar = document.getElementById('btnUiDescargar');
+        const btnUiCancelar = document.getElementById('btnUiCancelar');
+
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function ocultarUIOpcionesDescarga() {
+            if (tarjetaHorizontalDescarga) tarjetaHorizontalDescarga.style.display = 'none';
+            if (uiBottomPrompt) uiBottomPrompt.classList.remove('activo');
+        }
+
+        if (isAppInstalled()) {
+            ocultarUIOpcionesDescarga();
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!isAppInstalled()) {
+                setTimeout(() => {
+                    if (uiBottomPrompt) uiBottomPrompt.classList.add('activo');
+                }, 1000);
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            ocultarUIOpcionesDescarga();
+        });
+
+        async function activarInstalacionPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    ocultarUIOpcionesDescarga();
+                }
+                deferredPrompt = null;
+            } else {
+                alert('Para instalar MCPixel en tu dispositivo, pulsa el botón de opciones de tu navegador y selecciona "Añadir a la pantalla de inicio" o "Instalar aplicación".');
+            }
+        }
+
+        if (btnDescargarBanner) btnDescargarBanner.addEventListener('click', activarInstalacionPWA);
+        if (btnUiDescargar) btnUiDescargar.addEventListener('click', activarInstalacionPWA);
+        if (btnUiCancelar) btnUiCancelar.addEventListener('click', () => {
+            if (uiBottomPrompt) uiBottomPrompt.classList.remove('activo');
+        });
+
+        function dispararReflejoBoton() {
+            if (btnDescargarBanner) {
+                btnDescargarBanner.classList.add('animar-reflejo');
+                setTimeout(() => {
+                    btnDescargarBanner.classList.remove('animar-reflejo');
+                }, 1300);
+            }
+        }
+        setInterval(dispararReflejoBoton, 60000);
+
+        function verificarEstadoRed() {
+            const pantallaOffline = document.getElementById('pantallaOffline');
+            if (!navigator.onLine) {
+                pantallaOffline.classList.add('activa');
+            } else {
+                pantallaOffline.classList.remove('activa');
+            }
+        }
+
+        window.addEventListener('online', verificarEstadoRed);
+        window.addEventListener('offline', verificarEstadoRed);
+        document.getElementById('btnReintentarOffline').addEventListener('click', () => {
+            verificarEstadoRed();
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        });
+
         const SUPABASE_URL = 'https://uidkdvqfmqczgbclpbfb.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI';
         
@@ -2041,6 +2416,7 @@
         });
 
         (async function iniciarApp() {
+            verificarEstadoRed();
             inicializarPantalla();
             await verificarSesionYBloquearPublicar();
             await renderizarBanners();
