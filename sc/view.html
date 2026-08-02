@@ -1290,34 +1290,6 @@
         let userLikes = {};
         let userFavorites = {};
 
-        function verificarEstadoAnuncios() {
-            const expiracionAnuncios = localStorage.getItem('mcpixel_ads_expiracion');
-            if (!expiracionAnuncios) return false;
-            const ahora = Date.now();
-            if (ahora < parseInt(expiracionAnuncios, 10)) {
-                return true;
-            } else {
-                localStorage.removeItem('mcpixel_ads_expiracion');
-                return false;
-            }
-        }
-
-        function guardarEstadoAnunciosCompletados() {
-            const tiempoExpiracion = Date.now() + (24 * 60 * 60 * 1000);
-            localStorage.setItem('mcpixel_ads_expiracion', tiempoExpiracion.toString());
-        }
-
-        function procesarVerificacionUrlAds() {
-            const parametrosUrl = new URLSearchParams(window.location.search);
-            if (parametrosUrl.get('ads_verified') === 'true' || parametrosUrl.get('verified') === 'true') {
-                guardarEstadoAnunciosCompletados();
-                parametrosUrl.delete('ads_verified');
-                parametrosUrl.delete('verified');
-                const nuevaUrl = window.location.pathname + (parametrosUrl.toString() ? '?' + parametrosUrl.toString() : '');
-                window.history.replaceState({}, '', nuevaUrl);
-            }
-        }
-
         async function verificarSesion() {
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1693,13 +1665,6 @@
                     `;
                     a.addEventListener('click', async (e) => {
                         e.preventDefault();
-
-                        const tieneAnunciosValidos = verificarEstadoAnuncios();
-                        if (!tieneAnunciosValidos) {
-                            window.location.href = "https://cuty.io/oJWvoQc";
-                            return;
-                        }
-
                         const ahora = Date.now();
                         const ultimaDescarga = parseInt(localStorage.getItem('mcpixel_ultima_descarga_' + addon.id)) || 0;
                         const cooldown = 10 * 60 * 1000;
@@ -1994,7 +1959,6 @@
         });
 
         (async function iniciarApp() {
-            procesarVerificacionUrlAds();
             inicializarPantalla();
             await verificarSesion();
             await renderizarView();
