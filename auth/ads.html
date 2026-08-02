@@ -58,33 +58,72 @@
 
     <script>
         (function() {
-            const referrer = document.referrer.toLowerCase();
-            const esValido = referrer.includes('cuty.io');
+            const ONE_DAY_MS = 86400000;
+            const now = Date.now();
 
-            if (!esValido) {
-                document.getElementById('loader').style.display = 'none';
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            function isSessionValid() {
+                const authTime = localStorage.getItem('ads_verified_time');
+                const hasCookie = getCookie('ads_verified') === 'true';
+
+                if (authTime && (now - parseInt(authTime, 10) < ONE_DAY_MS)) {
+                    return true;
+                }
+                if (hasCookie && authTime) {
+                    return (now - parseInt(authTime, 10) < ONE_DAY_MS);
+                }
+                return false;
+            }
+
+            function validateOrigin() {
+                const referrer = document.referrer.toLowerCase();
+                const urlParams = new URLSearchParams(window.location.search);
+                
+                const hasCutyReferrer = referrer.includes('cuty.io') || referrer.includes('cuty.net');
+                const hasParamAuth = urlParams.has('verified') || urlParams.has('v') || urlParams.get('ref') === 'cuty';
+
+                return hasCutyReferrer || hasParamAuth;
+            }
+
+            if (isSessionValid()) {
+                redirectUser();
+                return;
+            }
+
+            if (validateOrigin()) {
+                const array = new Uint8Array(16);
+                crypto.getRandomValues(array);
+                const tokenUnico = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+
+                const expires = new Date(now + ONE_DAY_MS).toUTCString();
+                document.cookie = "ads_verified=true; path=/; expires=" + expires + "; SameSite=Lax";
+                
+                localStorage.setItem('ads_verified', 'true');
+                localStorage.setItem('ads_verified_time', now.toString());
+                localStorage.setItem('temp_auth_code', tokenUnico);
+
+                redirectUser();
+            } else {
                 document.getElementById('status-card').innerHTML = `
                     <h1 class="error-title">Acceso Denegado</h1>
                     <p style="color: #94a3b8;">Error: Debes pasar por la verificación requerida antes de acceder a este sitio.</p>
                 `;
-                return;
             }
 
-            const array = new Uint8Array(16);
-            crypto.getRandomValues(array);
-            const tokenUnico = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+            function redirectUser() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const returnUrl = urlParams.get('redirect') || urlParams.get('return') || '/';
 
-            const expires = new Date(Date.now() + 86400000).toUTCString();
-            document.cookie = "ads_verified=true; path=/; expires=" + expires;
-            localStorage.setItem('ads_verified', 'true');
-            localStorage.setItem('temp_auth_code', tokenUnico);
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const returnUrl = urlParams.get('redirect') || urlParams.get('return') || document.referrer || '/';
-
-            setTimeout(() => {
-                window.location.href = returnUrl;
-            }, 500);
+                setTimeout(() => {
+                    window.location.href = returnUrl;
+                }, 400);
+            }
         })();
     </script>
 </body>
