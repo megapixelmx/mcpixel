@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrador Total: Supabase ➔ Turso & Foxy Storage</title>
+    <!-- SDK Oficial de Supabase JS UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #151c2c;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: #2a364f;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.7rem;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #0b0f19;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            color: white;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .progress-container {
+            margin-top: 1.25rem;
+        }
+
+        .progress-bar-bg {
+            background: #090d16;
+            border-radius: 20px;
+            height: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #38bdf8, #22c55e);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .logs-box {
+            background: #060911;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            height: 380px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 0.35rem;
+            word-break: break-all;
+        }
+
+        .log-entry.info { color: #38bdf8; }
+        .log-entry.success { color: #22c55e; }
+        .log-entry.warn { color: #eab308; }
+        .log-entry.error { color: #ef4444; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.85rem;
+            text-align: center;
+        }
+
+        .stat-card div:first-child {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-card div:last-child {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📦 Migrador Total Supabase ➔ Turso</h1>
+        <p>Procesamiento avanzado de portadas, referencias y bypass de almacenamiento en Foxy Storage</p>
+    </header>
+
+    <div class="card">
+        <h2>⚙️ Configuración de accesos</h2>
+        <div class="grid-2">
+            <div>
+                <div class="form-group">
+                    <label>Supabase URL</label>
+                    <input type="text" id="supaUrl" value="https://uidkdvqfmqczgbclpbfb.supabase.co">
+                </div>
+                <div class="form-group">
+                    <label>Supabase Anon Key</label>
+                    <input type="text" id="supaToken" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpZGtkdnFmbXFjemdiY2xwYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNzQyMjYsImV4cCI6MjEwMDc1MDIyNn0.rE33ZcEgRr7H3OUmNCWVwZaMv7AMMSqqptAQ5HJiCDI">
+                </div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label>Turso DB URL (HTTPS / libsql)</label>
+                    <input type="text" id="tursoUrl" value="https://mcpixeldb-mcpixel.aws-us-west-2.turso.io">
+                </div>
+                <div class="form-group">
+                    <label>Turso Auth Token</label>
+                    <input type="text" id="tursoToken" value="eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYyMDUyOTcsImlkIjoiMDE5ZmUyMjAtNWYwMS03M2MxLWFjYTQtZWZlNWMzZDkzNmU5Iiwia2lkIjoiTmQ5b0dOdXdPX3RmeDdaVFplWGpxTFZudkdKSWdWRkxDTlY4RDB2UEdzdyIsInJpZCI6IjAwNjk5M2MwLWY1OTUtNDY4Ny04ZDM5LTFlNGZhM2I5OGU2ZSJ9.OeMKcyme0NxFXJ9-YF-4LVvkXw5kU6dJMuUD8S_0E1Ef-gRMkKq_WN8wWULUbtXIz3vna2wueDA-qzw1W9KCDQ">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Foxy Storage API Key</label>
+            <input type="text" id="foxyKey" value="mipcmihostfoxyesgood">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🚀 Control de Ejecución</h2>
+        <div class="btn-group">
+            <button id="btnProbar" class="btn btn-secondary">1. Analizar Addons de Supabase</button>
+            <button id="btnMigrar" class="btn">2. Migrar a Turso y Foxy Storage</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div id="statTotal">0</div>
+                <div>Addons Detectados</div>
+            </div>
+            <div class="stat-card">
+                <div id="statProcesados">0</div>
+                <div>Addons Migrados</div>
+            </div>
+            <div class="stat-card">
+                <div id="statPortadas">0</div>
+                <div>Portadas Subidas</div>
+            </div>
+            <div class="stat-card">
+                <div id="statReferencias">0</div>
+                <div>Referencias Subidas</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div id="progressBar" class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-stats">
+                <span id="progressText">Estado: Listo.</span>
+                <span id="progressPercent">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📋 Registro y Monitor de Descargas</h2>
+        <div id="logsBox" class="logs-box">
+            <div class="log-entry info">[SISTEMA] Listo para iniciar. Presiona "Analizar Addons" o "Migrar".</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const btnProbar = document.getElementById('btnProbar');
+    const btnMigrar = document.getElementById('btnMigrar');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const logsBox = document.getElementById('logsBox');
+    const statTotal = document.getElementById('statTotal');
+    const statProcesados = document.getElementById('statProcesados');
+    const statPortadas = document.getElementById('statPortadas');
+    const statReferencias = document.getElementById('statReferencias');
+
+    let countPortadas = 0;
+    let countReferencias = 0;
+
+    function log(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        const time = new Date().toLocaleTimeString();
+        div.textContent = `[${time}] ${msg}`;
+        logsBox.appendChild(div);
+        logsBox.scrollTop = logsBox.scrollHeight;
+    }
+
+    function setProgress(current, total, status) {
+        const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+        progressBar.style.width = `${pct}%`;
+        progressPercent.textContent = `${pct}%`;
+        if (status) progressText.textContent = status;
+    }
+
+    // Asegurar Autenticación en Supabase para evitar bloqueos por RLS
+    async function asegurarAuthSupabase(supaClient) {
+        try {
+            const { data: { session } } = await supaClient.auth.getSession();
+            if (session) {
+                log(`✓ Sesión Supabase autenticada: ${session.user.email || session.user.id}`, 'info');
+                return true;
+            }
+
+            log('Creando/Iniciando usuario en Supabase para bypass de RLS...', 'info');
+            const tempEmail = `migrador_${Math.floor(Math.random() * 899999 + 100000)}@mcpixel.local`;
+            const tempPass = 'MigradorPass2026!';
+
+            const { data: signUpData, error: signUpErr } = await supaClient.auth.signUp({
+                email: tempEmail,
+                password: tempPass
+            });
+
+            if (signUpErr) {
+                log(`Aviso Auth Supabase: ${signUpErr.message}`, 'warn');
+            } else if (signUpData?.user) {
+                log(`✓ Usuario temporal activo: ${tempEmail}`, 'success');
+            }
+            return true;
+        } catch (e) {
+            log(`Aviso en auth Supabase: ${e.message}`, 'warn');
+            return false;
+        }
+    }
+
+    // Conexión Turso Pipeline HTTP
+    async function tursoQuery(tursoUrl, tursoToken, statements) {
+        let httpUrl = tursoUrl.replace('libsql://', 'https://');
+        if (!httpUrl.endsWith('/v2/pipeline')) {
+            httpUrl = httpUrl.replace(/\/$/, '') + '/v2/pipeline';
+        }
+
+        const requests = statements.map(stmt => {
+            if (typeof stmt === 'string') {
+                return { type: 'execute', stmt: { sql: stmt } };
+            } else {
+                return {
+                    type: 'execute',
+                    stmt: {
+                        sql: stmt.sql,
+                        args: (stmt.args || []).map(arg => {
+                            if (arg === null || arg === undefined) return { type: 'null' };
+                            if (typeof arg === 'number') return { type: 'integer', value: String(arg) };
+                            return { type: 'text', value: String(arg) };
+                        })
+                    }
+                };
+            }
+        });
+
+        const res = await fetch(httpUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${tursoToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ requests })
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Error Turso (${res.status}): ${errText}`);
+        }
+
+        return await res.json();
+    }
+
+    // DESCARGAR IMAGEN CON MONITOR DE PROGRESO (BYTES/MB) Y TIMEOUT
+    async function descargarImagenBlobConProgreso(supaClient, urlOrPath, etiquetaLog = 'Imagen') {
+        if (!urlOrPath) return null;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segs max por imagen
+
+        try {
+            log(`    ↳ [${etiquetaLog}] Conectando para descargar...`, 'info');
+            const res = await fetch(urlOrPath, { signal: controller.signal, mode: 'cors' });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const contentLength = res.headers.get('content-length');
+                const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+
+                if (!res.body) {
+                    return await res.blob();
+                }
+
+                const reader = res.body.getReader();
+                let loadedBytes = 0;
+                const chunks = [];
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    loadedBytes += value.length;
+
+                    if (totalBytes > 0) {
+                        const pct = Math.round((loadedBytes / totalBytes) * 100);
+                        const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(2);
+                        const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                        log(`    ↳ [${etiquetaLog}] Progreso: ${pct}% (${loadedMB} MB de ${totalMB} MB)`, 'info');
+                    } else {
+                        const loadedKB = Math.round(loadedBytes / 1024);
+                        log(`    ↳ [${etiquetaLog}] Descargando: ${loadedKB} KB transferidos...`, 'info');
+                    }
+                }
+
+                log(`    ✓ [${etiquetaLog}] Descarga completada exitosamente.`, 'success');
+                return new Blob(chunks, { type: res.headers.get('content-type') || 'image/png' });
+            }
+        } catch (e) {
+            clearTimeout(timeoutId);
+            if (e.name === 'AbortError') {
+                log(`    ⚠ [${etiquetaLog}] Tiempo de espera agotado (Timeout 8s). Saltando recurso...`, 'warn');
+            } else {
+                log(`    ⚠ [${etiquetaLog}] Fetch directo no completado (${e.message}). Intentando SDK Supabase Storage...`, 'warn');
+            }
+        }
+
+        // Intento 2: Descargar con SDK oficial de Supabase
+        try {
+            let bucket = 'portadas';
+            let filePath = urlOrPath;
+
+            if (urlOrPath.includes('/storage/v1/object/public/')) {
+                const parts = urlOrPath.split('/storage/v1/object/public/')[1].split('/');
+                bucket = parts[0];
+                filePath = parts.slice(1).join('/');
+            } else if (urlOrPath.includes('/storage/v1/object/authenticated/')) {
+                const parts = urlOrPath.split('/storage/v1/object/authenticated/')[1].split('/');
+                bucket = parts[0];
+                filePath = parts.slice(1).join('/');
+            } else if (!urlOrPath.startsWith('http') && urlOrPath.includes('/')) {
+                bucket = urlOrPath.split('/')[0];
+                filePath = urlOrPath.split('/').slice(1).join('/');
+            }
+
+            const { data: blobData, error: downloadErr } = await supaClient.storage.from(bucket).download(filePath);
+            if (!downloadErr && blobData) {
+                log(`    ✓ [${etiquetaLog}] Obtenido mediante SDK Supabase Storage.`, 'success');
+                return blobData;
+            }
+        } catch (e) {}
+
+        return null;
+    }
+
+    // SUBIDA NATIVA A FOXY STORAGE
+    async function subirAFoxyStorage(blob, nombreArchivo, apiKey) {
+        if (!blob) return null;
+
+        const formData = new FormData();
+        formData.append('file', blob, nombreArchivo || 'imagen_addon.png');
+
+        const uploadEndpoint = `https://foxy.mipcmihost.sryze.cc/api/upload?key=${encodeURIComponent(apiKey)}`;
+
+        try {
+            const res = await fetch(uploadEndpoint, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': apiKey,
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const publicUrl = data.url || data.public_url || data.publicUrl || data.file_url || data.path;
+                const fileId = data.id || data.file_id || publicUrl || (data.file ? data.file.id : null);
+                return { id: fileId, url: publicUrl, raw: data };
+            }
+        } catch (e) {
+            log(`    ⚠ Error Foxy Intento 1: ${e.message}`, 'warn');
+        }
+
+        // Estrategia alternativa sin headers para librar preflight CORS
+        try {
+            const resAlt = await fetch(uploadEndpoint, { method: 'POST', body: formData });
+            if (resAlt.ok) {
+                const dataAlt = await resAlt.json();
+                const publicUrl = dataAlt.url || dataAlt.public_url || dataAlt.publicUrl || dataAlt.file_url || dataAlt.path;
+                const fileId = dataAlt.id || dataAlt.file_id || publicUrl || (dataAlt.file ? dataAlt.file.id : null);
+                return { id: fileId, url: publicUrl, raw: dataAlt };
+            }
+        } catch (e) {
+            log(`    ⚠ Error Foxy Intento 2: ${e.message}`, 'warn');
+        }
+
+        return null;
+    }
+
+    // Extracción de Referencias (Array, JSON o String)
+    function extraerListaReferencias(refData) {
+        if (!refData) return [];
+        if (Array.isArray(refData)) return refData.filter(Boolean);
+        if (typeof refData === 'string') {
+            const trimmed = refData.trim();
+            if (!trimmed) return [];
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (Array.isArray(parsed)) return parsed.filter(Boolean);
+            } catch (e) {}
+            if (trimmed.includes(',')) {
+                return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return [trimmed];
+        }
+        return [];
+    }
+
+    // 1. ANÁLISIS COMPLETO DE LA TABLA ADDONS
+    async function probarConexiones() {
+        btnProbar.disabled = true;
+        btnMigrar.disabled = true;
+        log('--- INICIANDO DIAGNÓSTICO Y EXTRACCIÓN ---', 'info');
+
+        const supaUrl = document.getElementById('supaUrl').value.trim();
+        const supaToken = document.getElementById('supaToken').value.trim();
+        const tursoUrl = document.getElementById('tursoUrl').value.trim();
+        const tursoToken = document.getElementById('tursoToken').value.trim();
+
+        try {
+            log('1. Conectando con Supabase...', 'info');
+            const supaClient = window.supabase.createClient(supaUrl, supaToken);
+            await asegurarAuthSupabase(supaClient);
+
+            log('2. Obteniendo todos los registros de la tabla "addons"...', 'info');
+            const { data: addons, error } = await supaClient.from('addons').select('*');
+            if (error) throw new Error(`Error en Supabase: ${error.message}`);
+
+            const total = addons ? addons.length : 0;
+            statTotal.textContent = total;
+            log(`✓ Registros encontrados en "addons": ${total}`, 'success');
+
+            if (total > 0) {
+                log('Estructura detectada en las primeras entradas:', 'info');
+                addons.forEach((a, i) => {
+                    const refs = extraerListaReferencias(a.referencias);
+                    log(`  [Addon ${i + 1}] ID: ${a.id} | Nombre: "${a.nombre}" | Portada: ${a.portada ? 'SÍ' : 'NO'} | Referencias: ${refs.length} imagen(es)`, 'info');
+                });
+            }
+
+            log('3. Asegurando tabla "addons" en Turso DB...', 'info');
+            await tursoQuery(tursoUrl, tursoToken, [
+                `CREATE TABLE IF NOT EXISTS addons (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT,
+                    nombre TEXT NOT NULL,
+                    descripcion TEXT,
+                    version TEXT DEFAULT '1.0.0',
+                    portada TEXT,
+                    archivo_url TEXT,
+                    etiquetas TEXT,
+                    descargas INTEGER DEFAULT 0,
+                    likes INTEGER DEFAULT 0,
+                    fecha TEXT,
+                    created_at TEXT,
+                    referencias TEXT,
+                    foxy_portada_id TEXT,
+                    foxy_referencias TEXT
+                );`
+            ]);
+            log('✓ Estructura en Turso lista para migración.', 'success');
+
+        } catch (err) {
+            log(`❌ ERROR EN EL DIAGNÓSTICO: ${err.message}`, 'error');
+        } finally {
+            btnProbar.disabled = false;
+            btnMigrar.disabled = false;
+        }
+    }
+
+    // 2. EJECUCIÓN MIGRACIÓN INTEGRAL
+    async function migrar() {
+        btnProbar.disabled = true;
+        btnMigrar.disabled = true;
+        countPortadas = 0;
+        countReferencias = 0;
+        statPortadas.textContent = 0;
+        statReferencias.textContent = 0;
+        statProcesados.textContent = 0;
+
+        log('==================================================', 'info');
+        log('🚀 INICIANDO MIGRACIÓN TOTAL A TURSO Y FOXY STORAGE', 'info');
+        log('==================================================', 'info');
+
+        const supaUrl = document.getElementById('supaUrl').value.trim();
+        const supaToken = document.getElementById('supaToken').value.trim();
+        const tursoUrl = document.getElementById('tursoUrl').value.trim();
+        const tursoToken = document.getElementById('tursoToken').value.trim();
+        const foxyKey = document.getElementById('foxyKey').value.trim();
+
+        try {
+            const supaClient = window.supabase.createClient(supaUrl, supaToken);
+            await asegurarAuthSupabase(supaClient);
+
+            log('Extrayendo catálogo completo de "addons"...', 'info');
+            const { data: addons, error } = await supaClient.from('addons').select('*');
+
+            if (error) throw new Error(`Error en Supabase: ${error.message}`);
+            if (!addons || addons.length === 0) {
+                log('⚠ No existen registros para migrar.', 'warn');
+                setProgress(100, 100, 'Sin registros');
+                return;
+            }
+
+            const total = addons.length;
+            statTotal.textContent = total;
+            let procesados = 0;
+
+            for (const addon of addons) {
+                log(`\n▶ [${procesados + 1}/${total}] Procesando Addon: "${addon.nombre}" (ID: ${addon.id})`, 'info');
+
+                // A. PORTADA
+                let foxyPortadaId = null;
+                if (addon.portada) {
+                    const blobPortada = await descargarImagenBlobConProgreso(supaClient, addon.portada, 'Portada');
+                    if (blobPortada) {
+                        log('  ↳ Subiendo portada a Foxy Storage...', 'info');
+                        const filename = `portada_${addon.id}.png`;
+                        const foxyResult = await subirAFoxyStorage(blobPortada, filename, foxyKey);
+                        if (foxyResult) {
+                            foxyPortadaId = foxyResult.id || foxyResult.url;
+                            countPortadas++;
+                            statPortadas.textContent = countPortadas;
+                            log(`  ✓ Portada re-alojada en Foxy Storage: ${foxyPortadaId}`, 'success');
+                        }
+                    }
+                }
+
+                // B. REFERENCIAS
+                const listaRefs = extraerListaReferencias(addon.referencias);
+                let foxyRefsList = [];
+
+                if (listaRefs.length > 0) {
+                    log(`  ↳ Procesando ${listaRefs.length} imagen(es) de la columna "referencias"...`, 'info');
+                    for (let rIdx = 0; rIdx < listaRefs.length; rIdx++) {
+                        const refUrl = listaRefs[rIdx];
+                        const blobRef = await descargarImagenBlobConProgreso(supaClient, refUrl, `Ref ${rIdx + 1}/${listaRefs.length}`);
+                        if (blobRef) {
+                            const refFilename = `ref_${addon.id}_${rIdx + 1}.png`;
+                            const foxyRefResult = await subirAFoxyStorage(blobRef, refFilename, foxyKey);
+                            if (foxyRefResult) {
+                                const refId = foxyRefResult.id || foxyRefResult.url;
+                                foxyRefsList.push(refId);
+                                countReferencias++;
+                                statReferencias.textContent = countReferencias;
+                                log(`    ✓ Referencia [${rIdx + 1}] guardada en Foxy Storage: ${refId}`, 'success');
+                            }
+                        }
+                    }
+                }
+
+                // C. INSERCIÓN EN TURSO DB
+                log(`  ↳ Guardando datos completos en Turso DB...`, 'info');
+                const sqlInsert = `
+                    INSERT INTO addons (
+                        id, user_id, nombre, descripcion, version, 
+                        portada, archivo_url, etiquetas, descargas, 
+                        likes, fecha, created_at, referencias,
+                        foxy_portada_id, foxy_referencias
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        nombre = excluded.nombre,
+                        descripcion = excluded.descripcion,
+                        version = excluded.version,
+                        portada = excluded.portada,
+                        archivo_url = excluded.archivo_url,
+                        etiquetas = excluded.etiquetas,
+                        descargas = excluded.descargas,
+                        likes = excluded.likes,
+                        referencias = excluded.referencias,
+                        foxy_portada_id = excluded.foxy_portada_id,
+                        foxy_referencias = excluded.foxy_referencias;
+                `;
+
+                const args = [
+                    addon.id,
+                    addon.user_id || null,
+                    addon.nombre,
+                    addon.descripcion || '',
+                    addon.version || '1.0.0',
+                    addon.portada || '',
+                    addon.archivo_url || '',
+                    addon.etiquetas || '',
+                    addon.descargas || 0,
+                    addon.likes || 0,
+                    addon.fecha || new Date().toISOString(),
+                    addon.created_at || new Date().toISOString(),
+                    typeof addon.referencias === 'string' ? addon.referencias : JSON.stringify(addon.referencias || []),
+                    foxyPortadaId || '',
+                    JSON.stringify(foxyRefsList)
+                ];
+
+                await tursoQuery(tursoUrl, tursoToken, [{ sql: sqlInsert, args }]);
+
+                procesados++;
+                statProcesados.textContent = procesados;
+                setProgress(procesados, total, `Migrado: ${addon.nombre}`);
+                log(`✓ Addon "${addon.nombre}" completado con éxito.`, 'success');
+            }
+
+            log('\n==================================================', 'success');
+            log('🎉 ¡MIGRACIÓN TOTAL EJECUTADA CORRECTAMENTE!', 'success');
+            log('==================================================', 'success');
+            setProgress(total, total, '¡Proceso finalizado!');
+
+        } catch (err) {
+            log(`❌ ERROR CRÍTICO: ${err.message}`, 'error');
+            setProgress(0, 100, 'Error en ejecución');
+        } finally {
+            btnProbar.disabled = false;
+            btnMigrar.disabled = false;
+        }
+    }
+
+    btnProbar.addEventListener('click', probarConexiones);
+    btnMigrar.addEventListener('click', migrar);
+</script>
+
+</body>
+</html>
