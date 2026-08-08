@@ -244,7 +244,7 @@
 <div class="container">
     <header>
         <h1>📦 Migrador Total Supabase ➔ Turso</h1>
-        <p>Procesamiento avanzado de portadas, referencias y bypass de almacenamiento en Foxy Storage</p>
+        <p>Conexión directa con Foxy Storage e inspección byte por byte de la tabla "addons"</p>
     </header>
 
     <div class="card">
@@ -353,16 +353,14 @@
         if (status) progressText.textContent = status;
     }
 
-    // Asegurar Autenticación en Supabase para evitar bloqueos por RLS
     async function asegurarAuthSupabase(supaClient) {
         try {
             const { data: { session } } = await supaClient.auth.getSession();
             if (session) {
-                log(`✓ Sesión Supabase autenticada: ${session.user.email || session.user.id}`, 'info');
+                log(`✓ Sesión Supabase activa: ${session.user.email || session.user.id}`, 'info');
                 return true;
             }
 
-            log('Creando/Iniciando usuario en Supabase para bypass de RLS...', 'info');
             const tempEmail = `migrador_${Math.floor(Math.random() * 899999 + 100000)}@mcpixel.local`;
             const tempPass = 'MigradorPass2026!';
 
@@ -371,19 +369,16 @@
                 password: tempPass
             });
 
-            if (signUpErr) {
-                log(`Aviso Auth Supabase: ${signUpErr.message}`, 'warn');
-            } else if (signUpData?.user) {
-                log(`✓ Usuario temporal activo: ${tempEmail}`, 'success');
+            if (!signUpErr && signUpData?.user) {
+                log(`✓ Sesión temporal iniciada en Supabase.`, 'success');
             }
             return true;
         } catch (e) {
-            log(`Aviso en auth Supabase: ${e.message}`, 'warn');
+            log(`Aviso Auth Supabase: ${e.message}`, 'warn');
             return false;
         }
     }
 
-    // Conexión Turso Pipeline HTTP
     async function tursoQuery(tursoUrl, tursoToken, statements) {
         let httpUrl = tursoUrl.replace('libsql://', 'https://');
         if (!httpUrl.endsWith('/v2/pipeline')) {
@@ -425,15 +420,14 @@
         return await res.json();
     }
 
-    // DESCARGAR IMAGEN CON MONITOR DE PROGRESO (BYTES/MB) Y TIMEOUT
     async function descargarImagenBlobConProgreso(supaClient, urlOrPath, etiquetaLog = 'Imagen') {
         if (!urlOrPath) return null;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segs max por imagen
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         try {
-            log(`    ↳ [${etiquetaLog}] Conectando para descargar...`, 'info');
+            log(`    ↳ [${etiquetaLog}] Obteniendo recurso...`, 'info');
             const res = await fetch(urlOrPath, { signal: controller.signal, mode: 'cors' });
             clearTimeout(timeoutId);
 
@@ -459,26 +453,25 @@
                         const pct = Math.round((loadedBytes / totalBytes) * 100);
                         const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(2);
                         const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
-                        log(`    ↳ [${etiquetaLog}] Progreso: ${pct}% (${loadedMB} MB de ${totalMB} MB)`, 'info');
+                        log(`    ↳ [${etiquetaLog}] Progreso: ${pct}% (${loadedMB} MB / ${totalMB} MB)`, 'info');
                     } else {
                         const loadedKB = Math.round(loadedBytes / 1024);
-                        log(`    ↳ [${etiquetaLog}] Descargando: ${loadedKB} KB transferidos...`, 'info');
+                        log(`    ↳ [${etiquetaLog}] Descargando: ${loadedKB} KB descargados...`, 'info');
                     }
                 }
 
-                log(`    ✓ [${etiquetaLog}] Descarga completada exitosamente.`, 'success');
+                log(`    ✓ [${etiquetaLog}] Descarga completada.`, 'success');
                 return new Blob(chunks, { type: res.headers.get('content-type') || 'image/png' });
             }
         } catch (e) {
             clearTimeout(timeoutId);
             if (e.name === 'AbortError') {
-                log(`    ⚠ [${etiquetaLog}] Tiempo de espera agotado (Timeout 8s). Saltando recurso...`, 'warn');
+                log(`    ⚠ [${etiquetaLog}] Timeout de 8s alcanzado. Omitiendo...`, 'warn');
             } else {
-                log(`    ⚠ [${etiquetaLog}] Fetch directo no completado (${e.message}). Intentando SDK Supabase Storage...`, 'warn');
+                log(`    ⚠ [${etiquetaLog}] Error directo (${e.message}). Intentando SDK Supabase Storage...`, 'warn');
             }
         }
 
-        // Intento 2: Descargar con SDK oficial de Supabase
         try {
             let bucket = 'portadas';
             let filePath = urlOrPath;
@@ -498,7 +491,7 @@
 
             const { data: blobData, error: downloadErr } = await supaClient.storage.from(bucket).download(filePath);
             if (!downloadErr && blobData) {
-                log(`    ✓ [${etiquetaLog}] Obtenido mediante SDK Supabase Storage.`, 'success');
+                log(`    ✓ [${etiquetaLog}] Descargado vía SDK Supabase.`, 'success');
                 return blobData;
             }
         } catch (e) {}
@@ -506,52 +499,40 @@
         return null;
     }
 
-    // SUBIDA NATIVA A FOXY STORAGE
-    async function subirAFoxyStorage(blob, nombreArchivo, apiKey) {
+    // SUBIDA NATIVA A FOXY STORAGE CON ESTRUCTURA EXACTA DE LA API
+    async function subirAFoxyStorage(blob, nombreArchivo, apiKey, titulo = '') {
         if (!blob) return null;
 
         const formData = new FormData();
         formData.append('file', blob, nombreArchivo || 'imagen_addon.png');
-
-        const uploadEndpoint = `https://foxy.mipcmihost.sryze.cc/api/upload?key=${encodeURIComponent(apiKey)}`;
+        formData.append('title', titulo || nombreArchivo || 'Imagen Addon');
 
         try {
-            const res = await fetch(uploadEndpoint, {
+            const res = await fetch('https://foxy.mipcmihost.sryze.cc/api/upload', {
                 method: 'POST',
                 headers: {
-                    'x-api-key': apiKey,
-                    'Authorization': `Bearer ${apiKey}`
+                    'x-api-key': apiKey
                 },
                 body: formData
             });
 
             if (res.ok) {
                 const data = await res.json();
-                const publicUrl = data.url || data.public_url || data.publicUrl || data.file_url || data.path;
-                const fileId = data.id || data.file_id || publicUrl || (data.file ? data.file.id : null);
-                return { id: fileId, url: publicUrl, raw: data };
+                // Extracción exacta de data.file.view_url o data.file.id
+                const viewUrl = data?.file?.view_url || data?.url || data?.public_url;
+                const fileId = data?.file?.id || viewUrl;
+                return { id: fileId, url: viewUrl, raw: data };
+            } else {
+                const errText = await res.text();
+                log(`    ⚠ Error Foxy Storage (${res.status}): ${errText}`, 'warn');
             }
         } catch (e) {
-            log(`    ⚠ Error Foxy Intento 1: ${e.message}`, 'warn');
-        }
-
-        // Estrategia alternativa sin headers para librar preflight CORS
-        try {
-            const resAlt = await fetch(uploadEndpoint, { method: 'POST', body: formData });
-            if (resAlt.ok) {
-                const dataAlt = await resAlt.json();
-                const publicUrl = dataAlt.url || dataAlt.public_url || dataAlt.publicUrl || dataAlt.file_url || dataAlt.path;
-                const fileId = dataAlt.id || dataAlt.file_id || publicUrl || (dataAlt.file ? dataAlt.file.id : null);
-                return { id: fileId, url: publicUrl, raw: dataAlt };
-            }
-        } catch (e) {
-            log(`    ⚠ Error Foxy Intento 2: ${e.message}`, 'warn');
+            log(`    ⚠ Error Foxy Storage: ${e.message}`, 'warn');
         }
 
         return null;
     }
 
-    // Extracción de Referencias (Array, JSON o String)
     function extraerListaReferencias(refData) {
         if (!refData) return [];
         if (Array.isArray(refData)) return refData.filter(Boolean);
@@ -570,11 +551,10 @@
         return [];
     }
 
-    // 1. ANÁLISIS COMPLETO DE LA TABLA ADDONS
     async function probarConexiones() {
         btnProbar.disabled = true;
         btnMigrar.disabled = true;
-        log('--- INICIANDO DIAGNÓSTICO Y EXTRACCIÓN ---', 'info');
+        log('--- DIAGNÓSTICO DE LA TABLA ADDONS ---', 'info');
 
         const supaUrl = document.getElementById('supaUrl').value.trim();
         const supaToken = document.getElementById('supaToken').value.trim();
@@ -586,23 +566,22 @@
             const supaClient = window.supabase.createClient(supaUrl, supaToken);
             await asegurarAuthSupabase(supaClient);
 
-            log('2. Obteniendo todos los registros de la tabla "addons"...', 'info');
+            log('2. Obteniendo registros de la tabla "addons"...', 'info');
             const { data: addons, error } = await supaClient.from('addons').select('*');
             if (error) throw new Error(`Error en Supabase: ${error.message}`);
 
             const total = addons ? addons.length : 0;
             statTotal.textContent = total;
-            log(`✓ Registros encontrados en "addons": ${total}`, 'success');
+            log(`✓ Total de addons encontrados: ${total}`, 'success');
 
             if (total > 0) {
-                log('Estructura detectada en las primeras entradas:', 'info');
                 addons.forEach((a, i) => {
                     const refs = extraerListaReferencias(a.referencias);
-                    log(`  [Addon ${i + 1}] ID: ${a.id} | Nombre: "${a.nombre}" | Portada: ${a.portada ? 'SÍ' : 'NO'} | Referencias: ${refs.length} imagen(es)`, 'info');
+                    log(`  [${i + 1}] ID: ${a.id} | Nombre: "${a.nombre}" | Portada: ${a.portada ? 'SÍ' : 'NO'} | Referencias: ${refs.length} imagen(es)`, 'info');
                 });
             }
 
-            log('3. Asegurando tabla "addons" en Turso DB...', 'info');
+            log('3. Verificando tabla "addons" en Turso DB...', 'info');
             await tursoQuery(tursoUrl, tursoToken, [
                 `CREATE TABLE IF NOT EXISTS addons (
                     id TEXT PRIMARY KEY,
@@ -622,17 +601,16 @@
                     foxy_referencias TEXT
                 );`
             ]);
-            log('✓ Estructura en Turso lista para migración.', 'success');
+            log('✓ Tabla en Turso DB lista.', 'success');
 
         } catch (err) {
-            log(`❌ ERROR EN EL DIAGNÓSTICO: ${err.message}`, 'error');
+            log(`❌ ERROR EN DIAGNÓSTICO: ${err.message}`, 'error');
         } finally {
             btnProbar.disabled = false;
             btnMigrar.disabled = false;
         }
     }
 
-    // 2. EJECUCIÓN MIGRACIÓN INTEGRAL
     async function migrar() {
         btnProbar.disabled = true;
         btnMigrar.disabled = true;
@@ -643,7 +621,7 @@
         statProcesados.textContent = 0;
 
         log('==================================================', 'info');
-        log('🚀 INICIANDO MIGRACIÓN TOTAL A TURSO Y FOXY STORAGE', 'info');
+        log('🚀 INICIANDO MIGRACIÓN DE ADDONS Y SUBIDA A FOXY', 'info');
         log('==================================================', 'info');
 
         const supaUrl = document.getElementById('supaUrl').value.trim();
@@ -656,12 +634,11 @@
             const supaClient = window.supabase.createClient(supaUrl, supaToken);
             await asegurarAuthSupabase(supaClient);
 
-            log('Extrayendo catálogo completo de "addons"...', 'info');
             const { data: addons, error } = await supaClient.from('addons').select('*');
 
-            if (error) throw new Error(`Error en Supabase: ${error.message}`);
+            if (error) throw new Error(`Error Supabase: ${error.message}`);
             if (!addons || addons.length === 0) {
-                log('⚠ No existen registros para migrar.', 'warn');
+                log('⚠ No se encontraron addons para migrar.', 'warn');
                 setProgress(100, 100, 'Sin registros');
                 return;
             }
@@ -671,50 +648,50 @@
             let procesados = 0;
 
             for (const addon of addons) {
-                log(`\n▶ [${procesados + 1}/${total}] Procesando Addon: "${addon.nombre}" (ID: ${addon.id})`, 'info');
+                log(`\n▶ [${procesados + 1}/${total}] Procesando: "${addon.nombre}" (ID: ${addon.id})`, 'info');
 
-                // A. PORTADA
-                let foxyPortadaId = null;
+                // A. SUBIDA DE PORTADA A FOXY STORAGE
+                let foxyPortadaUrl = null;
                 if (addon.portada) {
                     const blobPortada = await descargarImagenBlobConProgreso(supaClient, addon.portada, 'Portada');
                     if (blobPortada) {
-                        log('  ↳ Subiendo portada a Foxy Storage...', 'info');
+                        log('  ↳ Enviando portada a Foxy Storage...', 'info');
                         const filename = `portada_${addon.id}.png`;
-                        const foxyResult = await subirAFoxyStorage(blobPortada, filename, foxyKey);
+                        const foxyResult = await subirAFoxyStorage(blobPortada, filename, foxyKey, `Portada - ${addon.nombre}`);
                         if (foxyResult) {
-                            foxyPortadaId = foxyResult.id || foxyResult.url;
+                            foxyPortadaUrl = foxyResult.url || foxyResult.id;
                             countPortadas++;
                             statPortadas.textContent = countPortadas;
-                            log(`  ✓ Portada re-alojada en Foxy Storage: ${foxyPortadaId}`, 'success');
+                            log(`  ✓ Portada alojada en Foxy: ${foxyPortadaUrl}`, 'success');
                         }
                     }
                 }
 
-                // B. REFERENCIAS
+                // B. SUBIDA DE REFERENCIAS A FOXY STORAGE
                 const listaRefs = extraerListaReferencias(addon.referencias);
                 let foxyRefsList = [];
 
                 if (listaRefs.length > 0) {
-                    log(`  ↳ Procesando ${listaRefs.length} imagen(es) de la columna "referencias"...`, 'info');
+                    log(`  ↳ Procesando ${listaRefs.length} referencias...`, 'info');
                     for (let rIdx = 0; rIdx < listaRefs.length; rIdx++) {
                         const refUrl = listaRefs[rIdx];
                         const blobRef = await descargarImagenBlobConProgreso(supaClient, refUrl, `Ref ${rIdx + 1}/${listaRefs.length}`);
                         if (blobRef) {
                             const refFilename = `ref_${addon.id}_${rIdx + 1}.png`;
-                            const foxyRefResult = await subirAFoxyStorage(blobRef, refFilename, foxyKey);
+                            const foxyRefResult = await subirAFoxyStorage(blobRef, refFilename, foxyKey, `Ref ${rIdx + 1} - ${addon.nombre}`);
                             if (foxyRefResult) {
-                                const refId = foxyRefResult.id || foxyRefResult.url;
-                                foxyRefsList.push(refId);
+                                const finalRefUrl = foxyRefResult.url || foxyRefResult.id;
+                                foxyRefsList.push(finalRefUrl);
                                 countReferencias++;
                                 statReferencias.textContent = countReferencias;
-                                log(`    ✓ Referencia [${rIdx + 1}] guardada en Foxy Storage: ${refId}`, 'success');
+                                log(`    ✓ Referencia [${rIdx + 1}] guardada en Foxy: ${finalRefUrl}`, 'success');
                             }
                         }
                     }
                 }
 
-                // C. INSERCIÓN EN TURSO DB
-                log(`  ↳ Guardando datos completos en Turso DB...`, 'info');
+                // C. INSERCIÓN / ACTUALIZACIÓN EN TURSO DB
+                log(`  ↳ Guardando en Turso DB...`, 'info');
                 const sqlInsert = `
                     INSERT INTO addons (
                         id, user_id, nombre, descripcion, version, 
@@ -750,7 +727,7 @@
                     addon.fecha || new Date().toISOString(),
                     addon.created_at || new Date().toISOString(),
                     typeof addon.referencias === 'string' ? addon.referencias : JSON.stringify(addon.referencias || []),
-                    foxyPortadaId || '',
+                    foxyPortadaUrl || '',
                     JSON.stringify(foxyRefsList)
                 ];
 
@@ -759,16 +736,16 @@
                 procesados++;
                 statProcesados.textContent = procesados;
                 setProgress(procesados, total, `Migrado: ${addon.nombre}`);
-                log(`✓ Addon "${addon.nombre}" completado con éxito.`, 'success');
+                log(`✓ Addon "${addon.nombre}" completado.`, 'success');
             }
 
             log('\n==================================================', 'success');
-            log('🎉 ¡MIGRACIÓN TOTAL EJECUTADA CORRECTAMENTE!', 'success');
+            log('🎉 ¡MIGRACIÓN MIGRADA Y SUBIDA CORRECTAMENTE!', 'success');
             log('==================================================', 'success');
             setProgress(total, total, '¡Proceso finalizado!');
 
         } catch (err) {
-            log(`❌ ERROR CRÍTICO: ${err.message}`, 'error');
+            log(`❌ ERROR GENERAL: ${err.message}`, 'error');
             setProgress(0, 100, 'Error en ejecución');
         } finally {
             btnProbar.disabled = false;
